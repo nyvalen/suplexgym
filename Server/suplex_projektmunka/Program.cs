@@ -1,0 +1,144 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using suplex_projektmunka.Models.Context;
+using suplex_projektmunka.Services;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ─── DATABASE ─────────────────────────────────────────────────────────────────
+builder.Services.AddDbContext<GymContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ─── SERVICES ─────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IQrCodeService, QrCodeService>();
+
+// ─── JWT AUTHENTICATION ───────────────────────────────────────────────────────
+// FRONTEND: Every protected request must include header:
+//   Authorization: Bearer <accessToken>
+// If 401 is returned, call POST /api/auth/refresh with the refresh token.
+// If refresh also fails, redirect user to login screen.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero // No grace period on token expiry
+        };
+
+        // Return 401 JSON responses instead of redirect
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"message\": \"Unauthorized. Please log in.\"}");
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"message\": \"Forbidden. You do not have permission.\"}");
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// ─── CORS ─────────────────────────────────────────────────────────────────────
+// FRONTEND: Update the origin below to match your frontend dev server URL.
+// For production, replace with your actual frontend domain.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:3000",   // React web dev server
+                "http://localhost:5173",   // Vite dev server
+                "http://localhost:8081",   // React Native / Expo
+                "http://localhost:4200"    // Angular dev server
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+// ─── SWAGGER ──────────────────────────────────────────────────────────────────
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Suplex Gym API",
+        Version = "v1",
+        Description = "Backend API for Suplex Gym ticketing and access management system."
+    });
+
+    // Add JWT auth support in Swagger UI
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header. Enter: Bearer {your_token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+var app = builder.Build();
+
+// ─── MIDDLEWARE PIPELINE ──────────────────────────────────────────────────────
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    // FRONTEND DEVS: Swagger UI available at http://localhost:5000/swagger
+    // Use it to explore and test all available endpoints.
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseCors("FrontendPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+// ─── AUTO MIGRATION ON STARTUP ────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<GymContext>();
+    db.Database.Migrate();
+}
+
+app.Run();
