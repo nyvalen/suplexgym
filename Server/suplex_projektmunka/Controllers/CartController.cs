@@ -9,7 +9,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/cart")]
-    [Authorize]
+    // [Authorize]
     public class CartController : ControllerBase
     {
         private readonly GymContext _context;

@@ -11,7 +11,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/admin")]
-    [Authorize(Roles = "admin")] // All endpoints in this controller require admin role
+    // [Authorize(Roles = "admin")] // All endpoints in this controller require admin role
     public class AdminController : ControllerBase
     {
         private readonly GymContext _context;

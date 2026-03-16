@@ -68,7 +68,7 @@ namespace suplex_projektmunka.Controllers
         /// FRONTEND: Admin news creation form → POST body: { title, imagePath, content }
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        // [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto)
         {
             var news = new News
@@ -93,7 +93,7 @@ namespace suplex_projektmunka.Controllers
         /// FRONTEND: Admin news edit form → PUT body: { title, imagePath, content }
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Roles = "admin")]
+        // [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateNews(int id, [FromBody] CreateNewsDto dto)
         {
             var news = await _context.News.FindAsync(id);
@@ -113,7 +113,7 @@ namespace suplex_projektmunka.Controllers
         /// FRONTEND: "Delete" button in admin news list (shows confirm dialog first).
         /// </summary>
         [HttpDelete("{id}")]
-        [Authorize(Roles = "admin")]
+        // [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteNews(int id)
         {
             var news = await _context.News.FindAsync(id);

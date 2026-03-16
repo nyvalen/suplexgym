@@ -8,6 +8,7 @@ import {
 } from "@shopify/react-native-skia";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+import { View } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
@@ -67,12 +68,16 @@ export const Loader = () => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
 
-  const isLoading = isFetching + isMutating > 0;
+  const isLoading = true;
 
   return (
-    <>
+    <View className="h-full justify-center">
       {isLoading ? (
-        <Animated.View style={rStyle} exiting={FadeOut.duration(500)}>
+        <Animated.View
+          style={rStyle}
+          exiting={FadeOut.duration(500)}
+          className="flex-1 items-center h-screen justify-center"
+        >
           <Canvas style={{ width: CanvasSize, height: CanvasSize }}>
             <Path
               path={CirclePath}
@@ -107,6 +112,6 @@ export const Loader = () => {
           </Canvas>
         </Animated.View>
       ) : null}
-    </>
+    </View>
   );
 };

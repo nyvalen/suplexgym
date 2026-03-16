@@ -153,7 +153,7 @@ namespace suplex_projektmunka.Controllers
         /// FRONTEND: Call on logout button, then clear stored tokens and redirect to login.
         /// </summary>
         [HttpPost("logout")]
-        [Authorize]
+        // [Authorize]
         public async Task<IActionResult> Logout()
         {
             var userId = int.Parse(User.FindFirst("userId")!.Value);

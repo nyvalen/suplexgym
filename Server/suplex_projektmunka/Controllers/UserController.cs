@@ -10,7 +10,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/user")]
-    [Authorize] // All endpoints require a valid JWT token
+    // [Authorize] // All endpoints require a valid JWT token
     public class UserController : ControllerBase
     {
         private readonly GymContext _context;
