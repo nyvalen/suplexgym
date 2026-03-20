@@ -10,7 +10,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/orders")]
-    [Authorize]
+    // [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly GymContext _context;
@@ -97,7 +97,7 @@ namespace suplex_projektmunka.Controllers
         }
 
         /// <summary>
-        /// Checkout — converts cart items into a purchase.
+        /// Checkout ï¿½ converts cart items into a purchase.
         /// FRONTEND: "Checkout" / "Purchase" button on cart page.
         /// After success, clear cart UI and redirect to order confirmation page.
         /// Tickets start with ActivatedAt = now, ExpiresAt = now + validityDays.
@@ -169,7 +169,7 @@ namespace suplex_projektmunka.Controllers
         }
 
         /// <summary>
-        /// Renew an expired ticket — creates a new ticket for the same item.
+        /// Renew an expired ticket ï¿½ creates a new ticket for the same item.
         /// FRONTEND: "Renew" button shown on expired tickets in ticket list.
         /// This adds a new ticket directly (does not go through cart).
         /// </summary>
@@ -236,7 +236,7 @@ namespace suplex_projektmunka.Controllers
 
         /// <summary>
         /// Get a single ticket's QR code (for full-screen display on mobile).
-        /// FRONTEND: QR code screen — show large QR image when user taps a ticket.
+        /// FRONTEND: QR code screen ï¿½ show large QR image when user taps a ticket.
         /// Usage: <img src="data:image/png;base64,{qrCodeBase64}" />
         /// Works offline if QR data was already loaded and cached on device.
         /// </summary>

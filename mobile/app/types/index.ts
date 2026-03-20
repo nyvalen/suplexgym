@@ -20,3 +20,12 @@ export interface UsersDTO {
   name: string;
   username: string;
 }
+
+export interface ItemDTO {
+  id: number;
+  Name: string;
+  Description: string;
+  Price: number;
+  ImagePath: string;
+  Type_id: number;
+}

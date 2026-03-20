@@ -85,7 +85,7 @@ export default function NewsListScreen() {
           className="flex-1 flex-row"
           onPress={() => navigation.navigate("NewsDetail", { article: item })}
         >
-          <View className="bg-transparent rounded-lg p-3 elevation w-48">
+          <View className="bg-transparent rounded-lg p-3 w-48">
             <Image source={item.imagePath} className="w-full h-full" />
           </View>
           <View className="h-20">
