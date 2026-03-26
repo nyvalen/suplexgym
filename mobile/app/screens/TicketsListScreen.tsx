@@ -8,8 +8,6 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRestApi } from "../hooks/useRestApi";
-import type { TicketsDTO } from "../types";
 import { useNavigation } from "@react-navigation/native";
 
 export default function TicketsListScreen() {
@@ -17,14 +15,6 @@ export default function TicketsListScreen() {
 
   const noImage =
     "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
-
-  const { items, refetchItems } = useRestApi<TicketsDTO>("/items");
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetchItems();
-    setRefreshing(false);
-  }, []);
 
   // const renderItem = (info: ListRenderItemInfo<TicketsDTO>) => {
   //   const item = info.item;

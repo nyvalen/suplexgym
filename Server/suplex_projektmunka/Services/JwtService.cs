@@ -36,14 +36,15 @@ namespace suplex_projektmunka.Services
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
                 // FRONTEND: Read role from JWT to show/hide admin UI elements
                 new Claim(ClaimTypes.Role, role),
-                new Claim("userId", user.Id.ToString())
+                new Claim("userId", user.Id.ToString()),
+                new Claim("role", role)
             };
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                // Access token expires in 15 minutes — frontend must refresh on 401
+                // Access token expires in 15 minutes ï¿½ frontend must refresh on 401
                 expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: creds
             );

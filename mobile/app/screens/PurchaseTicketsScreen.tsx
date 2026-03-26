@@ -16,8 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Button } from "@react-navigation/elements";
 import { Text } from "@/app/components/ui/text";
-import { useRestApi } from "../hooks/useRestApi";
-import { ItemDTO, TicketsDTO } from "../types";
 
 export default function PurchaseTickets() {
   const ref = React.useRef<TriggerRef>(null);
@@ -39,16 +37,6 @@ export default function PurchaseTickets() {
   function onTouchStart() {
     ref.current?.open();
   }
-
-  const [refreshing, setRefreshing] = React.useState(false);
-
-  const { items, refetchItems } = useRestApi("/tickets");
-
-  const onRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    await refetchItems();
-    setRefreshing(false);
-  }, []);
 
   const [selectedType, setSelectedType] = React.useState<string | null>(null);
 

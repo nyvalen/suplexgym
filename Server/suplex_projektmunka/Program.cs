@@ -35,7 +35,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero // No grace period on token expiry
         };
 
         // Return 401 JSON responses instead of redirect

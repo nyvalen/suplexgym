@@ -1,10 +1,9 @@
-import { ThemeProvider } from "./components/theme-provider"
-import { ModeToggle } from "./components/mode-toggle"
+import Page from "./pages/page"
 
 export function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <ModeToggle />
-    </ThemeProvider>
+    <>
+      <Page />
+    </>
   )
 }
