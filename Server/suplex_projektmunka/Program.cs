@@ -66,15 +66,19 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:3000",   // React web dev server
-                "http://localhost:5173",   // Vite dev server
-                "http://localhost:8081",   // React Native / Expo
-                "http://localhost:4200"    // Angular dev server
-            )
+            // .WithOrigins(
+            //     "http://localhost:3000",        // React web dev server
+            //     "http://localhost:5173",        // Vite dev server
+            //     "http://localhost:8081",        // React Native / Expo (localhost)
+            //     "http://localhost:4200",        // Angular dev server
+            //     "http://192.168.0.209:5103",    // Your machine IP address
+            //     "http://192.168.0.209:3000",    // Your machine IP on other ports
+            //     "http://192.168.0.209:5173",    // Your machine IP on other ports
+            //     "http://192.168.0.18"           // Phone running Expo Go
+            // )
+            .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowAnyMethod();
     });
 });
 

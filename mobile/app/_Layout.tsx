@@ -15,23 +15,24 @@ import "./global.css";
 import {
   NavigationIndependentTree,
   ThemeProvider,
+  createStaticNavigation,
+  StaticParamList,
+  DarkTheme,
+  DefaultTheme,
 } from "@react-navigation/native";
 import { NAV_THEME } from "./theme/theme";
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import { Loader } from "./components/Loader/Loader";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SignInForm } from "./components/sign-in-form";
 import { SignUpForm } from "./components/sign-up-form";
-import { HeaderButton, Text } from "@react-navigation/elements";
 import {
-  createStaticNavigation,
-  StaticParamList,
-} from "@react-navigation/native";
-import { Image } from "react-native";
+  HeaderButton,
+  Text,
+  Assets as NavigationAssets,
+} from "@react-navigation/elements";
 import SignInScreen from "./screens/SignInScreen";
 
-import { Assets as NavigationAssets } from "@react-navigation/elements";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { Asset } from "expo-asset";
 import { createURL } from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
@@ -203,7 +204,8 @@ export default function RootLayout() {
       <ThemeProvider value={NAV_THEME["light"]}>
         <GestureHandlerRootView className="flex-1">
           <View className="flex-1 h-full justify-center">
-            <NavigationIndependentTree>
+            <NewsListScreen />
+            {/* <NavigationIndependentTree>
               <Navigation
                 theme={NAV_THEME["light"]}
                 linking={{
@@ -214,7 +216,7 @@ export default function RootLayout() {
                   SplashScreen.hideAsync();
                 }}
               />
-            </NavigationIndependentTree>
+            </NavigationIndependentTree> */}
           </View>
 
           <PortalHost />

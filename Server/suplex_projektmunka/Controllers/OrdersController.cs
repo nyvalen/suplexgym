@@ -10,7 +10,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/orders")]
-    // [Authorize]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly GymContext _context;

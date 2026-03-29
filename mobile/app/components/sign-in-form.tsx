@@ -12,19 +12,49 @@ import { Separator } from "@/app/components/ui/separator";
 import { Text } from "@/app/components/ui/text";
 import * as React from "react";
 import { type TextInput, View } from "react-native";
-
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../context/auth-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function SignInForm() {
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [accessToken, setAccessToken] = React.useState("");
   const passwordInputRef = React.useRef<TextInput>(null);
 
   function onEmailSubmitEditing() {
     passwordInputRef.current?.focus();
   }
-
-  function onSubmit() {
-    // TODO: Submit form and navigate to protected screen if successful
-  }
+  function onSubmit() {}
+  const handleSubmit = async () => {
+    setError("");
+    try {
+      const response = await fetch("http://192.168.0.209:5103/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, password: password }),
+      });
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        console.log("Login successful:", data);
+        setAccessToken(data.accessToken);
+        await AsyncStorage.setItem("accessToken", data.accessToken);
+        const token = await AsyncStorage.getItem("accessToken");
+        navigation.navigate("NavTabs");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Login failed");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    }
+  };
 
   const navigation = useNavigation();
 
@@ -49,6 +79,8 @@ export function SignInForm() {
                 keyboardType="email-address"
                 autoComplete="email"
                 autoCapitalize="none"
+                onChangeText={setEmail}
+                value={email}
                 onSubmitEditing={onEmailSubmitEditing}
                 returnKeyType="next"
                 submitBehavior="submit"
@@ -74,12 +106,13 @@ export function SignInForm() {
                 ref={passwordInputRef}
                 id="password"
                 secureTextEntry
-                returnKeyType="send"
+                onChangeText={setPassword}
+                value={password}
                 onSubmitEditing={onSubmit}
               />
             </View>
-            <Button className="w-full" screen="NavTabs">
-              <Text>Continue</Text>
+            <Button className="w-full" onPressIn={handleSubmit}>
+              Continue
             </Button>
           </View>
         </CardContent>

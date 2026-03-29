@@ -8,8 +8,7 @@ import {
   ListRenderItemInfo,
   ImageSourcePropType,
 } from "react-native";
-import { useRestApi } from "../hooks/useRestApi";
-import type { NewsDTO } from "../types";
+
 import NewsDetailsScreen from "./NewsDetailsScreen";
 import { useNavigation } from "@react-navigation/native";
 
@@ -23,7 +22,7 @@ interface NewsListScreenItem {
 
 async function fetchNews(): Promise<NewsListScreenItem[]> {
   try {
-    const res = await fetch("http://localhost:5103/api/news");
+    const res = await fetch("http://192.168.0.209:5103/api/news");
     if (!res.ok) throw new Error("Failed fetch");
     return (await res.json()) as NewsListScreenItem[];
   } catch (err) {

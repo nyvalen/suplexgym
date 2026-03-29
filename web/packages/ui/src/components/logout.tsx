@@ -8,9 +8,41 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { useTheme } from "../../../../apps/web/src/components/theme-provider"
 import { Button } from "@workspace/ui/components/button"
+import { AuthContext } from "../../../../apps/web/src/context/auth-context"
+import { useContext, useEffect, useState } from "react"
 
 export function Logout() {
-  const { setTheme } = useTheme()
+  const [error, setError] = useState("")
+
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext)
+  const Logout = async () => {
+    setError("")
+    try {
+      const response = await fetch("http://localhost:5103/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        console.log("Logout successful:", data)
+        setIsLoggedIn(false)
+        localStorage.setItem("accessToken", "")
+        window.location.href = "/"
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Login failed")
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.")
+    }
+  }
+  const handleClick = async () => {
+    await Logout()
+  }
 
   return (
     <DropdownMenu>
@@ -26,10 +58,7 @@ export function Logout() {
       <DropdownMenuContent align="center">
         <DropdownMenuItem
           className="w-full p-1.5"
-          onClick={() => {
-            localStorage.setItem("accessToken", "")
-            window.location.href = "/"
-          }}
+          onClick={() => handleClick()}
         >
           Are you sure you want to log out?
         </DropdownMenuItem>
