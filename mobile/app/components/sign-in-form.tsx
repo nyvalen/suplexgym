@@ -15,6 +15,7 @@ import { type TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../context/auth-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { api_endpoints } from "@/app/config/api";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -31,7 +32,7 @@ export function SignInForm() {
   const handleSubmit = async () => {
     setError("");
     try {
-      const response = await fetch("http://192.168.0.209:5103/api/auth/login", {
+      const response = await fetch(api_endpoints.login, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export function SignInForm() {
         setError(errorData.message || "Login failed");
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError("Invalid email or password. Please try again.");
     }
   };
 
@@ -115,6 +116,11 @@ export function SignInForm() {
               Continue
             </Button>
           </View>
+          {error ? (
+            <Text className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">
+              {error}
+            </Text>
+          ) : null}
         </CardContent>
       </Card>
     </View>

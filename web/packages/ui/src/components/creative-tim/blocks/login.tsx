@@ -38,14 +38,20 @@ export default function Login({
           setAccessToken(data.accessToken)
           console.log("Access Token:", data.accessToken)
           localStorage.setItem("accessToken", data.accessToken)
+          if (data.role !== "admin") {
+            setError(
+              "Permission denied. Use admin account to access this page."
+            )
+          } else {
+            setIsLoggedIn(true)
+          }
         }
-        setIsLoggedIn(true)
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Login failed")
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      setError("Invalid email or password. Please try again.")
     }
   }
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,6 +119,11 @@ export default function Login({
           <Button type="submit" size="lg" className="w-full">
             Sign In
           </Button>
+          {error ? (
+            <p className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">
+              {error}
+            </p>
+          ) : null}
         </form>
       </div>
     </div>

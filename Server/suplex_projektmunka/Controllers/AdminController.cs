@@ -94,6 +94,21 @@ namespace suplex_projektmunka.Controllers
         }
 
         /// <summary>
+        /// Get all available roles for user role management.
+        /// FRONTEND: Admin user management form role dropdown.
+        /// </summary>
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = await _context.Roles
+                .Where(r => r.IsActive)
+                .Select(r => new { r.Id, r.Role })
+                .ToListAsync();
+
+            return Ok(roles);
+        }
+
+        /// <summary>
         /// View all tickets for a specific user, including expiry and remaining days.
         /// FRONTEND: Admin "view user tickets" panel — show expiry countdown and renewal history.
         /// </summary>

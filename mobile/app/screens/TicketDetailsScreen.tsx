@@ -15,7 +15,6 @@ export default function TicketsDetailsScreen({ route }) {
         />
         <View className="border-t-2">
           <Text className="text-2xl m-1">{article.name}</Text>
-          <Text className="text-lg ml-1">{article.description}</Text>
         </View>
         <Button
           className="w-3/5 self-center"

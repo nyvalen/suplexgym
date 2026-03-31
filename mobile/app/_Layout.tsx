@@ -204,8 +204,7 @@ export default function RootLayout() {
       <ThemeProvider value={NAV_THEME["light"]}>
         <GestureHandlerRootView className="flex-1">
           <View className="flex-1 h-full justify-center">
-            <NewsListScreen />
-            {/* <NavigationIndependentTree>
+            <NavigationIndependentTree>
               <Navigation
                 theme={NAV_THEME["light"]}
                 linking={{
@@ -216,7 +215,7 @@ export default function RootLayout() {
                   SplashScreen.hideAsync();
                 }}
               />
-            </NavigationIndependentTree> */}
+            </NavigationIndependentTree>
           </View>
 
           <PortalHost />

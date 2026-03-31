@@ -1,0 +1,14 @@
+{
+  "folders": [
+	{
+		"path": "../../.."
+	},
+	{
+		"path": "../../../../eszidual/Eszi.Demo"
+	},
+	{
+		"path": "../../../../vite-monorepo"
+	}
+],
+  "settings": {}
+}

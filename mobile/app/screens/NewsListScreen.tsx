@@ -11,18 +11,19 @@ import {
 
 import NewsDetailsScreen from "./NewsDetailsScreen";
 import { useNavigation } from "@react-navigation/native";
+import { api_endpoints } from "@/app/config/api";
 
 interface NewsListScreenItem {
   id: number;
   title: string;
   subtitle: string;
   content: string;
-  imagePath: ImageSourcePropType;
+  imagePath: string;
 }
 
 async function fetchNews(): Promise<NewsListScreenItem[]> {
   try {
-    const res = await fetch("http://192.168.0.209:5103/api/news");
+    const res = await fetch(api_endpoints.news);
     if (!res.ok) throw new Error("Failed fetch");
     return (await res.json()) as NewsListScreenItem[];
   } catch (err) {
@@ -58,7 +59,7 @@ export default function NewsListScreen() {
           <View className="h-20 w-full">
             <Text className="text-2xl font-bold mt-2 mb-1">{title}</Text>
             <View className="bg-transparent rounded-lg p-3 elevation w-48">
-              <Image source={imagePath} className="w-full h-full" />
+              <Image source={{ uri: imagePath }} className="w-full h-full" />
             </View>
           </View>
         </TouchableOpacity>

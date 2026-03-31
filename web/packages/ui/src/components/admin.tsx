@@ -11,8 +11,12 @@ function decodeToken(token) {
 
 const token = localStorage.getItem("accessToken")
 
-const data = token !== undefined && token !== "" ? decodeToken(token) : ""
+console.log(token)
 
+const data =
+  token !== undefined && token !== null && token !== ""
+    ? decodeToken(token)
+    : ""
 export function Admin() {
   return (
     <Button
@@ -22,7 +26,7 @@ export function Admin() {
       onClick={() => {
         {
           console.log("Decoded Token Data:", data)
-          data.role == "admin"
+          data == "admin"
             ? (window.location.href = "/admin")
             : (window.location.href = "/login")
         }
