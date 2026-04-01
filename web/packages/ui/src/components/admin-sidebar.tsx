@@ -10,6 +10,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -62,7 +63,7 @@ export function AdminSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" variant="outline" asChild>
               <a onClick={() => (window.location.href = "/")}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-ring text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-purple-600/60 text-sidebar-primary-foreground dark:bg-sidebar-ring">
                   <Dumbbell className="size-4" />
                 </div>
                 <div className="flex w-full gap-0.5 leading-none">
@@ -100,12 +101,13 @@ export function AdminSidebar({
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
-      <div className="aspect-square items-center justify-center self-center rounded-lg">
-        <ModeToggle />
-        <Logout />
-        <Language />
-      </div>
+      <SidebarFooter>
+        <div className="mb-6 flex items-center gap-1 self-center px-1">
+          <ModeToggle />
+          <Logout />
+          <Language />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   )
 }

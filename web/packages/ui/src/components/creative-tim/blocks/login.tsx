@@ -67,7 +67,7 @@ export default function Login({
   return (
     <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70% p-4">
       <div className="mx-auto w-full max-w-md p-4">
-        <h2 className="mb-2 text-center text-2xl font-bold tracking-tight">
+        <h2 className="mb-2 text-center text-2xl font-bold tracking-tight text-white/80">
           Sign In
         </h2>
         <p className="mb-12 text-center text-base text-muted-foreground">
@@ -75,28 +75,34 @@ export default function Login({
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-semibold">
+            <Label
+              htmlFor="email"
+              className="text-sm font-semibold text-white/80"
+            >
               Email
             </Label>
             <Input
               id="email"
               type="email"
               placeholder="user@example.com"
-              className="h-11"
+              className="h-11 text-white/90"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-semibold">
+            <Label
+              htmlFor="password"
+              className="text-sm font-semibold text-white/90"
+            >
               Password
             </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                className="h-11 pr-10"
+                className="h-11 pr-10 text-white/80"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -105,7 +111,7 @@ export default function Login({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-1/2 right-1.5 h-7 w-7 -translate-y-1/2"
+                className="absolute top-1/2 right-1.5 h-7 w-7 -translate-y-1/2 text-white/80"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (

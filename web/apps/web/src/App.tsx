@@ -1,4 +1,4 @@
-import Page from "@/pages/page"
+import Page from "@/pages/page.tsx"
 
 export function App() {
   return (

@@ -1,8 +1,6 @@
 import { useState } from "react"
 import { AdminSidebar } from "@workspace/ui/components/admin-sidebar"
-import {
-  SidebarProvider,
-} from "@workspace/ui/components/sidebar"
+import { SidebarProvider } from "@workspace/ui/components/sidebar"
 import CrudsManageUsers from "@workspace/ui/components/creative-tim/blocks/cruds-manage-users"
 import CrudsManageNews from "@workspace/ui/components/creative-tim/blocks/cruds-manage-news"
 import CrudsManageItems from "@workspace/ui/components/creative-tim/blocks/cruds-manage-items"
@@ -18,7 +16,7 @@ export default function AdminPage() {
       style={{ "--sidebar-width": "19rem" } as React.CSSProperties}
     >
       <AdminSidebar activeSection={section} onSectionChange={setSection} />
-      <div className="h-full w-full flex-col bg-radial-[at_1000%_30%] from-purple-600 to-zinc-900 to-95%">
+      <div className="to-white-900 h-full w-full flex-col bg-radial-[at_-500%_30%] from-purple-600 to-95% dark:bg-radial-[at_300%_30%] dark:to-85%">
         {section === "users" && <CrudsManageUsers />}
         {section === "news" && <CrudsManageNews />}
         {section === "items" && <CrudsManageItems />}
