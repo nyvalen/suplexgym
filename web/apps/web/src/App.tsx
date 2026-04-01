@@ -1,4 +1,4 @@
-import Page from "./pages/page"
+import Page from "@/pages/page"
 
 export function App() {
   return (

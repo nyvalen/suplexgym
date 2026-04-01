@@ -1,5 +1,6 @@
 import * as React from "react"
-import { Dumbbell } from "lucide-react"
+import { Dumbbell, Home, Newspaper, CreditCard, Phone } from "lucide-react"
+import { Link, useLocation } from "react-router-dom"
 
 import {
   Sidebar,
@@ -9,98 +10,121 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
+  SidebarFooter,
 } from "./sidebar"
 import { HoverExpand } from "./unlumen-ui/hover-expand"
 import { ModeToggle } from "./mode-toggle"
 import { Admin } from "./admin"
 import { Language } from "./language"
 
-// This is sample data.
-const data = {
-  navMain: [
-    {
-      title: "1",
-      url: "#",
-      items: [
-        {
-          subitem: [
-            {
-              label: "Kyoto",
-              sublabel: "Japan",
-              description: "Ancient temples hidden among bamboo groves",
-              image: "/images/1.jpg",
-            },
-          ],
-          title: "1",
-          url: "#",
-        },
-        {
-          subitem: [
-            {
-              label: "Bangladesh",
-              sublabel: "India",
-              description: "Ancient temples hidden among bamboo groves",
-              image: "/images/4.jpg.webp",
-            },
-          ],
-          title: "2",
-          url: "#",
-        },
-      ],
-    },
-  ],
-}
+const navItems = [
+  {
+    label: "Home",
+    href: "/",
+    icon: Home,
+  },
+  {
+    label: "News",
+    href: "/news",
+    icon: Newspaper,
+  },
+  {
+    label: "Memberships",
+    href: "/plans",
+    icon: CreditCard,
+  },
+  {
+    label: "Contact",
+    href: "/contact",
+    icon: Phone,
+  },
+]
+
+const spotlightItems = [
+  {
+    label: "New summer classes",
+    sublabel: "June 2025",
+    description: "12 new group sessions added to the timetable",
+    image:
+      "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&w=600&q=75",
+  },
+  {
+    label: "Equipment upgrade",
+    sublabel: "May 2025",
+    description: "40 new machines installed across the main floor",
+    image:
+      "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const location = useLocation()
+
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" variant={"outline"} asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-ring text-sidebar-primary-foreground">
-                  <Dumbbell className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-stretch-150 font-mono% size-6 tracking-widest text-sidebar-accent-foreground uppercase">
-                    Suplex Gym
-                  </span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      {/* Logo */}
+      <SidebarHeader className="pb-4">
+        <Link to="/" className="flex items-center gap-2.5 px-2 py-1">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-ring">
+            <Dumbbell className="h-4 w-4 text-sidebar-primary-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-mono text-[11px] font-medium tracking-[0.18em] text-sidebar-accent-foreground uppercase">
+              Suplex Gym
+            </span>
+            <span className="text-[10px] text-sidebar-foreground/40">
+              Since 2025
+            </span>
+          </div>
+        </Link>
       </SidebarHeader>
+
       <SidebarContent>
+        {/* Primary nav */}
         <SidebarGroup>
-          <SidebarMenu className="gap-2">
-            {data.navMain.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                {item.items?.length ? (
-                  <SidebarMenuSub className="mb-1.5 ml-0 border-l-0 px-1.5">
-                    {item.items.map((item) => (
-                      <SidebarMenuSubItem key={item.title}>
-                        <div className="mt-0.5 mb-1.5 w-full border-t border-current opacity-15" />
-                        <a href={item.url}>
-                          <HoverExpand items={item.subitem} />
-                        </a>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                ) : null}
-              </SidebarMenuItem>
-            ))}
+          <SidebarMenu className="gap-0.5">
+            {navItems.map(({ label, href, icon: Icon }) => {
+              const active = location.pathname === href
+              return (
+                <SidebarMenuItem key={label}>
+                  <SidebarMenuButton asChild isActive={active}>
+                    <Link to={href} className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Divider */}
+        <div className="mx-3 my-1 border-t border-current opacity-8" />
+
+        {/* News spotlight */}
+        <SidebarGroup>
+          <p className="mb-2 px-2 font-mono text-[10px] tracking-widest text-sidebar-foreground/40 uppercase">
+            Latest
+          </p>
+          <Link to="/news" className="block rounded-md">
+            <HoverExpand
+              items={spotlightItems}
+              collapsedHeight={62}
+              expandedHeight={180}
+            />
+          </Link>
+        </SidebarGroup>
       </SidebarContent>
-      <div className="aspect-square items-center justify-center self-center rounded-lg">
-        <ModeToggle />
-        <Admin />
-        <Language />
-      </div>
+
+      {/* Footer actions */}
+      <SidebarFooter>
+        <div className="flex items-center gap-1 self-center px-1">
+          <ModeToggle />
+          <Admin />
+          <Language />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   )
 }

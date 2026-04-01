@@ -31,6 +31,7 @@
   "include": [
     "src",
     "../../packages/ui/src/components/mode-toggle.tsx",
-    "src/components/theme-provider.tsx"
+    "src/components/theme-provider.tsx",
+    "src/pages/page.tsx"
   ]
 }

@@ -69,7 +69,9 @@ export default function BlogContent() {
                 </CardContent>
                 <CardFooter className="flex items-center gap-3 p-6 pt-0">
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground">{createdAt}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(createdAt).toLocaleString()}
+                    </p>
                   </div>
                 </CardFooter>
               </Card>
@@ -88,7 +90,9 @@ export default function BlogContent() {
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-4 w-4" />
-                              <span>{createdAt}</span>
+                              <span>
+                                {new Date(createdAt).toLocaleString()}
+                              </span>
                             </div>
                           </div>
                         </div>

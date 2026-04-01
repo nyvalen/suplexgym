@@ -1,27 +1,32 @@
 import {
-  SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar"
 import { AppSidebar } from "@workspace/ui/components/app-sidebar"
 import BlogContentLimited from "@workspace/ui/components/creative-tim/blocks/blog-content-limited"
 import Hero from "@workspace/ui/components/creative-tim/blocks/hero"
+import Faq from "@workspace/ui/components/creative-tim/blocks/faq"
 
 export default function Page() {
   return (
     <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "19rem",
-        } as React.CSSProperties
-      }
+      style={{ "--sidebar-width": "19rem" } as React.CSSProperties}
     >
       <AppSidebar />
-      <div className="h-full flex-col bg-radial-[at_1000%_30%] from-purple-600 to-zinc-900 to-95%">
-        {" "}
+      <div className="relative min-h-screen w-full">
+        {/*
+          Sticky floating sidebar trigger — scrolls with the page,
+          always visible in the top-right corner.
+          The animate-pulse-slow class pulses gently to stay noticeable
+          without being distracting.
+        */}
+        <div className="fixed top-4 right-4 z-30">
+          <SidebarTrigger className="rounded-full border border-white/15 bg-zinc-900/80 p-2 text-white/60 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-white/30 hover:bg-zinc-800/90 hover:text-white hover:shadow-xl active:scale-95" />
+        </div>
+
         <Hero />
         <BlogContentLimited />
-        <SidebarTrigger className="absolute top-0 right-0 ml-2 shrink-0 px-4" />
+        <Faq />
       </div>
     </SidebarProvider>
   )

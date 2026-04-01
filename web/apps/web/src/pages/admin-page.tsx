@@ -1,23 +1,28 @@
+import { useState } from "react"
 import { AdminSidebar } from "@workspace/ui/components/admin-sidebar"
-import { Button } from "@workspace/ui/components/button"
-import CrudsManageUsers from "@workspace/ui/components/creative-tim/blocks/cruds-manage-users"
 import {
   SidebarProvider,
-  SidebarTrigger,
 } from "@workspace/ui/components/sidebar"
+import CrudsManageUsers from "@workspace/ui/components/creative-tim/blocks/cruds-manage-users"
+import CrudsManageNews from "@workspace/ui/components/creative-tim/blocks/cruds-manage-news"
+import CrudsManageItems from "@workspace/ui/components/creative-tim/blocks/cruds-manage-items"
+import CrudsManageEquipment from "@workspace/ui/components/creative-tim/blocks/cruds-manage-equipment"
+
+type Section = "users" | "news" | "items" | "equipment"
 
 export default function AdminPage() {
+  const [section, setSection] = useState<Section>("users")
+
   return (
     <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "19rem",
-        } as React.CSSProperties
-      }
+      style={{ "--sidebar-width": "19rem" } as React.CSSProperties}
     >
-      <AdminSidebar />
+      <AdminSidebar activeSection={section} onSectionChange={setSection} />
       <div className="h-full w-full flex-col bg-radial-[at_1000%_30%] from-purple-600 to-zinc-900 to-95%">
-        <CrudsManageUsers />
+        {section === "users" && <CrudsManageUsers />}
+        {section === "news" && <CrudsManageNews />}
+        {section === "items" && <CrudsManageItems />}
+        {section === "equipment" && <CrudsManageEquipment />}
       </div>
     </SidebarProvider>
   )

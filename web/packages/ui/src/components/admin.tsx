@@ -14,9 +14,7 @@ const token = localStorage.getItem("accessToken")
 console.log(token)
 
 const data =
-  token !== undefined && token !== null && token !== ""
-    ? decodeToken(token)
-    : ""
+  token !== undefined && token !== null && token != "" ? decodeToken(token) : ""
 export function Admin() {
   return (
     <Button
