@@ -41,6 +41,7 @@ import PurchaseTickets from "./screens/PurchaseTicketsScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { UserMenu } from "./components/user-menu";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 Asset.loadAsync([...NavigationAssets]);
 
@@ -201,26 +202,28 @@ declare global {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={NAV_THEME["light"]}>
-        <GestureHandlerRootView className="flex-1">
-          <View className="flex-1 h-full justify-center">
-            <NavigationIndependentTree>
-              <Navigation
-                theme={NAV_THEME["light"]}
-                linking={{
-                  enabled: "auto",
-                  prefixes: [prefix],
-                }}
-                onReady={() => {
-                  SplashScreen.hideAsync();
-                }}
-              />
-            </NavigationIndependentTree>
-          </View>
+      <LanguageProvider>
+        <ThemeProvider value={NAV_THEME["light"]}>
+          <GestureHandlerRootView className="flex-1">
+            <View className="flex-1 h-full justify-center">
+              <NavigationIndependentTree>
+                <Navigation
+                  theme={NAV_THEME["light"]}
+                  linking={{
+                    enabled: "auto",
+                    prefixes: [prefix],
+                  }}
+                  onReady={() => {
+                    SplashScreen.hideAsync();
+                  }}
+                />
+              </NavigationIndependentTree>
+            </View>
 
-          <PortalHost />
-        </GestureHandlerRootView>
-      </ThemeProvider>
+            <PortalHost />
+          </GestureHandlerRootView>
+        </ThemeProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

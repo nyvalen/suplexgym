@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://10.224.49.76:5103";
+  process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.143:5103";
 
 export const api_endpoints = {
   login: `${API_BASE_URL}/api/auth/login`,
@@ -8,7 +8,7 @@ export const api_endpoints = {
   logout: `${API_BASE_URL}/api/auth/logout`,
   user: `${API_BASE_URL}/api/user/profile`,
   password: `${API_BASE_URL}/api/user/change-password`,
-  billingaddress: `${API_BASE_URL}/api/billing-address`,
+  billingaddress: `${API_BASE_URL}/api/user/billing-address`,
   cart: `${API_BASE_URL}/api/cart`,
   news: `${API_BASE_URL}/api/news`,
   orders: `${API_BASE_URL}/api/orders`,
