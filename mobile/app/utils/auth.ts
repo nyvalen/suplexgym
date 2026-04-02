@@ -1,10 +1,44 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { api_endpoints } from "../config/api";
+
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.143:5103";
+
+export const ENDPOINTS = {
+  login:    `${API_BASE_URL}/api/auth/login`,
+  register: `${API_BASE_URL}/api/auth/register`,
+  refresh:  `${API_BASE_URL}/api/auth/refresh`,
+  logout:   `${API_BASE_URL}/api/auth/logout`,
+  user:     `${API_BASE_URL}/api/user/profile`,
+  password: `${API_BASE_URL}/api/user/change-password`,
+  billing:  `${API_BASE_URL}/api/user/billing-address`,
+  settings: `${API_BASE_URL}/api/user/settings`,
+  cart:         `${API_BASE_URL}/api/cart`,
+  cartAdd:      `${API_BASE_URL}/api/cart/add`,
+  cartClear:    `${API_BASE_URL}/api/cart/clear`,
+  cartItem:     (id: number) => `${API_BASE_URL}/api/cart/item/${id}`,
+  items:        `${API_BASE_URL}/api/items`,
+  itemTypes:    `${API_BASE_URL}/api/items/types`,
+  orders:       `${API_BASE_URL}/api/orders`,
+  checkout:     `${API_BASE_URL}/api/orders/checkout`,
+  renew:        (id: number) => `${API_BASE_URL}/api/orders/renew/${id}`,
+  news:         `${API_BASE_URL}/api/news`,
+};
+
+/** Save both tokens after login/register */
+export async function saveTokens(access: string, refresh: string) {
+  await AsyncStorage.multiSet([
+    ["accessToken", access],
+    ["refreshToken", refresh],
+  ]);
+}
+
+export async function clearTokens() {
+  await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
+}
 
 /**
- * Makes an authenticated fetch request.
- * On 401, attempts a token refresh once, then retries.
- * If refresh fails, clears storage (forces re-login).
+ * Authenticated fetch with automatic token refresh on 401.
+ * Throws "SESSION_EXPIRED" if refresh also fails.
  */
 export async function authFetch(
   url: string,
@@ -23,44 +57,29 @@ export async function authFetch(
     });
 
   let res = await doFetch(token ?? "");
-
   if (res.status !== 401) return res;
 
-  // ── Token expired: try to refresh ────────────────────────────────────────
+  // Try refresh
   const refreshToken = await AsyncStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    await clearTokens();
-    throw new Error("SESSION_EXPIRED");
-  }
+  if (!refreshToken) { await clearTokens(); throw new Error("SESSION_EXPIRED"); }
 
-  const refreshRes = await fetch(api_endpoints.refresh, {
+  const refreshRes = await fetch(ENDPOINTS.refresh, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
   });
 
-  if (!refreshRes.ok) {
-    await clearTokens();
-    throw new Error("SESSION_EXPIRED");
-  }
+  if (!refreshRes.ok) { await clearTokens(); throw new Error("SESSION_EXPIRED"); }
 
   const { accessToken, refreshToken: newRefresh } = await refreshRes.json();
-  await AsyncStorage.setItem("accessToken", accessToken);
-  if (newRefresh) await AsyncStorage.setItem("refreshToken", newRefresh);
+  await saveTokens(accessToken, newRefresh || refreshToken);
 
-  // Retry original request with new token
-  res = await doFetch(accessToken);
-  return res;
+  return doFetch(accessToken);
 }
 
-export async function clearTokens() {
-  await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
-}
-
-/** Save both tokens after login */
-export async function saveTokens(accessToken: string, refreshToken: string) {
-  await AsyncStorage.multiSet([
-    ["accessToken", accessToken],
-    ["refreshToken", refreshToken],
-  ]);
+export function decodeJwt(token: string): Record<string, string> | null {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
+  } catch { return null; }
 }

@@ -42,6 +42,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { UserMenu } from "./components/user-menu";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import SignUpScreen from "./screens/SignUpScreen";
 
 Asset.loadAsync([...NavigationAssets]);
 
@@ -152,7 +153,7 @@ const RootStack = createNativeStackNavigator({
     },
 
     SignUp: {
-      screen: SignUpForm,
+      screen: SignUpScreen,
       options: ({ navigation }) => ({
         presentation: "modal",
         headerRight: () => (
