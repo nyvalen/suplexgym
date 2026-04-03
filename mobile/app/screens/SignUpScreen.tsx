@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import {
-  View, Text, StyleSheet, TextInput, Pressable,
-  ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar,
+  View, Text, Pressable, ScrollView,
+  KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar, TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ENDPOINTS } from "../utils/auth";
-
-const C = {
-  bg: "#09090b", border: "#27272a",
-  text: "#fafafa", textSub: "rgba(250,250,250,0.5)", textMuted: "rgba(250,250,250,0.25)",
-};
+import { useTheme, tokens } from "../theme/ThemeContext";
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
+  const { isDark } = useTheme();
+  const t = isDark ? tokens.dark : tokens.light;
+
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -39,65 +38,124 @@ export default function SignUpScreen() {
     finally { setLoading(false); }
   };
 
+  const inputStyle = {
+    backgroundColor: t.surfaceHigh, borderWidth: 1, borderColor: t.border,
+    borderRadius: 14, paddingHorizontal: 18, paddingVertical: 14,
+    color: t.text, fontSize: 15,
+  };
+
   const FIELDS = [
-    { key: "name",     label: "Teljes név",  placeholder: "Kovács János",     keyboard: undefined,      secure: false },
-    { key: "username", label: "Felhasználónév", placeholder: "kovacsj",       keyboard: undefined,      secure: false, lower: true },
-    { key: "email",    label: "Email",        placeholder: "te@pelda.hu",      keyboard: "email-address" as const, secure: false, lower: true },
-    { key: "password", label: "Jelszó",       placeholder: "••••••••",         keyboard: undefined,      secure: true },
+    { key: "name",     label: "Teljes név",     placeholder: "Kovács János",  keyboard: undefined as any, lower: false },
+    { key: "username", label: "Felhasználónév", placeholder: "kovacsj",       keyboard: undefined as any, lower: true  },
+    { key: "email",    label: "Email",           placeholder: "te@pelda.hu",   keyboard: "email-address" as const, lower: true  },
+    { key: "password", label: "Jelszó",          placeholder: "••••••••",     keyboard: undefined as any, secure: true },
   ];
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
-      <View style={styles.glow} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <Pressable onPress={() => navigation.goBack()} style={styles.back}>
-          <Text style={styles.backText}>← Vissza</Text>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.bg }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={t.bg} />
+
+      <View style={{
+        position: "absolute", top: -60, right: -60,
+        width: 280, height: 280, borderRadius: 140,
+        backgroundColor: isDark ? "rgba(124,58,237,0.14)" : "rgba(124,58,237,0.05)",
+      }} />
+
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 64, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        <Pressable onPress={() => navigation.goBack()} style={{ marginBottom: 36 }}>
+          <Text style={{ color: t.textMuted, fontSize: 14 }}>← Vissza</Text>
         </Pressable>
 
-        <View style={styles.header}>
-          <View style={styles.icon}><Text style={{ fontSize: 28 }}>💪</Text></View>
-          <Text style={styles.title}>Regisztráció</Text>
-          <Text style={styles.sub}>Csatlakozz a Suplex Gymhez</Text>
+        <View style={{ alignItems: "center", marginBottom: 40, gap: 8 }}>
+          <View style={{
+            width: 64, height: 64, borderRadius: 20,
+            backgroundColor: t.primarySoft, borderWidth: 1, borderColor: t.primaryBorder,
+            alignItems: "center", justifyContent: "center", marginBottom: 4,
+          }}>
+            <Text style={{ fontSize: 28 }}>💪</Text>
+          </View>
+          <Text style={{ color: t.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 }}>Regisztráció</Text>
+          <Text style={{ color: t.textSub, fontSize: 14 }}>Csatlakozz a Suplex Gymhez</Text>
         </View>
 
         {success ? (
-          <View style={styles.successBox}>
-            <Text style={styles.successIcon}>✓</Text>
-            <Text style={styles.successTitle}>Sikeres regisztráció!</Text>
-            <Text style={styles.successSub}>Ellenőrizd az emailed, majd jelentkezz be.</Text>
-            <Pressable style={({ pressed }) => [styles.btn, pressed && { opacity: 0.75 }]}
-              onPress={() => navigation.navigate("SignIn" as never)}>
-              <Text style={styles.btnText}>Bejelentkezés</Text>
+          <View style={{
+            alignItems: "center", gap: 14, paddingTop: 20,
+            backgroundColor: t.surface, borderRadius: 20, padding: 32,
+            borderWidth: 1, borderColor: t.border,
+          }}>
+            <View style={{
+              width: 72, height: 72, borderRadius: 36,
+              backgroundColor: isDark ? "rgba(74,222,128,0.15)" : "rgba(22,163,74,0.1)",
+              alignItems: "center", justifyContent: "center",
+              borderWidth: 1, borderColor: isDark ? "rgba(74,222,128,0.3)" : "rgba(22,163,74,0.25)",
+            }}>
+              <Text style={{ fontSize: 32 }}>✓</Text>
+            </View>
+            <Text style={{ color: t.text, fontSize: 22, fontWeight: "700" }}>Sikeres regisztráció!</Text>
+            <Text style={{ color: t.textSub, fontSize: 14, textAlign: "center", lineHeight: 20 }}>
+              Ellenőrizd az emailed, majd jelentkezz be.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [{
+                backgroundColor: t.primary, borderRadius: 14,
+                paddingVertical: 16, paddingHorizontal: 32, marginTop: 8, opacity: pressed ? 0.8 : 1,
+              }]}
+              onPress={() => navigation.navigate("SignIn" as never)}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Bejelentkezés</Text>
             </Pressable>
           </View>
         ) : (
-          <View style={styles.form}>
+          <View style={{ gap: 14 }}>
             {FIELDS.map(f => (
-              <View key={f.key} style={styles.field}>
-                <Text style={styles.label}>{f.label}</Text>
+              <View key={f.key} style={{ gap: 7 }}>
+                <Text style={{ color: t.textSub, fontSize: 12, fontWeight: "600", letterSpacing: 0.8, textTransform: "uppercase" }}>
+                  {f.label}
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={inputStyle}
                   placeholder={f.placeholder}
-                  placeholderTextColor={C.textMuted}
+                  placeholderTextColor={t.textMuted}
                   keyboardType={f.keyboard}
                   autoCapitalize={f.lower ? "none" : "words"}
-                  secureTextEntry={f.secure}
+                  secureTextEntry={!!(f as any).secure}
                   value={(form as any)[f.key]}
                   onChangeText={set(f.key)}
                 />
               </View>
             ))}
-            {error ? <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View> : null}
+
+            {!!error && (
+              <View style={{
+                backgroundColor: isDark ? "rgba(248,113,113,0.1)" : "rgba(220,38,38,0.07)",
+                borderRadius: 12, padding: 14,
+                borderWidth: 1, borderColor: isDark ? "rgba(248,113,113,0.25)" : "rgba(220,38,38,0.2)",
+              }}>
+                <Text style={{ color: t.danger, fontSize: 13, textAlign: "center" }}>{error}</Text>
+              </View>
+            )}
+
             <Pressable
-              style={({ pressed }) => [styles.btn, pressed && { opacity: 0.75 }, loading && { opacity: 0.6 }]}
-              onPress={handleRegister} disabled={loading}
+              style={({ pressed }) => [{
+                backgroundColor: t.primary, borderRadius: 16,
+                paddingVertical: 18, alignItems: "center", marginTop: 4,
+                opacity: pressed || loading ? 0.75 : 1,
+                shadowColor: t.primary, shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
+              }]}
+              onPress={handleRegister}
+              disabled={loading}
             >
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Fiók létrehozása</Text>}
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Fiók létrehozása</Text>
+              }
             </Pressable>
-            <Pressable onPress={() => navigation.navigate("SignIn" as never)} style={styles.switchRow}>
-              <Text style={styles.switchText}>
-                Már van fiókod? <Text style={styles.switchLink}>Bejelentkezés</Text>
+
+            <Pressable onPress={() => navigation.navigate("SignIn" as never)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, alignItems: "center" }]}>
+              <Text style={{ color: t.textMuted, fontSize: 14 }}>
+                Már van fiókod? <Text style={{ color: t.primaryLight, fontWeight: "700" }}>Bejelentkezés</Text>
               </Text>
             </Pressable>
           </View>
@@ -106,50 +164,3 @@ export default function SignUpScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  glow: {
-    position: "absolute", top: -60, right: -60,
-    width: 280, height: 280, borderRadius: 140,
-    backgroundColor: "rgba(124,58,237,0.12)",
-  },
-  scroll: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 60, paddingBottom: 40 },
-  back: { marginBottom: 32 },
-  backText: { color: "rgba(250,250,250,0.4)", fontSize: 14 },
-  header: { alignItems: "center", marginBottom: 36, gap: 8 },
-  icon: {
-    width: 56, height: 56, borderRadius: 16,
-    backgroundColor: "rgba(124,58,237,0.4)",
-    alignItems: "center", justifyContent: "center", marginBottom: 4,
-  },
-  title: { color: C.text, fontSize: 26, fontWeight: "700", letterSpacing: -0.3 },
-  sub: { color: C.textSub, fontSize: 14 },
-  form: { gap: 14 },
-  field: { gap: 7 },
-  label: { color: C.textSub, fontSize: 13, fontWeight: "500" },
-  input: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderWidth: 1, borderColor: C.border,
-    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
-    color: C.text, fontSize: 15,
-  },
-  errorBox: {
-    backgroundColor: "rgba(248,113,113,0.1)", borderRadius: 10, padding: 12,
-    borderWidth: 1, borderColor: "rgba(248,113,113,0.2)",
-  },
-  errorText: { color: "#f87171", fontSize: 13, textAlign: "center" },
-  btn: {
-    backgroundColor: "rgba(124,58,237,0.8)", borderRadius: 14,
-    paddingVertical: 16, alignItems: "center", marginTop: 6,
-    borderWidth: 1, borderColor: "rgba(124,58,237,0.4)",
-  },
-  btnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  switchRow: { alignItems: "center", marginTop: 8 },
-  switchText: { color: C.textMuted, fontSize: 14 },
-  switchLink: { color: "rgba(167,139,250,0.9)", fontWeight: "600" },
-  successBox: { alignItems: "center", gap: 12, paddingTop: 20 },
-  successIcon: { fontSize: 48, color: "#4ade80" },
-  successTitle: { color: C.text, fontSize: 22, fontWeight: "700" },
-  successSub: { color: C.textSub, fontSize: 14, textAlign: "center", paddingHorizontal: 20 },
-});

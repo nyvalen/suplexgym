@@ -117,7 +117,6 @@ npm-debug.log*
 
 # No bundled stuff in git
 dist
-lib
 
 # No rollup stuff
 .rts2_cache*

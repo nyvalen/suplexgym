@@ -1,13 +1,3 @@
-/**
- * PurchaseTicketsScreen
- *
- * PURCHASE FLOW (FIXED):
- * 1. User taps + on a ticket card
- * 2. We call POST /api/cart/add  { item_id, quantity } so the server cart is authoritative
- * 3. Local state mirrors the server cart for UI
- * 4. "Fizetés →" button navigates to PurchaseFinalizationScreen
- * 5. PurchaseFinalizationScreen calls POST /api/orders/checkout (server reads its own cart)
- */
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View, Text, TextInput, FlatList, TouchableOpacity,
@@ -15,98 +5,91 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { authFetch, ENDPOINTS } from "../utils/auth";
+import { useTheme, tokens } from "../theme/ThemeContext";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-interface TicketItem {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  validityDays: number;
-  typeName: string;
-  type_id: number;
-}
-
-export interface CartItem {
-  itemId: number;
-  name: string;
-  price: number;
-  validityDays: number;
-  typeName: string;
-  type_id: number;
-  quantity: number;
-}
+interface TicketItem { id: number; name: string; description: string; price: number; validityDays: number; typeName: string; type_id: number; }
+export interface CartItem { itemId: number; name: string; price: number; validityDays: number; typeName: string; type_id: number; quantity: number; }
 
 type Category = "all" | "daily" | "monthly" | "yearly";
 const TYPE_MAP: Record<number, Category> = { 1: "daily", 2: "monthly", 3: "yearly" };
 const CATEGORY_LABELS: Record<Category, string> = { all: "Összes", daily: "Napi", monthly: "Havi", yearly: "Éves" };
-const CATEGORY_COLORS: Record<Category, string> = {
-  all: "#5B7FA6", daily: "#C4873A", monthly: "#5B8A6E", yearly: "#8B5BA6",
-};
+const CATEGORY_COLORS: Record<Category, string> = { all: "#6366f1", daily: "#f59e0b", monthly: "#10b981", yearly: "#7c3aed" };
 
-const C = {
-  bg: "#0D1117", surface: "#161B22", surfaceHigh: "#21262D",
-  border: "#30363D", text: "#F0F6FC", textSub: "#8B949E",
-  textMuted: "#6E7681", accent: "#C4873A",
-};
-
-// ── Category chip ─────────────────────────────────────────────────────────────
-function CategoryChip({ cat, active, onPress }: { cat: Category; active: boolean; onPress: () => void }) {
+function CategoryChip({ cat, active, onPress, t }: any) {
   const scale = useRef(new Animated.Value(1)).current;
+  const color = CATEGORY_COLORS[cat as Category];
   const press = () => {
     Animated.sequence([
-      Animated.timing(scale, { toValue: 0.92, duration: 70, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 0.9, duration: 70, useNativeDriver: true }),
       Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
     ]).start();
     onPress();
   };
   return (
     <Animated.View style={{ transform: [{ scale }] }}>
-      <TouchableOpacity onPress={press} activeOpacity={0.85}
-        style={[styles.chip, active
-          ? { backgroundColor: CATEGORY_COLORS[cat], borderColor: CATEGORY_COLORS[cat] }
-          : { backgroundColor: C.surfaceHigh, borderColor: C.border }]}>
-        <Text style={[styles.chipText, { color: active ? "#fff" : C.textSub }]}>
-          {CATEGORY_LABELS[cat]}
+      <TouchableOpacity onPress={press} activeOpacity={0.85} style={{
+        paddingHorizontal: 18, paddingVertical: 9, borderRadius: 22, borderWidth: 1.5,
+        backgroundColor: active ? color : t.surface,
+        borderColor: active ? color : t.border,
+      }}>
+        <Text style={{ fontSize: 13, fontWeight: "700", color: active ? "#fff" : t.textSub }}>
+          {CATEGORY_LABELS[cat as Category]}
         </Text>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
-// ── Ticket card ───────────────────────────────────────────────────────────────
-function TicketCard({
-  item, qty, onAdd, adding,
-}: { item: TicketItem; qty: number; onAdd: () => void; adding: boolean }) {
+function TicketCard({ item, qty, onAdd, adding, t, isDark }: any) {
   const cat: Category = TYPE_MAP[item.type_id] ?? "all";
   const color = CATEGORY_COLORS[cat];
   return (
-    <View style={styles.card}>
-      <View style={[styles.cardStripe, { backgroundColor: color }]} />
-      <View style={styles.cardBody}>
-        <View style={styles.cardTop}>
-          <View style={styles.cardBadge}>
-            <Text style={[styles.cardBadgeText, { color }]}>{CATEGORY_LABELS[cat].toUpperCase()}</Text>
+    <View style={{
+      backgroundColor: t.surface, borderRadius: 18,
+      borderWidth: 1, borderColor: t.border,
+      flexDirection: "row", overflow: "hidden",
+    }}>
+      <View style={{ width: 4, backgroundColor: color }} />
+      <View style={{ flex: 1, padding: 16, gap: 6 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View style={{
+            backgroundColor: color + "22", paddingHorizontal: 8, paddingVertical: 4,
+            borderRadius: 8, borderWidth: 1, borderColor: color + "44",
+          }}>
+            <Text style={{ fontSize: 10, fontWeight: "800", color, letterSpacing: 0.5 }}>
+              {CATEGORY_LABELS[cat].toUpperCase()}
+            </Text>
           </View>
-          <Text style={styles.cardPrice}>{item.price.toLocaleString("hu-HU")} Ft</Text>
+          <Text style={{ fontSize: 17, fontWeight: "800", color: t.text }}>{item.price.toLocaleString("hu-HU")} Ft</Text>
         </View>
-        <Text style={styles.cardName}>{item.name}</Text>
-        <Text style={styles.cardDesc} numberOfLines={2}>
+
+        <Text style={{ fontSize: 17, fontWeight: "700", color: t.text }}>{item.name}</Text>
+        <Text style={{ fontSize: 13, color: t.textSub, lineHeight: 18 }} numberOfLines={2}>
           {item.description || `Érvényes ${item.validityDays} napig`}
         </Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.cardDays}>⏱ {item.validityDays} nap</Text>
-          <TouchableOpacity onPress={onAdd} disabled={adding}
-            activeOpacity={0.85} style={[styles.addBtn, { backgroundColor: color, opacity: adding ? 0.6 : 1 }]}>
+
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <Text style={{ fontSize: 13, color: t.textMuted }}>⏱</Text>
+            <Text style={{ fontSize: 12, color: t.textMuted }}>{item.validityDays} nap</Text>
+          </View>
+
+          <TouchableOpacity onPress={onAdd} disabled={adding} activeOpacity={0.85}
+            style={[{
+              width: 40, height: 40, borderRadius: 12, backgroundColor: color,
+              alignItems: "center", justifyContent: "center", position: "relative",
+            }, adding && { opacity: 0.6 }]}
+          >
             {qty > 0 && (
-              <View style={styles.addBtnBadge}>
-                <Text style={styles.addBtnBadgeText}>{qty}</Text>
+              <View style={{
+                position: "absolute", top: -7, right: -7,
+                backgroundColor: t.danger, width: 19, height: 19, borderRadius: 9.5,
+                alignItems: "center", justifyContent: "center", zIndex: 1,
+              }}>
+                <Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{qty}</Text>
               </View>
             )}
-            {adding
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Text style={styles.addBtnText}>+</Text>
-            }
+            {adding ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 24, fontWeight: "300", lineHeight: 28 }}>+</Text>}
           </TouchableOpacity>
         </View>
       </View>
@@ -114,209 +97,137 @@ function TicketCard({
   );
 }
 
-// ── Floating cart bar ─────────────────────────────────────────────────────────
-function CartBar({ cart, onCheckout }: { cart: CartItem[]; onCheckout: () => void }) {
+function CartBar({ cart, onCheckout, t }: any) {
   const translateY = useRef(new Animated.Value(100)).current;
-  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const count = cart.reduce((s, i) => s + i.quantity, 0);
+  const total = cart.reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
+  const count = cart.reduce((s: number, i: CartItem) => s + i.quantity, 0);
 
   useEffect(() => {
-    Animated.spring(translateY, {
-      toValue: cart.length > 0 ? 0 : 100, useNativeDriver: true, tension: 80, friction: 12,
-    }).start();
+    Animated.spring(translateY, { toValue: cart.length > 0 ? 0 : 120, useNativeDriver: true, tension: 80, friction: 12 }).start();
   }, [cart.length]);
 
   return (
-    <Animated.View style={[styles.cartBar, { transform: [{ translateY }] }]}
-      pointerEvents={cart.length > 0 ? "auto" : "none"}>
+    <Animated.View style={[{
+      position: "absolute", bottom: 24, left: 20, right: 20,
+      backgroundColor: t.primary, borderRadius: 20,
+      flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      paddingVertical: 18, paddingHorizontal: 22,
+      shadowColor: t.primary, shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.45, shadowRadius: 20, elevation: 16,
+    }, { transform: [{ translateY }] }]}
+      pointerEvents={cart.length > 0 ? "auto" : "none"}
+    >
       <View>
-        <Text style={styles.cartLabel}>KOSÁR ÖSSZESEN</Text>
-        <Text style={styles.cartTotal}>{total.toLocaleString("hu-HU")} Ft</Text>
+        <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", fontWeight: "600", letterSpacing: 0.8 }}>KOSÁR ÖSSZESEN</Text>
+        <Text style={{ fontSize: 21, fontWeight: "800", color: "#fff" }}>{total.toLocaleString("hu-HU")} Ft</Text>
       </View>
-      <TouchableOpacity onPress={onCheckout} style={styles.cartBtn} activeOpacity={0.85}>
-        <View style={styles.cartBtnBadge}>
-          <Text style={styles.cartBtnBadgeText}>{count}</Text>
+      <TouchableOpacity onPress={onCheckout} style={{
+        backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 14,
+        paddingHorizontal: 18, paddingVertical: 12,
+        flexDirection: "row", alignItems: "center", gap: 8,
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.3)",
+      }} activeOpacity={0.85}>
+        <View style={{
+          backgroundColor: "#fff", width: 23, height: 23,
+          borderRadius: 11.5, alignItems: "center", justifyContent: "center",
+        }}>
+          <Text style={{ color: t.primary, fontSize: 12, fontWeight: "800" }}>{count}</Text>
         </View>
-        <Text style={styles.cartBtnText}>Fizetés →</Text>
+        <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>Fizetés →</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function PurchaseTicketsScreen() {
-  const [items, setItems]     = useState<TicketItem[]>([]);
+  const [items, setItems] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch]   = useState("");
+  const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category>("all");
-  const [cart, setCart]       = useState<CartItem[]>([]);
-  const [adding, setAdding]   = useState<Record<number, boolean>>({});
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [adding, setAdding] = useState<Record<number, boolean>>({});
   const navigation = useNavigation();
+  const { isDark } = useTheme();
+  const t = isDark ? tokens.dark : tokens.light;
 
-  // Load items
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await authFetch(ENDPOINTS.items);
-        if (res.ok) setItems(await res.json());
-      } catch (e) { console.error("fetchItems:", e); }
-      finally { setLoading(false); }
-    })();
+    authFetch(ENDPOINTS.items).then(r => r.ok ? r.json() : []).then(setItems).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  // Add to BOTH server cart and local state
   const addToCart = useCallback(async (item: TicketItem) => {
     if (adding[item.id]) return;
     setAdding(prev => ({ ...prev, [item.id]: true }));
     try {
-      const res = await authFetch(ENDPOINTS.cartAdd, {
-        method: "POST",
-        body: JSON.stringify({ item_id: item.id, quantity: 1 }),
-      });
+      const res = await authFetch(ENDPOINTS.cartAdd, { method: "POST", body: JSON.stringify({ item_id: item.id, quantity: 1 }) });
       if (res.ok) {
         setCart(prev => {
-          const existing = prev.find(c => c.itemId === item.id);
-          if (existing) return prev.map(c => c.itemId === item.id ? { ...c, quantity: c.quantity + 1 } : c);
-          return [...prev, {
-            itemId: item.id, name: item.name, price: item.price,
-            validityDays: item.validityDays, typeName: item.typeName,
-            type_id: item.type_id, quantity: 1,
-          }];
+          const ex = prev.find(c => c.itemId === item.id);
+          if (ex) return prev.map(c => c.itemId === item.id ? { ...c, quantity: c.quantity + 1 } : c);
+          return [...prev, { itemId: item.id, name: item.name, price: item.price, validityDays: item.validityDays, typeName: item.typeName, type_id: item.type_id, quantity: 1 }];
         });
-      } else {
-        const err = await res.json().catch(() => ({}));
-        console.error("addToCart error:", err.message);
       }
-    } catch (e) { console.error("addToCart:", e); }
+    } catch {}
     finally { setAdding(prev => ({ ...prev, [item.id]: false })); }
   }, [adding]);
-
-  const cartQty = (id: number) => cart.find(c => c.itemId === id)?.quantity ?? 0;
 
   const filtered = items.filter(item => {
     const catMatch = category === "all" || TYPE_MAP[item.type_id] === category;
     const q = search.toLowerCase();
-    const searchMatch = !q || item.name.toLowerCase().includes(q)
-      || (item.description ?? "").toLowerCase().includes(q);
-    return catMatch && searchMatch;
+    const srch = !q || item.name.toLowerCase().includes(q) || (item.description ?? "").toLowerCase().includes(q);
+    return catMatch && srch;
   });
 
-  const goCheckout = () => {
-    if (cart.length === 0) return;
-    // Pass cart for display only — checkout reads server-side cart
-    navigation.navigate("PurchaseFinalization" as never, { cart } as never);
-  };
-
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={t.bg} />
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Jegyvásárlás</Text>
-        <Text style={styles.headerSub}>Válassz bérletet vagy belépőt</Text>
+      <View style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 }}>
+        <Text style={{ fontSize: 30, fontWeight: "800", color: t.text, letterSpacing: -0.5 }}>Jegyvásárlás</Text>
+        <Text style={{ fontSize: 14, color: t.textSub, marginTop: 3 }}>Válassz bérletet vagy belépőt</Text>
       </View>
 
-      <View style={styles.searchRow}>
-        <TextInput
-          style={styles.searchInput} placeholder="Keresés..."
-          placeholderTextColor={C.textMuted} value={search} onChangeText={setSearch}
-        />
+      {/* Search */}
+      <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
+        <View style={{
+          backgroundColor: t.surface, borderWidth: 1.5, borderColor: t.border,
+          borderRadius: 14, paddingHorizontal: 16, paddingVertical: 13,
+          flexDirection: "row", alignItems: "center", gap: 10,
+        }}>
+          <Text style={{ color: t.textMuted, fontSize: 15 }}>🔍</Text>
+          <TextInput
+            style={{ flex: 1, color: t.text, fontSize: 15 }}
+            placeholder="Keresés..."
+            placeholderTextColor={t.textMuted}
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}
-        style={styles.chipRow} contentContainerStyle={styles.chipRowContent}>
+      {/* Category chips */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, paddingBottom: 14 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, flexDirection: "row" }}>
         {(["all", "daily", "monthly", "yearly"] as Category[]).map(cat => (
-          <CategoryChip key={cat} cat={cat} active={category === cat} onPress={() => setCategory(cat)} />
+          <CategoryChip key={cat} cat={cat} active={category === cat} t={t} isDark={isDark} onPress={() => setCategory(cat)} />
         ))}
       </ScrollView>
 
       {loading ? (
-        <ActivityIndicator color={C.accent} style={{ flex: 1 }} />
+        <ActivityIndicator color={t.primary} style={{ flex: 1 }} />
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={i => String(i.id)}
           renderItem={({ item }) => (
-            <TicketCard
-              item={item}
-              qty={cartQty(item.id)}
-              adding={!!adding[item.id]}
-              onAdd={() => addToCart(item)}
-            />
+            <TicketCard item={item} qty={cart.find(c => c.itemId === item.id)?.quantity ?? 0}
+              adding={!!adding[item.id]} t={t} isDark={isDark} onAdd={() => addToCart(item)} />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 130, gap: 12 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<Text style={styles.emptyText}>Nincs találat</Text>}
+          ListEmptyComponent={<Text style={{ textAlign: "center", color: t.textSub, marginTop: 60, fontSize: 15 }}>Nincs találat</Text>}
         />
       )}
 
-      <CartBar cart={cart} onCheckout={goCheckout} />
+      <CartBar cart={cart} t={t} onCheckout={() => cart.length > 0 && navigation.navigate("PurchaseFinalization" as never, { cart } as never)} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 },
-  headerTitle: { fontSize: 28, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
-  headerSub: { fontSize: 14, color: C.textSub, marginTop: 2 },
-  searchRow: { paddingHorizontal: 20, paddingBottom: 12 },
-  searchInput: {
-    backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.border,
-    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
-    color: C.text, fontSize: 15,
-  },
-  chipRow: { flexGrow: 0, paddingBottom: 12 },
-  chipRowContent: { paddingHorizontal: 20, gap: 8, flexDirection: "row" },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
-  chipText: { fontSize: 13, fontWeight: "600" },
-  listContent: { paddingHorizontal: 20, paddingBottom: 130, gap: 12 },
-  card: {
-    backgroundColor: C.surface, borderRadius: 16,
-    borderWidth: 1, borderColor: C.border,
-    flexDirection: "row", overflow: "hidden",
-  },
-  cardStripe: { width: 4 },
-  cardBody: { flex: 1, padding: 16, gap: 6 },
-  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardBadge: { backgroundColor: C.surfaceHigh, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  cardBadgeText: { fontSize: 10, fontWeight: "700", letterSpacing: 0.5 },
-  cardPrice: { fontSize: 16, fontWeight: "700", color: C.text },
-  cardName: { fontSize: 17, fontWeight: "700", color: C.text },
-  cardDesc: { fontSize: 13, color: C.textSub, lineHeight: 18 },
-  cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 },
-  cardDays: { fontSize: 12, color: C.textMuted },
-  addBtn: {
-    width: 36, height: 36, borderRadius: 10,
-    alignItems: "center", justifyContent: "center", position: "relative",
-  },
-  addBtnBadge: {
-    position: "absolute", top: -6, right: -6,
-    backgroundColor: "#DA3633", width: 18, height: 18, borderRadius: 9,
-    alignItems: "center", justifyContent: "center", zIndex: 1,
-  },
-  addBtnBadgeText: { color: "#fff", fontSize: 10, fontWeight: "800" },
-  addBtnText: { color: "#fff", fontSize: 22, fontWeight: "400", lineHeight: 26 },
-  emptyText: { textAlign: "center", color: C.textSub, marginTop: 60, fontSize: 15 },
-  cartBar: {
-    position: "absolute", bottom: 24, left: 20, right: 20,
-    backgroundColor: C.accent, borderRadius: 18,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingVertical: 16, paddingHorizontal: 20,
-    shadowColor: C.accent, shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4, shadowRadius: 20, elevation: 16,
-  },
-  cartLabel: { fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: "600", letterSpacing: 0.5 },
-  cartTotal: { fontSize: 20, fontWeight: "800", color: "#fff" },
-  cartBtn: {
-    backgroundColor: "rgba(0,0,0,0.25)", borderRadius: 12,
-    paddingHorizontal: 16, paddingVertical: 10,
-    flexDirection: "row", alignItems: "center", gap: 8,
-  },
-  cartBtnBadge: {
-    backgroundColor: "#fff", width: 22, height: 22,
-    borderRadius: 11, alignItems: "center", justifyContent: "center",
-  },
-  cartBtnBadgeText: { color: C.accent, fontSize: 12, fontWeight: "800" },
-  cartBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
-});

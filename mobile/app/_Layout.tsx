@@ -14,7 +14,6 @@ import { PortalHost } from "@rn-primitives/portal";
 import "./global.css";
 import {
   NavigationIndependentTree,
-  ThemeProvider,
   createStaticNavigation,
   StaticParamList,
   DarkTheme,
@@ -35,18 +34,18 @@ import SignInScreen from "./screens/SignInScreen";
 
 import { Asset } from "expo-asset";
 import { createURL } from "expo-linking";
-import * as SplashScreen from "expo-splash-screen";
 import * as React from "react";
 import PurchaseTickets from "./screens/PurchaseTicketsScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { UserMenu } from "./components/user-menu";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { ThemeProvider } from "./theme/ThemeContext";
 import SignUpScreen from "./screens/SignUpScreen";
 
 Asset.loadAsync([...NavigationAssets]);
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 const prefix = createURL("/");
 
@@ -204,7 +203,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <ThemeProvider value={NAV_THEME["light"]}>
+        <ThemeProvider>
           <GestureHandlerRootView className="flex-1">
             <View className="flex-1 h-full justify-center">
               <NavigationIndependentTree>
@@ -215,7 +214,7 @@ export default function RootLayout() {
                     prefixes: [prefix],
                   }}
                   onReady={() => {
-                    SplashScreen.hideAsync();
+                    // SplashScreen.hideAsync();
                   }}
                 />
               </NavigationIndependentTree>
