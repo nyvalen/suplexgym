@@ -1,122 +1,147 @@
 import React, { useState } from "react";
 import {
-  View, Text, Pressable, ScrollView,
-  KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar, TextInput,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  StatusBar,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ENDPOINTS } from "../utils/auth";
-import { useTheme, tokens } from "../theme/ThemeContext";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
   const { isDark } = useTheme();
-  const t = isDark ? tokens.dark : tokens.light;
 
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const set = (k: string) => (v: string) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleRegister = async () => {
     setError("");
     const { name, username, email, password } = form;
     if (!name.trim() || !username.trim() || !email.trim() || !password) {
-      setError("Töltsd ki az összes mezőt."); return;
+      setError("Töltsd ki az összes mezőt.");
+      return;
     }
     setLoading(true);
     try {
       const res = await fetch(ENDPOINTS.register, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), username: username.trim(), email: email.trim(), password }),
+        body: JSON.stringify({
+          name: name.trim(),
+          username: username.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
       const data = await res.json();
-      if (res.ok) { setSuccess(true); }
-      else { setError(data.message || "Regisztráció sikertelen."); }
-    } catch { setError("Hálózati hiba. Kérjük próbáld újra."); }
-    finally { setLoading(false); }
-  };
-
-  const inputStyle = {
-    backgroundColor: t.surfaceHigh, borderWidth: 1, borderColor: t.border,
-    borderRadius: 14, paddingHorizontal: 18, paddingVertical: 14,
-    color: t.text, fontSize: 15,
+      if (res.ok) setSuccess(true);
+      else setError(data.message || "Regisztráció sikertelen.");
+    } catch {
+      setError("Hálózati hiba. Kérjük próbáld újra.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const FIELDS = [
-    { key: "name",     label: "Teljes név",     placeholder: "Kovács János",  keyboard: undefined as any, lower: false },
-    { key: "username", label: "Felhasználónév", placeholder: "kovacsj",       keyboard: undefined as any, lower: true  },
-    { key: "email",    label: "Email",           placeholder: "te@pelda.hu",   keyboard: "email-address" as const, lower: true  },
-    { key: "password", label: "Jelszó",          placeholder: "••••••••",     keyboard: undefined as any, secure: true },
+    { key: "name", label: "Teljes név", placeholder: "Kovács János", keyboard: undefined as any, lower: false },
+    { key: "username", label: "Felhasználónév", placeholder: "kovacsj", keyboard: undefined as any, lower: true },
+    { key: "email", label: "Email", placeholder: "te@pelda.hu", keyboard: "email-address" as const, lower: true },
+    { key: "password", label: "Jelszó", placeholder: "••••••••", keyboard: undefined as any, secure: true },
   ];
 
+  const bg = isDark ? "bg-[#09090b]" : "bg-[#fafafa]";
+  const textPrimary = isDark ? "text-[#fafafa]" : "text-[#09090b]";
+  const textSub = isDark ? "text-[#a1a1aa]" : "text-[#52525b]";
+  const textMuted = isDark ? "text-[#71717a]" : "text-[#a1a1aa]";
+  const surface = isDark ? "bg-[#18181b]" : "bg-white";
+  const surfaceHigh = isDark ? "bg-[#27272a]" : "bg-[#f4f4f5]";
+  const border = isDark ? "border-[#3f3f46]" : "border-[#e4e4e7]";
+
+  const inputClass = `${surfaceHigh} border ${border} rounded-2xl px-[18px] py-3.5 text-sm ${textPrimary}`;
+
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.bg }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={t.bg} />
+    <KeyboardAvoidingView
+      className={`flex-1 ${bg}`}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor="transparent" />
 
-      <View style={{
-        position: "absolute", top: -60, right: -60,
-        width: 280, height: 280, borderRadius: 140,
-        backgroundColor: isDark ? "rgba(124,58,237,0.14)" : "rgba(124,58,237,0.05)",
-      }} />
+      <View
+        className="absolute -top-16 -right-16 w-[280px] h-[280px] rounded-full"
+        style={{
+          backgroundColor: isDark ? "rgba(124,58,237,0.14)" : "rgba(124,58,237,0.05)",
+        }}
+      />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 64, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-        <Pressable onPress={() => navigation.goBack()} style={{ marginBottom: 36 }}>
-          <Text style={{ color: t.textMuted, fontSize: 14 }}>← Vissza</Text>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 64, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Pressable onPress={() => navigation.goBack()} className="mb-9">
+          <Text className={`text-sm ${textMuted}`}>← Vissza</Text>
         </Pressable>
 
-        <View style={{ alignItems: "center", marginBottom: 40, gap: 8 }}>
-          <View style={{
-            width: 64, height: 64, borderRadius: 20,
-            backgroundColor: t.primarySoft, borderWidth: 1, borderColor: t.primaryBorder,
-            alignItems: "center", justifyContent: "center", marginBottom: 4,
-          }}>
-            <Text style={{ fontSize: 28 }}>💪</Text>
+        <View className="items-center mb-10 gap-2">
+          <View
+            className={`w-16 h-16 rounded-xl items-center justify-center mb-1 border ${
+              isDark
+                ? "bg-[rgba(124,58,237,0.15)] border-[rgba(124,58,237,0.35)]"
+                : "bg-[rgba(124,58,237,0.08)] border-[rgba(124,58,237,0.25)]"
+            }`}
+          >
+            <Text className="text-3xl">💪</Text>
           </View>
-          <Text style={{ color: t.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 }}>Regisztráció</Text>
-          <Text style={{ color: t.textSub, fontSize: 14 }}>Csatlakozz a Suplex Gymhez</Text>
+          <Text className={`text-3xl font-extrabold -tracking-wide ${textPrimary}`}>
+            Regisztráció
+          </Text>
+          <Text className={`text-sm ${textSub}`}>Csatlakozz a Suplex Gymhez</Text>
         </View>
 
         {success ? (
-          <View style={{
-            alignItems: "center", gap: 14, paddingTop: 20,
-            backgroundColor: t.surface, borderRadius: 20, padding: 32,
-            borderWidth: 1, borderColor: t.border,
-          }}>
-            <View style={{
-              width: 72, height: 72, borderRadius: 36,
-              backgroundColor: isDark ? "rgba(74,222,128,0.15)" : "rgba(22,163,74,0.1)",
-              alignItems: "center", justifyContent: "center",
-              borderWidth: 1, borderColor: isDark ? "rgba(74,222,128,0.3)" : "rgba(22,163,74,0.25)",
-            }}>
-              <Text style={{ fontSize: 32 }}>✓</Text>
+          <View className={`items-center gap-3.5 pt-5 ${surface} rounded-2xl p-8 border ${border}`}>
+            <View
+              className="w-[72px] h-[72px] rounded-full items-center justify-center border"
+              style={{
+                backgroundColor: isDark ? "rgba(74,222,128,0.15)" : "rgba(22,163,74,0.1)",
+                borderColor: isDark ? "rgba(74,222,128,0.3)" : "rgba(22,163,74,0.25)",
+              }}
+            >
+              <Text className="text-3xl">✓</Text>
             </View>
-            <Text style={{ color: t.text, fontSize: 22, fontWeight: "700" }}>Sikeres regisztráció!</Text>
-            <Text style={{ color: t.textSub, fontSize: 14, textAlign: "center", lineHeight: 20 }}>
+            <Text className={`text-xl font-bold ${textPrimary}`}>Sikeres regisztráció!</Text>
+            <Text className={`text-sm text-center leading-5 ${textSub}`}>
               Ellenőrizd az emailed, majd jelentkezz be.
             </Text>
             <Pressable
-              style={({ pressed }) => [{
-                backgroundColor: t.primary, borderRadius: 14,
-                paddingVertical: 16, paddingHorizontal: 32, marginTop: 8, opacity: pressed ? 0.8 : 1,
-              }]}
+              className="bg-[#7c3aed] rounded-2xl py-4 px-8 mt-2"
+              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
               onPress={() => navigation.navigate("SignIn" as never)}
             >
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Bejelentkezés</Text>
+              <Text className="text-white text-base font-bold">Bejelentkezés</Text>
             </Pressable>
           </View>
         ) : (
-          <View style={{ gap: 14 }}>
-            {FIELDS.map(f => (
-              <View key={f.key} style={{ gap: 7 }}>
-                <Text style={{ color: t.textSub, fontSize: 12, fontWeight: "600", letterSpacing: 0.8, textTransform: "uppercase" }}>
+          <View className="gap-3.5">
+            {FIELDS.map((f) => (
+              <View key={f.key} className="gap-[7px]">
+                <Text className={`text-xs font-semibold tracking-[0.8px] uppercase ${textSub}`}>
                   {f.label}
                 </Text>
                 <TextInput
-                  style={inputStyle}
+                  className={inputClass}
                   placeholder={f.placeholder}
-                  placeholderTextColor={t.textMuted}
+                  placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                   keyboardType={f.keyboard}
                   autoCapitalize={f.lower ? "none" : "words"}
                   secureTextEntry={!!(f as any).secure}
@@ -127,35 +152,42 @@ export default function SignUpScreen() {
             ))}
 
             {!!error && (
-              <View style={{
-                backgroundColor: isDark ? "rgba(248,113,113,0.1)" : "rgba(220,38,38,0.07)",
-                borderRadius: 12, padding: 14,
-                borderWidth: 1, borderColor: isDark ? "rgba(248,113,113,0.25)" : "rgba(220,38,38,0.2)",
-              }}>
-                <Text style={{ color: t.danger, fontSize: 13, textAlign: "center" }}>{error}</Text>
+              <View
+                className={`rounded-xl p-3.5 border ${
+                  isDark
+                    ? "bg-[rgba(248,113,113,0.1)] border-[rgba(248,113,113,0.25)]"
+                    : "bg-[rgba(220,38,38,0.07)] border-[rgba(220,38,38,0.2)]"
+                }`}
+              >
+                <Text
+                  className={`text-xs text-center ${isDark ? "text-[#f87171]" : "text-[#dc2626]"}`}
+                >
+                  {error}
+                </Text>
               </View>
             )}
 
             <Pressable
-              style={({ pressed }) => [{
-                backgroundColor: t.primary, borderRadius: 16,
-                paddingVertical: 18, alignItems: "center", marginTop: 4,
-                opacity: pressed || loading ? 0.75 : 1,
-                shadowColor: t.primary, shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
-              }]}
+              className="bg-[#7c3aed] rounded-2xl py-[18px] items-center mt-1"
+              style={({ pressed }) => ({ opacity: pressed || loading ? 0.75 : 1 })}
               onPress={handleRegister}
               disabled={loading}
             >
-              {loading
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Fiók létrehozása</Text>
-              }
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white text-base font-bold">Fiók létrehozása</Text>
+              )}
             </Pressable>
 
-            <Pressable onPress={() => navigation.navigate("SignIn" as never)} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, alignItems: "center" }]}>
-              <Text style={{ color: t.textMuted, fontSize: 14 }}>
-                Már van fiókod? <Text style={{ color: t.primaryLight, fontWeight: "700" }}>Bejelentkezés</Text>
+            <Pressable
+              onPress={() => navigation.navigate("SignIn" as never)}
+              className="items-center"
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Text className={`text-sm ${textMuted}`}>
+                Már van fiókod?{" "}
+                <Text className="text-[#8b5cf6] font-bold">Bejelentkezés</Text>
               </Text>
             </Pressable>
           </View>

@@ -1,38 +1,61 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  View, Text, TouchableOpacity, FlatList,
-  Image, Animated, StatusBar, ActivityIndicator,
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Animated,
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { api_endpoints } from "../config/api";
-import { useTheme, tokens } from "../theme/ThemeContext";
+import { useTheme } from "../theme/ThemeContext";
 
-const FALLBACK = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+const FALLBACK =
+  "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
 
-interface NewsItem { id: number; title: string; content: string; imagePath: string; createdAt?: string; }
+interface NewsItem {
+  id: number;
+  title: string;
+  content: string;
+  imagePath: string;
+  createdAt?: string;
+}
 
-function FeaturedCard({ item, onPress, t, isDark }: any) {
+function FeaturedCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
+  const borderColor = isDark ? "#3f3f46" : "#e4e4e7";
+
   return (
     <TouchableOpacity
-      onPress={onPress} activeOpacity={0.93}
-      onPressIn={() => Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()}
-      onPressOut={() => Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()}
+      onPress={onPress}
+      activeOpacity={0.93}
+      onPressIn={() =>
+        Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()
+      }
+      onPressOut={() =>
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
+      }
     >
-      <Animated.View style={[{
-        height: 240, borderRadius: 20, overflow: "hidden", marginBottom: 8,
-        borderWidth: 1, borderColor: t.border,
-      }, { transform: [{ scale }] }]}>
-        <Image source={{ uri: item.imagePath || FALLBACK }} style={{ position: "absolute", width: "100%", height: "100%" }} resizeMode="cover" />
-        <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.5)" }} />
-        <View style={{ flex: 1, justifyContent: "flex-end", padding: 20 }}>
-          <View style={{
-            backgroundColor: t.primary, alignSelf: "flex-start",
-            paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 8,
-          }}>
-            <Text style={{ color: "#fff", fontSize: 10, fontWeight: "800", letterSpacing: 1.5 }}>KIEMELT</Text>
+      <Animated.View
+        className="h-[240px] rounded-[20px] overflow-hidden mb-2 border"
+        style={{ transform: [{ scale }], borderColor }}
+      >
+        <Image
+          source={{ uri: item.imagePath || FALLBACK }}
+          className="absolute w-full h-full"
+          resizeMode="cover"
+        />
+        <View className="absolute w-full h-full bg-black/50" />
+        <View className="flex-1 justify-end p-5">
+          <View className="bg-[#7c3aed] self-start px-2.5 py-1 rounded-lg mb-2">
+            <Text className="text-white text-[10px] font-extrabold tracking-[1.5px]">
+              KIEMELT
+            </Text>
           </View>
-          <Text style={{ fontSize: 22, fontWeight: "800", color: "#fff", lineHeight: 28 }} numberOfLines={2}>
+          <Text className="text-2xl font-extrabold text-white leading-7" numberOfLines={2}>
             {item.title}
           </Text>
         </View>
@@ -41,28 +64,49 @@ function FeaturedCard({ item, onPress, t, isDark }: any) {
   );
 }
 
-function NewsCard({ item, onPress, t }: any) {
+function NewsCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
+  const surface = isDark ? "#18181b" : "#ffffff";
+  const borderColor = isDark ? "#3f3f46" : "#e4e4e7";
+  const textPrimary = isDark ? "#fafafa" : "#09090b";
+  const textSub = isDark ? "#a1a1aa" : "#52525b";
+
   return (
     <TouchableOpacity
-      onPress={onPress} activeOpacity={0.93}
-      onPressIn={() => Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()}
-      onPressOut={() => Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()}
+      onPress={onPress}
+      activeOpacity={0.93}
+      onPressIn={() =>
+        Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()
+      }
+      onPressOut={() =>
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
+      }
     >
-      <Animated.View style={[{
-        backgroundColor: t.surface, borderRadius: 16,
-        borderWidth: 1, borderColor: t.border,
-        flexDirection: "row", overflow: "hidden", height: 110,
-      }, { transform: [{ scale }] }]}>
-        <Image source={{ uri: item.imagePath || FALLBACK }} style={{ width: 110, height: "100%" }} resizeMode="cover" />
-        <View style={{ flex: 1, padding: 14, justifyContent: "space-between" }}>
-          <Text style={{ fontSize: 15, fontWeight: "700", color: t.text, lineHeight: 20 }} numberOfLines={2}>
+      <Animated.View
+        className="rounded-2xl overflow-hidden h-[110px] flex-row border"
+        style={{ transform: [{ scale }], backgroundColor: surface, borderColor }}
+      >
+        <Image
+          source={{ uri: item.imagePath || FALLBACK }}
+          style={{ width: 110, height: "100%" }}
+          resizeMode="cover"
+        />
+        <View className="flex-1 p-3.5 justify-between">
+          <Text
+            className="text-sm font-bold leading-5"
+            style={{ color: textPrimary }}
+            numberOfLines={2}
+          >
             {item.title}
           </Text>
-          <Text style={{ fontSize: 12, color: t.textSub, lineHeight: 17, flex: 1, marginTop: 4 }} numberOfLines={2}>
+          <Text
+            className="text-xs leading-[17px] flex-1 mt-1"
+            style={{ color: textSub }}
+            numberOfLines={2}
+          >
             {item.content}
           </Text>
-          <Text style={{ fontSize: 12, color: t.primary, fontWeight: "700" }}>Olvasd tovább →</Text>
+          <Text className="text-xs font-bold text-[#7c3aed]">Olvasd tovább →</Text>
         </View>
       </Animated.View>
     </TouchableOpacity>
@@ -74,47 +118,67 @@ export default function NewsListScreen() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const { isDark } = useTheme();
-  const t = isDark ? tokens.dark : tokens.light;
 
   useEffect(() => {
     fetch(api_endpoints.news)
-      .then(r => r.ok ? r.json() : [])
-      .then(setNews).catch(() => {}).finally(() => setLoading(false));
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setNews)
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const featured = news[0] ?? null;
   const rest = news.slice(1);
 
-  return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={t.bg} />
+  const bg = isDark ? "bg-[#09090b]" : "bg-[#fafafa]";
+  const textPrimary = isDark ? "text-[#fafafa]" : "text-[#09090b]";
+  const textSub = isDark ? "text-[#a1a1aa]" : "text-[#52525b]";
 
-      <View style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16 }}>
-        <Text style={{ fontSize: 30, fontWeight: "800", color: t.text, letterSpacing: -0.5 }}>Hírek</Text>
-        <Text style={{ fontSize: 13, color: t.textSub, marginTop: 3 }}>Suplex Gym értesítők</Text>
+  return (
+    <View className={`flex-1 ${bg}`}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+      />
+
+      <View className="px-5 pt-[60px] pb-4">
+        <Text className={`text-3xl font-extrabold -tracking-wide ${textPrimary}`}>
+          Hírek
+        </Text>
+        <Text className={`text-xs mt-0.5 ${textSub}`}>Suplex Gym értesítők</Text>
       </View>
 
       {loading ? (
-        <ActivityIndicator color={t.primary} style={{ flex: 1 }} />
+        <ActivityIndicator color="#7c3aed" className="flex-1" />
       ) : news.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <Text style={{ fontSize: 48 }}>📰</Text>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: t.text }}>Nincs elérhető hír</Text>
+        <View className="flex-1 items-center justify-center gap-3">
+          <Text className="text-5xl">📰</Text>
+          <Text className={`text-lg font-bold ${textPrimary}`}>Nincs elérhető hír</Text>
         </View>
       ) : (
         <FlatList
           data={rest}
-          keyExtractor={i => String(i.id)}
+          keyExtractor={(i) => String(i.id)}
           renderItem={({ item }) => (
-            <NewsCard item={item} t={t} isDark={isDark}
-              onPress={() => navigation.navigate("NewsDetail" as never, { article: item } as never)}
+            <NewsCard
+              item={item}
+              isDark={isDark}
+              onPress={() =>
+                navigation.navigate("NewsDetail" as never, { article: item } as never)
+              }
             />
           )}
-          ListHeaderComponent={featured ? (
-            <FeaturedCard item={featured} t={t} isDark={isDark}
-              onPress={() => navigation.navigate("NewsDetail" as never, { article: featured } as never)}
-            />
-          ) : null}
+          ListHeaderComponent={
+            featured ? (
+              <FeaturedCard
+                item={featured}
+                isDark={isDark}
+                onPress={() =>
+                  navigation.navigate("NewsDetail" as never, { article: featured } as never)
+                }
+              />
+            ) : null
+          }
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 10 }}
           showsVerticalScrollIndicator={false}
         />
