@@ -20,10 +20,18 @@ import { Language } from "../i18n";
 import { api_endpoints } from "../config/api";
 import { useTheme } from "../theme/ThemeContext";
 
-interface UserProfile { name: string; username: string; email: string; }
+interface UserProfile {
+  name: string;
+  username: string;
+  email: string;
+}
 interface BillingAddress {
-  zipCode: string; name: string; streetAddress: string;
-  apartmentNumber: string; city: string; state: string;
+  zipCode: string;
+  name: string;
+  streetAddress: string;
+  apartmentNumber: string;
+  city: string;
+  state: string;
 }
 
 export default function ProfileScreen() {
@@ -33,15 +41,28 @@ export default function ProfileScreen() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(fadeAnim, { toValue: 1, duration: 450, useNativeDriver: true }).start();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 450,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-  const [profile, setProfile] = useState<UserProfile>({ name: "", username: "", email: "" });
+  const [profile, setProfile] = useState<UserProfile>({
+    name: "",
+    username: "",
+    email: "",
+  });
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwords, setPasswords] = useState({ current: "", next: "" });
   const [pwLoading, setPwLoading] = useState(false);
   const [billing, setBilling] = useState<BillingAddress>({
-    zipCode: "", name: "", streetAddress: "", apartmentNumber: "", city: "", state: "",
+    zipCode: "",
+    name: "",
+    streetAddress: "",
+    apartmentNumber: "",
+    city: "",
+    state: "",
   });
   const [billingLoading, setBillingLoading] = useState(false);
   const [animationsOn, setAnimationsOn] = useState(true);
@@ -54,7 +75,11 @@ export default function ProfileScreen() {
       });
       if (!res.ok) return;
       const data = await res.json();
-      setProfile({ name: data.name ?? "", username: data.username ?? "", email: data.email ?? "" });
+      setProfile({
+        name: data.name ?? "",
+        username: data.username ?? "",
+        email: data.email ?? "",
+      });
       if (data.billingAddress) {
         setBilling({
           zipCode: String(data.billingAddress.zipCode ?? ""),
@@ -74,13 +99,19 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("accessToken");
       const res = await fetch(api_endpoints.user, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(profile),
       });
       if (res.ok) Alert.alert("✓", "Profil mentve");
       else Alert.alert("Hiba", "Nem sikerült menteni.");
-    } catch { Alert.alert("Hiba", "Hálózati hiba."); }
-    finally { setProfileLoading(false); }
+    } catch {
+      Alert.alert("Hiba", "Hálózati hiba.");
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   const savePassword = async () => {
@@ -90,12 +121,23 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("accessToken");
       const res = await fetch(api_endpoints.password, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ currentPassword: passwords.current, newPassword: passwords.next }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: passwords.current,
+          newPassword: passwords.next,
+        }),
       });
-      if (res.ok) { Alert.alert("✓", "Jelszó frissítve"); setPasswords({ current: "", next: "" }); }
-      else Alert.alert("Hiba", "Nem sikerült frissíteni.");
-    } catch {} finally { setPwLoading(false); }
+      if (res.ok) {
+        Alert.alert("✓", "Jelszó frissítve");
+        setPasswords({ current: "", next: "" });
+      } else Alert.alert("Hiba", "Nem sikerült frissíteni.");
+    } catch {
+    } finally {
+      setPwLoading(false);
+    }
   };
 
   const saveBilling = async () => {
@@ -104,7 +146,10 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("accessToken");
       await fetch(api_endpoints.billingaddress, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           zIP_code: parseInt(billing.zipCode) || 0,
           name: billing.name,
@@ -115,7 +160,10 @@ export default function ProfileScreen() {
         }),
       });
       Alert.alert("✓", "Számlázási cím mentve");
-    } catch {} finally { setBillingLoading(false); }
+    } catch {
+    } finally {
+      setBillingLoading(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -123,36 +171,55 @@ export default function ProfileScreen() {
     navigation.navigate("Welcome" as never);
   };
 
-  const bg = isDark ? "bg-[#09090b]" : "bg-[#fafafa]";
-  const surface = isDark ? "bg-[#18181b]" : "bg-white";
-  const surfaceHigh = isDark ? "bg-[#27272a]" : "bg-[#f4f4f5]";
-  const border = isDark ? "border-[#3f3f46]" : "border-[#e4e4e7]";
-  const textPrimary = isDark ? "text-[#fafafa]" : "text-[#09090b]";
-  const textSub = isDark ? "text-[#a1a1aa]" : "text-[#52525b]";
-  const textMuted = isDark ? "text-[#71717a]" : "text-[#a1a1aa]";
+  const bg = isDark ? "#09090b" : "#fafafa";
+  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
+  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const inputBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)";
+  const inputBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const textPrimary = isDark ? "#fafafa" : "#09090b";
+  const textSub = isDark ? "#a1a1aa" : "#52525b";
+  const textMuted = isDark ? "#71717a" : "#a1a1aa";
 
-  const inputClass = `${surfaceHigh} border ${border} rounded-xl px-3.5 py-3 text-sm mb-1 ${textPrimary}`;
-
-  const PrimaryButton = ({ label, onPress, loading: l, danger }: any) => (
+  const ActionButton = ({ label, onPress, loading: l, danger }: any) => (
     <TouchableOpacity
       onPress={onPress}
       disabled={l}
       activeOpacity={0.75}
-      className={`rounded-xl py-3.5 items-center mt-3.5 border ${
-        danger
-          ? "bg-[rgba(248,113,113,0.1)] border-[rgba(248,113,113,0.35)]"
+      style={{
+        borderRadius: 16,
+        paddingVertical: 14,
+        alignItems: "center",
+        marginTop: 14,
+        borderWidth: 1,
+        backgroundColor: danger
+          ? isDark
+            ? "rgba(248,113,113,0.1)"
+            : "rgba(220,38,38,0.06)"
           : isDark
-          ? "bg-[rgba(124,58,237,0.15)] border-[rgba(124,58,237,0.35)]"
-          : "bg-[rgba(124,58,237,0.08)] border-[rgba(124,58,237,0.25)]"
-      }`}
+            ? "rgba(124,58,237,0.15)"
+            : "rgba(124,58,237,0.07)",
+        borderColor: danger
+          ? isDark
+            ? "rgba(248,113,113,0.3)"
+            : "rgba(220,38,38,0.2)"
+          : isDark
+            ? "rgba(124,58,237,0.35)"
+            : "rgba(124,58,237,0.2)",
+      }}
     >
       {l ? (
-        <ActivityIndicator size="small" color={danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed"} />
+        <ActivityIndicator
+          size="small"
+          color={danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed"}
+        />
       ) : (
         <Text
-          className={`text-sm font-bold tracking-wide ${
-            danger ? (isDark ? "text-[#f87171]" : "text-[#dc2626]") : "text-[#7c3aed]"
-          }`}
+          style={{
+            fontSize: 14,
+            fontWeight: "700",
+            letterSpacing: 0.3,
+            color: danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed",
+          }}
         >
           {label}
         </Text>
@@ -161,83 +228,240 @@ export default function ProfileScreen() {
   );
 
   const Card = ({ children }: { children: React.ReactNode }) => (
-    <View className={`${surface} rounded-2xl border ${border} p-5 mb-4`}>{children}</View>
+    <View
+      style={{
+        backgroundColor: surface,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: surfaceBorder,
+        padding: 20,
+        marginBottom: 16,
+      }}
+    >
+      {children}
+    </View>
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <Text className="text-[11px] font-extrabold text-[#7c3aed] tracking-[2px] uppercase mb-4">
+    <Text
+      style={{
+        fontSize: 11,
+        fontWeight: "800",
+        color: "#7c3aed",
+        letterSpacing: 2,
+        textTransform: "uppercase",
+        marginBottom: 16,
+      }}
+    >
       {title}
     </Text>
   );
 
   const FieldLabel = ({ label }: { label: string }) => (
-    <Text className={`text-[11px] font-semibold tracking-[0.8px] uppercase mb-1.5 mt-2.5 ${textSub}`}>
+    <Text
+      style={{
+        fontSize: 11,
+        fontWeight: "600",
+        letterSpacing: 1,
+        textTransform: "uppercase",
+        marginBottom: 6,
+        marginTop: 10,
+        color: textSub,
+      }}
+    >
       {label}
     </Text>
   );
 
+  const inputStyle = {
+    backgroundColor: inputBg,
+    borderWidth: 1,
+    borderColor: inputBorder,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: textPrimary,
+    marginBottom: 4,
+  };
+
   return (
-    <View className={`flex-1 ${bg}`}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor="transparent" />
-      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Animated.View className="flex-1" style={{ opacity: fadeAnim }}>
+    <View style={{ flex: 1, backgroundColor: bg }}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
+
+      {/* Blobs */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: -40,
+          left: -40,
+          width: 240,
+          height: 240,
+          borderRadius: 120,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.12)"
+            : "rgba(124,58,237,0.05)",
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <ScrollView
-            contentContainerStyle={{ padding: 20, paddingTop: 60 }}
+            contentContainerStyle={{ padding: 20, paddingTop: 64 }}
             showsVerticalScrollIndicator={false}
           >
             {/* Avatar header */}
-            <View className="items-center mb-7">
+            <View style={{ alignItems: "center", marginBottom: 28 }}>
               <View
-                className="w-[88px] h-[88px] rounded-full border-[2.5px] border-[#7c3aed] p-[3px] mb-3.5"
+                style={{
+                  width: 88,
+                  height: 88,
+                  borderRadius: 44,
+                  borderWidth: 2.5,
+                  borderColor: "#7c3aed",
+                  padding: 3,
+                  marginBottom: 14,
+                }}
               >
-                <View className="flex-1 rounded-full bg-[rgba(124,58,237,0.15)] items-center justify-center">
-                  <Text className="text-[30px] font-extrabold text-[#7c3aed]">
+                <View
+                  style={{
+                    flex: 1,
+                    borderRadius: 41,
+                    backgroundColor: "rgba(124,58,237,0.15)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 30,
+                      fontWeight: "800",
+                      color: "#7c3aed",
+                    }}
+                  >
                     {profile.name?.charAt(0)?.toUpperCase() || "?"}
                   </Text>
                 </View>
               </View>
-              <Text className={`text-xl font-bold tracking-wide mb-1 ${textPrimary}`}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "700",
+                  letterSpacing: 0.3,
+                  marginBottom: 4,
+                  color: textPrimary,
+                }}
+              >
                 {profile.name || profile.username}
               </Text>
-              <Text className={`text-xs ${textSub}`}>{profile.email}</Text>
+              <Text style={{ fontSize: 12, color: textSub }}>
+                {profile.email}
+              </Text>
             </View>
 
             {/* Appearance */}
             <Card>
               <SectionTitle title="Megjelenés" />
-              <View className={`flex-row justify-between items-center ${surfaceHigh} border ${border} rounded-xl px-3.5 py-3 mb-2.5`}>
-                <Text className={`text-sm font-medium ${textPrimary}`}>Sötét mód</Text>
-                <Switch
-                  value={isDark}
-                  onValueChange={toggleTheme}
-                  trackColor={{ false: isDark ? "#3f3f46" : "#e4e4e7", true: "#7c3aed88" }}
-                  thumbColor={isDark ? "#7c3aed" : (isDark ? "#71717a" : "#a1a1aa")}
-                />
-              </View>
-              <View className={`flex-row justify-between items-center ${surfaceHigh} border ${border} rounded-xl px-3.5 py-3 mb-2.5`}>
-                <Text className={`text-sm font-medium ${textPrimary}`}>Animációk</Text>
-                <Switch
-                  value={animationsOn}
-                  onValueChange={setAnimationsOn}
-                  trackColor={{ false: isDark ? "#3f3f46" : "#e4e4e7", true: "#7c3aed88" }}
-                  thumbColor={animationsOn ? "#7c3aed" : (isDark ? "#71717a" : "#a1a1aa")}
-                />
-              </View>
-              <View className={`flex-row justify-between items-center ${surfaceHigh} border ${border} rounded-xl px-3.5 py-2.5`}>
-                <Text className={`text-sm font-medium ${textPrimary}`}>Nyelv</Text>
-                <View className="flex-row gap-2">
+              {[
+                { label: "Sötét mód", value: isDark, onChange: toggleTheme },
+                {
+                  label: "Animációk",
+                  value: animationsOn,
+                  onChange: setAnimationsOn,
+                },
+              ].map((row) => (
+                <View
+                  key={row.label}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: inputBg,
+                    borderWidth: 1,
+                    borderColor: inputBorder,
+                    borderRadius: 14,
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "500",
+                      color: textPrimary,
+                    }}
+                  >
+                    {row.label}
+                  </Text>
+                  <Switch
+                    value={row.value}
+                    onValueChange={row.onChange}
+                    trackColor={{
+                      false: isDark
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.1)",
+                      true: "rgba(124,58,237,0.5)",
+                    }}
+                    thumbColor={
+                      row.value ? "#7c3aed" : isDark ? "#71717a" : "#a1a1aa"
+                    }
+                  />
+                </View>
+              ))}
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  backgroundColor: inputBg,
+                  borderWidth: 1,
+                  borderColor: inputBorder,
+                  borderRadius: 14,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "500",
+                    color: textPrimary,
+                  }}
+                >
+                  Nyelv
+                </Text>
+                <View style={{ flexDirection: "row", gap: 8 }}>
                   {(["en", "hu"] as Language[]).map((lang) => (
                     <TouchableOpacity
                       key={lang}
                       onPress={() => setLocale(lang)}
                       activeOpacity={0.8}
-                      className={`px-4 py-2 rounded-[20px] border ${
-                        locale === lang
-                          ? "bg-[#7c3aed] border-[#7c3aed]"
-                          : `${surfaceHigh} ${border}`
-                      }`}
+                      style={{
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        borderRadius: 20,
+                        backgroundColor: locale === lang ? "#7c3aed" : inputBg,
+                        borderWidth: 1,
+                        borderColor: locale === lang ? "#7c3aed" : inputBorder,
+                      }}
                     >
-                      <Text className={`text-xs font-bold ${locale === lang ? "text-white" : textSub}`}>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "700",
+                          color: locale === lang ? "#fff" : textSub,
+                        }}
+                      >
                         {lang === "en" ? "EN" : "HU"}
                       </Text>
                     </TouchableOpacity>
@@ -249,22 +473,30 @@ export default function ProfileScreen() {
             {/* Personal Info */}
             <Card>
               <SectionTitle title="Személyes Adatok" />
-              {[["Teljes Név", "name"], ["Felhasználónév", "username"], ["E-mail", "email"]].map(
-                ([label, key]) => (
-                  <React.Fragment key={key}>
-                    <FieldLabel label={label} />
-                    <TextInput
-                      value={(profile as any)[key]}
-                      onChangeText={(v) => setProfile((p) => ({ ...p, [key]: v }))}
-                      className={inputClass}
-                      placeholder={label}
-                      placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
-                      keyboardType={key === "email" ? "email-address" : "default"}
-                    />
-                  </React.Fragment>
-                )
-              )}
-              <PrimaryButton label="Módosítások Mentése" onPress={saveProfile} loading={profileLoading} />
+              {[
+                ["Teljes Név", "name"],
+                ["Felhasználónév", "username"],
+                ["E-mail", "email"],
+              ].map(([label, key]) => (
+                <React.Fragment key={key}>
+                  <FieldLabel label={label} />
+                  <TextInput
+                    value={(profile as any)[key]}
+                    onChangeText={(v) =>
+                      setProfile((p) => ({ ...p, [key]: v }))
+                    }
+                    style={inputStyle}
+                    placeholder={label}
+                    placeholderTextColor={textMuted}
+                    keyboardType={key === "email" ? "email-address" : "default"}
+                  />
+                </React.Fragment>
+              ))}
+              <ActionButton
+                label="Módosítások Mentése"
+                onPress={saveProfile}
+                loading={profileLoading}
+              />
             </Card>
 
             {/* Password */}
@@ -273,22 +505,28 @@ export default function ProfileScreen() {
               <FieldLabel label="Jelenlegi Jelszó" />
               <TextInput
                 value={passwords.current}
-                onChangeText={(v) => setPasswords((p) => ({ ...p, current: v }))}
-                className={inputClass}
+                onChangeText={(v) =>
+                  setPasswords((p) => ({ ...p, current: v }))
+                }
+                style={inputStyle}
                 placeholder="••••••••"
-                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
+                placeholderTextColor={textMuted}
                 secureTextEntry
               />
               <FieldLabel label="Új Jelszó" />
               <TextInput
                 value={passwords.next}
                 onChangeText={(v) => setPasswords((p) => ({ ...p, next: v }))}
-                className={inputClass}
+                style={inputStyle}
                 placeholder="••••••••"
-                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
+                placeholderTextColor={textMuted}
                 secureTextEntry
               />
-              <PrimaryButton label="Jelszó Frissítése" onPress={savePassword} loading={pwLoading} />
+              <ActionButton
+                label="Jelszó Frissítése"
+                onPress={savePassword}
+                loading={pwLoading}
+              />
             </Card>
 
             {/* Billing */}
@@ -308,19 +546,25 @@ export default function ProfileScreen() {
                   <FieldLabel label={label} />
                   <TextInput
                     value={billing[field]}
-                    onChangeText={(v) => setBilling((b) => ({ ...b, [field]: v }))}
-                    className={inputClass}
+                    onChangeText={(v) =>
+                      setBilling((b) => ({ ...b, [field]: v }))
+                    }
+                    style={inputStyle}
                     placeholder={label}
-                    placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
+                    placeholderTextColor={textMuted}
                     keyboardType={kb}
                   />
                 </React.Fragment>
               ))}
-              <PrimaryButton label="Számlázási Cím Mentése" onPress={saveBilling} loading={billingLoading} />
+              <ActionButton
+                label="Számlázási Cím Mentése"
+                onPress={saveBilling}
+                loading={billingLoading}
+              />
             </Card>
 
-            <PrimaryButton label="Kijelentkezés" onPress={handleLogout} danger />
-            <View className="h-10" />
+            <ActionButton label="Kijelentkezés" onPress={handleLogout} danger />
+            <View style={{ height: 20 }} />
           </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>

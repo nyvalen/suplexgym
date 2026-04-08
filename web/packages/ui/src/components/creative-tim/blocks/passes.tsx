@@ -11,7 +11,7 @@ const FEATURED: (typeof PASS_KEYS)[number] = "monthly"
 const ACCENT: Record<(typeof PASS_KEYS)[number], string> = {
   single: "border-white/[0.08]",
   tenPass: "border-white/[0.08]",
-  monthly: "border-white/30",
+  monthly: "border-white/[0.08]",
   annual: "border-white/[0.08]",
 }
 
@@ -46,7 +46,7 @@ export default function Passes() {
           return (
             <div
               key={key}
-              className={`relative flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-black/3 p-6 transition-colors hover:bg-black/5 dark:bg-white/[0.04] dark:hover:bg-white/[0.07] ${ACCENT[key]}`}
+              className={`relative flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-black/3 p-6 transition-colors hover:bg-black/6 dark:bg-white/[0.04] dark:hover:bg-white/[0.05] ${ACCENT[key]}`}
             >
               {isFeatured && (
                 <div className="absolute top-0 right-0 left-0 h-[2px] bg-black/8 dark:bg-white/40" />

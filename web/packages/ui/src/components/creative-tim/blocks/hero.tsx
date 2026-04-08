@@ -65,25 +65,6 @@ export default function Hero() {
           <p className="mb-8 max-w-sm text-base leading-relaxed text-purple-600/60 dark:text-white/50">
             {t("hero.sub")}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              className="border-0 bg-purple-600/60 hover:bg-white/90 dark:bg-white dark:text-zinc-950"
-            >
-              {t("hero.join")}
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-black/4 bg-black/6 hover:border-white/40 hover:bg-white/5 hover:text-white dark:border-white/20 dark:text-white/70"
-              onClick={() => {
-                const el = document.getElementById("passes")
-                if (el) el.scrollIntoView({ behavior: "smooth" })
-              }}
-            >
-              {t("hero.plans")}
-            </Button>
-          </div>
         </div>
         <div className="relative min-h-[300px]">
           <img

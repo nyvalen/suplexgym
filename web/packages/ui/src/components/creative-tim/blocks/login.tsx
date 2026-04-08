@@ -1,24 +1,27 @@
 "use client"
 
 import * as React from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { Button } from "../../button"
 import { Input } from "../../input"
 import { Label } from "../../label"
 import { AuthContext } from "../../../../../../apps/web/src/context/auth-context"
+import { useTranslation } from "react-i18next"
+import { Language } from "../../language"
+import { Link } from "react-router-dom"
 
 export default function Login({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = React.useState(false)
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [error, setError] = React.useState("")
-  const [accessToken, setAccessToken] = React.useState("")
   const { isLoggedIn, setIsLoggedIn, setUserId } = React.useContext(AuthContext)
 
-  const Login = async () => {
+  const doLogin = async () => {
     setError("")
     try {
       const response = await fetch("http://localhost:5103/api/auth/login", {
@@ -26,38 +29,33 @@ export default function Login({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: email, password: password }),
+        body: JSON.stringify({ email, password }),
       })
       const data = await response.json()
 
       if (response.ok) {
-        console.log("Login successful:", data)
-
         if (data.userId !== undefined && data.userId !== null) {
           setUserId(BigInt(data.userId))
-          setAccessToken(data.accessToken)
-          console.log("Access Token:", data.accessToken)
           localStorage.setItem("accessToken", data.accessToken)
           if (data.role !== "admin") {
-            setError(
-              "Permission denied. Use admin account to access this page."
-            )
+            setError(t("login.errorPermission"))
           } else {
             setIsLoggedIn(true)
           }
         }
       } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Login failed")
+        setError(t("login.errorDefault"))
       }
-    } catch (err) {
-      setError("Invalid email or password. Please try again.")
+    } catch {
+      setError(t("login.errorDefault"))
     }
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await Login()
+    await doLogin()
   }
+
   React.useEffect(() => {
     if (isLoggedIn) {
       window.location.href = "/admin"
@@ -66,12 +64,25 @@ export default function Login({
 
   return (
     <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70% p-4">
+      <div className="absolute top-4 left-4">
+        <Link
+          to="/"
+          className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          {t("nav.backHome")}
+        </Link>
+      </div>
+      <div className="absolute bottom-2 left-2">
+        <Language />
+      </div>
+
       <div className="mx-auto w-full max-w-md p-4">
         <h2 className="mb-2 text-center text-2xl font-bold tracking-tight text-white/80">
-          Sign In
+          {t("login.title")}
         </h2>
         <p className="mb-12 text-center text-base text-muted-foreground">
-          Enter your email and password to sign in
+          {t("login.subtitle")}
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -79,12 +90,12 @@ export default function Login({
               htmlFor="email"
               className="text-sm font-semibold text-white/80"
             >
-              Email
+              {t("login.email")}
             </Label>
             <Input
               id="email"
               type="email"
-              placeholder="user@example.com"
+              placeholder={t("login.emailPlaceholder")}
               className="h-11 text-white/90"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -96,7 +107,7 @@ export default function Login({
               htmlFor="password"
               className="text-sm font-semibold text-white/90"
             >
-              Password
+              {t("login.password")}
             </Label>
             <div className="relative">
               <Input
@@ -123,13 +134,13 @@ export default function Login({
             </div>
           </div>
           <Button type="submit" size="lg" className="w-full">
-            Sign In
+            {t("login.submit")}
           </Button>
-          {error ? (
+          {error && (
             <p className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">
               {error}
             </p>
-          ) : null}
+          )}
         </form>
       </div>
     </div>

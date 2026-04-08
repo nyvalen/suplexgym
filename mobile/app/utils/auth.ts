@@ -1,27 +1,27 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.143:5103";
+  process.env.EXPO_PUBLIC_API_URL || "http://10.224.48.186:5103";
 
 export const ENDPOINTS = {
-  login:    `${API_BASE_URL}/api/auth/login`,
+  login: `${API_BASE_URL}/api/auth/login`,
   register: `${API_BASE_URL}/api/auth/register`,
-  refresh:  `${API_BASE_URL}/api/auth/refresh`,
-  logout:   `${API_BASE_URL}/api/auth/logout`,
-  user:     `${API_BASE_URL}/api/user/profile`,
+  refresh: `${API_BASE_URL}/api/auth/refresh`,
+  logout: `${API_BASE_URL}/api/auth/logout`,
+  user: `${API_BASE_URL}/api/user/profile`,
   password: `${API_BASE_URL}/api/user/change-password`,
-  billing:  `${API_BASE_URL}/api/user/billing-address`,
+  billing: `${API_BASE_URL}/api/user/billing-address`,
   settings: `${API_BASE_URL}/api/user/settings`,
-  cart:         `${API_BASE_URL}/api/cart`,
-  cartAdd:      `${API_BASE_URL}/api/cart/add`,
-  cartClear:    `${API_BASE_URL}/api/cart/clear`,
-  cartItem:     (id: number) => `${API_BASE_URL}/api/cart/item/${id}`,
-  items:        `${API_BASE_URL}/api/items`,
-  itemTypes:    `${API_BASE_URL}/api/items/types`,
-  orders:       `${API_BASE_URL}/api/orders`,
-  checkout:     `${API_BASE_URL}/api/orders/checkout`,
-  renew:        (id: number) => `${API_BASE_URL}/api/orders/renew/${id}`,
-  news:         `${API_BASE_URL}/api/news`,
+  cart: `${API_BASE_URL}/api/cart`,
+  cartAdd: `${API_BASE_URL}/api/cart/add`,
+  cartClear: `${API_BASE_URL}/api/cart/clear`,
+  cartItem: (id: number) => `${API_BASE_URL}/api/cart/item/${id}`,
+  items: `${API_BASE_URL}/api/items`,
+  itemTypes: `${API_BASE_URL}/api/items/types`,
+  orders: `${API_BASE_URL}/api/orders`,
+  checkout: `${API_BASE_URL}/api/orders/checkout`,
+  renew: (id: number) => `${API_BASE_URL}/api/orders/renew/${id}`,
+  news: `${API_BASE_URL}/api/news`,
 };
 
 /** Save both tokens after login/register */
@@ -42,7 +42,7 @@ export async function clearTokens() {
  */
 export async function authFetch(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<Response> {
   const token = await AsyncStorage.getItem("accessToken");
 
@@ -61,7 +61,10 @@ export async function authFetch(
 
   // Try refresh
   const refreshToken = await AsyncStorage.getItem("refreshToken");
-  if (!refreshToken) { await clearTokens(); throw new Error("SESSION_EXPIRED"); }
+  if (!refreshToken) {
+    await clearTokens();
+    throw new Error("SESSION_EXPIRED");
+  }
 
   const refreshRes = await fetch(ENDPOINTS.refresh, {
     method: "POST",
@@ -69,7 +72,10 @@ export async function authFetch(
     body: JSON.stringify({ refreshToken }),
   });
 
-  if (!refreshRes.ok) { await clearTokens(); throw new Error("SESSION_EXPIRED"); }
+  if (!refreshRes.ok) {
+    await clearTokens();
+    throw new Error("SESSION_EXPIRED");
+  }
 
   const { accessToken, refreshToken: newRefresh } = await refreshRes.json();
   await saveTokens(accessToken, newRefresh || refreshToken);
@@ -81,5 +87,7 @@ export function decodeJwt(token: string): Record<string, string> | null {
   try {
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }

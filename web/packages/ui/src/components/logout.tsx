@@ -10,6 +10,7 @@ import { useTheme } from "../../../../apps/web/src/components/theme-provider"
 import { Button } from "@workspace/ui/components/button"
 import { AuthContext } from "../../../../apps/web/src/context/auth-context"
 import { useContext, useEffect, useState } from "react"
+import { fetchWithAuth } from "../lib/auth"
 
 export function Logout() {
   const [error, setError] = useState("")
@@ -18,13 +19,16 @@ export function Logout() {
   const Logout = async () => {
     setError("")
     try {
-      const response = await fetch("http://localhost:5103/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
+      const response = await fetchWithAuth(
+        "http://localhost:5103/api/auth/logout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      )
       const data = await response.json()
 
       if (response.ok) {

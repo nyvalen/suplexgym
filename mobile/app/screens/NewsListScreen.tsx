@@ -26,38 +26,98 @@ interface NewsItem {
 
 function FeaturedCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
-  const borderColor = isDark ? "#3f3f46" : "#e4e4e7";
+  const surfaceBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
 
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.93}
       onPressIn={() =>
-        Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()
+        Animated.timing(scale, {
+          toValue: 0.98,
+          duration: 100,
+          useNativeDriver: true,
+        }).start()
       }
       onPressOut={() =>
         Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
       }
     >
       <Animated.View
-        className="h-[240px] rounded-[20px] overflow-hidden mb-2 border"
-        style={{ transform: [{ scale }], borderColor }}
+        style={{
+          height: 240,
+          borderRadius: 22,
+          overflow: "hidden",
+          marginBottom: 8,
+          borderWidth: 1,
+          borderColor: surfaceBorder,
+          transform: [{ scale }],
+        }}
       >
         <Image
           source={{ uri: item.imagePath || FALLBACK }}
-          className="absolute w-full h-full"
+          style={{ position: "absolute", width: "100%", height: "100%" }}
           resizeMode="cover"
         />
-        <View className="absolute w-full h-full bg-black/50" />
-        <View className="flex-1 justify-end p-5">
-          <View className="bg-[#7c3aed] self-start px-2.5 py-1 rounded-lg mb-2">
-            <Text className="text-white text-[10px] font-extrabold tracking-[1.5px]">
+        {/* Gradient-like overlay — two layered semi-transparent views */}
+        <View
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.45)",
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(124,58,237,0.15)",
+          }}
+        />
+        <View style={{ flex: 1, justifyContent: "flex-end", padding: 20 }}>
+          <View
+            style={{
+              backgroundColor: "#7c3aed",
+              alignSelf: "flex-start",
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 8,
+              marginBottom: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: "800",
+                letterSpacing: 1.5,
+              }}
+            >
               KIEMELT
             </Text>
           </View>
-          <Text className="text-2xl font-extrabold text-white leading-7" numberOfLines={2}>
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: "800",
+              color: "#fff",
+              lineHeight: 28,
+            }}
+            numberOfLines={2}
+          >
             {item.title}
           </Text>
+          {item.createdAt && (
+            <Text
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,0.6)",
+                marginTop: 6,
+              }}
+            >
+              {new Date(item.createdAt).toLocaleDateString("hu-HU")}
+            </Text>
+          )}
         </View>
       </Animated.View>
     </TouchableOpacity>
@@ -66,8 +126,8 @@ function FeaturedCard({ item, onPress, isDark }: any) {
 
 function NewsCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
-  const surface = isDark ? "#18181b" : "#ffffff";
-  const borderColor = isDark ? "#3f3f46" : "#e4e4e7";
+  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
+  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
   const textPrimary = isDark ? "#fafafa" : "#09090b";
   const textSub = isDark ? "#a1a1aa" : "#52525b";
 
@@ -76,37 +136,69 @@ function NewsCard({ item, onPress, isDark }: any) {
       onPress={onPress}
       activeOpacity={0.93}
       onPressIn={() =>
-        Animated.timing(scale, { toValue: 0.98, duration: 100, useNativeDriver: true }).start()
+        Animated.timing(scale, {
+          toValue: 0.98,
+          duration: 100,
+          useNativeDriver: true,
+        }).start()
       }
       onPressOut={() =>
         Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
       }
     >
       <Animated.View
-        className="rounded-2xl overflow-hidden h-[110px] flex-row border"
-        style={{ transform: [{ scale }], backgroundColor: surface, borderColor }}
+        style={{
+          borderRadius: 18,
+          overflow: "hidden",
+          height: 110,
+          flexDirection: "row",
+          borderWidth: 1,
+          borderColor: surfaceBorder,
+          backgroundColor: surface,
+          transform: [{ scale }],
+        }}
       >
         <Image
           source={{ uri: item.imagePath || FALLBACK }}
           style={{ width: 110, height: "100%" }}
           resizeMode="cover"
         />
-        <View className="flex-1 p-3.5 justify-between">
+        {/* Purple tint on image */}
+        <View
+          style={{
+            position: "absolute",
+            width: 110,
+            height: "100%",
+            backgroundColor: "rgba(124,58,237,0.08)",
+          }}
+        />
+        <View style={{ flex: 1, padding: 14, justifyContent: "space-between" }}>
           <Text
-            className="text-sm font-bold leading-5"
-            style={{ color: textPrimary }}
+            style={{
+              fontSize: 13,
+              fontWeight: "700",
+              lineHeight: 18,
+              color: textPrimary,
+            }}
             numberOfLines={2}
           >
             {item.title}
           </Text>
-          <Text
-            className="text-xs leading-[17px] flex-1 mt-1"
-            style={{ color: textSub }}
-            numberOfLines={2}
-          >
-            {item.content}
-          </Text>
-          <Text className="text-xs font-bold text-[#7c3aed]">Olvasd tovább →</Text>
+          <View>
+            <Text style={{ fontSize: 11, color: textSub }} numberOfLines={2}>
+              {item.content}
+            </Text>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "700",
+                color: "#7c3aed",
+                marginTop: 4,
+              }}
+            >
+              Olvasd tovább →
+            </Text>
+          </View>
         </View>
       </Animated.View>
     </TouchableOpacity>
@@ -130,30 +222,67 @@ export default function NewsListScreen() {
   const featured = news[0] ?? null;
   const rest = news.slice(1);
 
-  const bg = isDark ? "bg-[#09090b]" : "bg-[#fafafa]";
-  const textPrimary = isDark ? "text-[#fafafa]" : "text-[#09090b]";
-  const textSub = isDark ? "text-[#a1a1aa]" : "text-[#52525b]";
+  const bg = isDark ? "#09090b" : "#fafafa";
+  const textPrimary = isDark ? "#fafafa" : "#09090b";
+  const textSub = isDark ? "#a1a1aa" : "#52525b";
 
   return (
-    <View className={`flex-1 ${bg}`}>
+    <View style={{ flex: 1, backgroundColor: bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
+        translucent
       />
 
-      <View className="px-5 pt-[60px] pb-4">
-        <Text className={`text-3xl font-extrabold -tracking-wide ${textPrimary}`}>
+      {/* Gradient blob */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: -30,
+          right: -30,
+          width: 200,
+          height: 200,
+          borderRadius: 100,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.1)"
+            : "rgba(124,58,237,0.05)",
+        }}
+      />
+
+      <View
+        style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 16 }}
+      >
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: "800",
+            letterSpacing: -0.5,
+            color: textPrimary,
+          }}
+        >
           Hírek
         </Text>
-        <Text className={`text-xs mt-0.5 ${textSub}`}>Suplex Gym értesítők</Text>
+        <Text style={{ fontSize: 12, marginTop: 2, color: textSub }}>
+          Suplex Gym értesítők
+        </Text>
       </View>
 
       {loading ? (
-        <ActivityIndicator color="#7c3aed" className="flex-1" />
+        <ActivityIndicator color="#7c3aed" style={{ flex: 1 }} />
       ) : news.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-3">
-          <Text className="text-5xl">📰</Text>
-          <Text className={`text-lg font-bold ${textPrimary}`}>Nincs elérhető hír</Text>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
+          <Text style={{ fontSize: 48 }}>📰</Text>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: textPrimary }}>
+            Nincs elérhető hír
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -164,7 +293,10 @@ export default function NewsListScreen() {
               item={item}
               isDark={isDark}
               onPress={() =>
-                navigation.navigate("NewsDetail" as never, { article: item } as never)
+                navigation.navigate(
+                  "NewsDetail" as never,
+                  { article: item } as never,
+                )
               }
             />
           )}
@@ -174,12 +306,19 @@ export default function NewsListScreen() {
                 item={featured}
                 isDark={isDark}
                 onPress={() =>
-                  navigation.navigate("NewsDetail" as never, { article: featured } as never)
+                  navigation.navigate(
+                    "NewsDetail" as never,
+                    { article: featured } as never,
+                  )
                 }
               />
             ) : null
           }
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 10 }}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingBottom: 40,
+            gap: 10,
+          }}
           showsVerticalScrollIndicator={false}
         />
       )}

@@ -6,6 +6,7 @@ import {
   Package,
   Dumbbell as GymIcon,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import {
   Sidebar,
@@ -23,29 +24,6 @@ import { Logout } from "./logout"
 
 type Section = "users" | "news" | "items" | "equipment"
 
-const navItems: { title: string; section: Section; icon: React.ReactNode }[] = [
-  {
-    title: "Manage Users",
-    section: "users",
-    icon: <Users className="size-4" />,
-  },
-  {
-    title: "Manage News",
-    section: "news",
-    icon: <Newspaper className="size-4" />,
-  },
-  {
-    title: "Manage Items",
-    section: "items",
-    icon: <Package className="size-4" />,
-  },
-  {
-    title: "Manage Equipment",
-    section: "equipment",
-    icon: <GymIcon className="size-4" />,
-  },
-]
-
 interface AdminSidebarProps extends React.ComponentProps<typeof Sidebar> {
   activeSection?: Section
   onSectionChange?: (section: Section) => void
@@ -56,6 +34,31 @@ export function AdminSidebar({
   onSectionChange,
   ...props
 }: AdminSidebarProps) {
+  const { t } = useTranslation()
+
+  const navItems: { title: string; section: Section; icon: React.ReactNode }[] = [
+    {
+      title: t("admin.sections.users"),
+      section: "users",
+      icon: <Users className="size-4" />,
+    },
+    {
+      title: t("admin.sections.news"),
+      section: "news",
+      icon: <Newspaper className="size-4" />,
+    },
+    {
+      title: t("admin.sections.items"),
+      section: "items",
+      icon: <Package className="size-4" />,
+    },
+    {
+      title: t("admin.sections.equipment"),
+      section: "equipment",
+      icon: <GymIcon className="size-4" />,
+    },
+  ]
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -72,7 +75,7 @@ export function AdminSidebar({
                   </span>
                 </div>
                 <span className="w-32 self-end text-xs text-muted-foreground">
-                  Admin Panel
+                  {t("admin.title")}
                 </span>
               </a>
             </SidebarMenuButton>

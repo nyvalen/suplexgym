@@ -24,7 +24,8 @@ export default function Faq() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-x-6">
+      {/* Single column layout — each item opens independently, no weird gaps */}
+      <div className="flex flex-col gap-2">
         {items.map(({ q, a }, i) => {
           const isOpen = open === i
           return (
@@ -46,7 +47,7 @@ export default function Faq() {
                   {q}
                 </span>
                 <span
-                  className="mt-0.5 shrink-0 text-white/40 transition-transform duration-300"
+                  className="mt-0.5 shrink-0 text-black/40 transition-transform duration-300 dark:text-white/40"
                   style={{ transform: isOpen ? "rotate(45deg)" : "none" }}
                 >
                   <Plus className="h-4 w-4" />
@@ -55,7 +56,7 @@ export default function Faq() {
               <div
                 className="overflow-hidden transition-all duration-300 ease-in-out"
                 style={{
-                  maxHeight: isOpen ? "200px" : "0px",
+                  maxHeight: isOpen ? "300px" : "0px",
                   opacity: isOpen ? 1 : 0,
                 }}
               >

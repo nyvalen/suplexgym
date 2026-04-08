@@ -48,63 +48,122 @@ export default function MainScreen() {
       .finally(() => setNewsLoading(false));
   }, []);
 
-  const bg = isDark ? "bg-[#09090b]" : "bg-[#fafafa]";
-  const surface = isDark ? "bg-[#18181b]" : "bg-white";
-  const border = isDark ? "border-[#3f3f46]" : "border-[#e4e4e7]";
-  const textPrimary = isDark ? "text-[#fafafa]" : "text-[#09090b]";
-  const textSub = isDark ? "text-[#a1a1aa]" : "text-[#52525b]";
-  const textMuted = isDark ? "text-[#71717a]" : "text-[#a1a1aa]";
+  const bg = isDark ? "#09090b" : "#fafafa";
+  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.8)";
+  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const textPrimary = isDark ? "#fafafa" : "#09090b";
+  const textSub = isDark ? "#a1a1aa" : "#52525b";
+  const textMuted = isDark ? "#71717a" : "#a1a1aa";
 
   return (
     <ScrollView
-      className={`flex-1 ${bg}`}
-      contentContainerStyle={{ paddingBottom: 24 }}
+      style={{ flex: 1, backgroundColor: bg }}
+      contentContainerStyle={{ paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
     >
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
+        translucent
       />
 
-      {/* Purple glow */}
+      {/* Radial gradient background blobs */}
       <View
-        className="absolute top-36 -left-32 w-[260px] h-[100px] rotate-45 rounded-full"
+        pointerEvents="none"
         style={{
+          position: "absolute",
+          top: 80,
+          left: -80,
+          width: 280,
+          height: 140,
+          borderRadius: 140,
+          transform: [{ rotate: "45deg" }],
           backgroundColor: isDark
-            ? "rgba(124,58,237,0.12)"
+            ? "rgba(124,58,237,0.14)"
             : "rgba(124,58,237,0.06)",
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: -40,
+          right: -40,
+          width: 200,
+          height: 200,
+          borderRadius: 100,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.07)"
+            : "rgba(124,58,237,0.04)",
         }}
       />
 
       {/* Header */}
-      <View className="flex-row justify-between items-start px-5 pt-6 pb-5">
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          paddingHorizontal: 20,
+          paddingTop: 64,
+          paddingBottom: 24,
+        }}
+      >
         <View>
-          <Text className={`text-xs mb-0.5 ${textSub}`}>
+          <Text style={{ fontSize: 12, marginBottom: 3, color: textSub }}>
             {username ? `Üdvözlünk, ${username}` : "Üdvözlünk"}
           </Text>
           <Text
-            className={`text-xl font-extrabold tracking-widest ${textPrimary}`}
+            style={{
+              fontSize: 22,
+              fontWeight: "800",
+              letterSpacing: 3,
+              color: textPrimary,
+              textTransform: "uppercase",
+            }}
           >
             SUPLEX GYM
           </Text>
         </View>
         {role === "admin" && (
           <View
-            className={`rounded-xl px-3 py-1.5 border ${
-              isDark
-                ? "bg-[rgba(124,58,237,0.15)] border-[rgba(124,58,237,0.35)]"
-                : "bg-[rgba(124,58,237,0.08)] border-[rgba(124,58,237,0.25)]"
-            }`}
+            style={{
+              borderRadius: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              backgroundColor: isDark
+                ? "rgba(124,58,237,0.18)"
+                : "rgba(124,58,237,0.08)",
+              borderWidth: 1,
+              borderColor: isDark
+                ? "rgba(124,58,237,0.4)"
+                : "rgba(124,58,237,0.25)",
+            }}
           >
-            <Text className="text-[#c4b5fd] text-[11px] font-bold tracking-wide">
+            <Text
+              style={{
+                color: "#c4b5fd",
+                fontSize: 11,
+                fontWeight: "700",
+                letterSpacing: 1,
+              }}
+            >
               Admin
             </Text>
           </View>
         )}
       </View>
 
-      {/* Stats grid */}
-      <View className="flex-row flex-wrap gap-2.5 px-5 mb-7">
+      {/* Stats grid — glassy cards like the web */}
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 10,
+          paddingHorizontal: 20,
+          marginBottom: 28,
+        }}
+      >
         {[
           { value: "1 240", label: "Aktív tagok" },
           { value: "34", label: "Heti edzések" },
@@ -113,74 +172,133 @@ export default function MainScreen() {
         ].map((s) => (
           <View
             key={s.label}
-            className={`w-[47%] ${surface} border ${border} rounded-2xl p-4`}
+            style={{
+              width: "47%",
+              backgroundColor: surface,
+              borderWidth: 1,
+              borderColor: surfaceBorder,
+              borderRadius: 20,
+              padding: 16,
+            }}
           >
-            <Text className={`text-2xl font-bold ${textPrimary}`}>
+            <Text
+              style={{ fontSize: 26, fontWeight: "700", color: textPrimary }}
+            >
               {s.value}
             </Text>
-            <Text className={`text-[11px] mt-0.5 ${textMuted}`}>{s.label}</Text>
+            <Text style={{ fontSize: 11, marginTop: 2, color: textMuted }}>
+              {s.label}
+            </Text>
           </View>
         ))}
       </View>
 
-      {/* News preview */}
+      {/* News section label */}
       <Text
-        className={`text-xs font-bold tracking-[1.5px] uppercase px-5 mt-2 mb-3 ${textSub}`}
+        style={{
+          fontSize: 11,
+          fontWeight: "700",
+          letterSpacing: 2,
+          textTransform: "uppercase",
+          paddingHorizontal: 20,
+          marginBottom: 12,
+          color: textSub,
+        }}
       >
         Legfrissebb hírek
       </Text>
 
       {newsLoading ? (
-        <ActivityIndicator color="#7c3aed" className="mt-3" />
+        <ActivityIndicator color="#7c3aed" style={{ marginTop: 12 }} />
       ) : (
-        news.map((n) => (
-          <TouchableOpacity
-            key={n.id}
-            className={`mx-5 ${surface} rounded-2xl p-3.5 flex-row items-center border ${border} mb-2`}
-            onPress={() =>
-              navigation.navigate(
-                "NewsDetail" as never,
-                { article: n } as never,
-              )
-            }
-            activeOpacity={0.75}
-          >
-            <View className="flex-1">
-              <Text
-                className={`text-sm font-semibold leading-5 ${textPrimary}`}
-                numberOfLines={2}
-              >
-                {n.title}
+        <View style={{ paddingHorizontal: 20, gap: 8 }}>
+          {news.map((n) => (
+            <TouchableOpacity
+              key={n.id}
+              style={{
+                backgroundColor: surface,
+                borderRadius: 18,
+                padding: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: surfaceBorder,
+              }}
+              onPress={() =>
+                navigation.navigate(
+                  "NewsDetail" as never,
+                  { article: n } as never,
+                )
+              }
+              activeOpacity={0.75}
+            >
+              {/* Left purple accent */}
+              <View
+                style={{
+                  width: 50,
+                  height: "175%",
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(124,58,237,0.4)",
+                  borderTopLeftRadius: 16,
+                  borderBottomLeftRadius: 16,
+                }}
+              />
+              <View style={{ flex: 1, paddingLeft: 8 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    lineHeight: 20,
+                    color: textPrimary,
+                  }}
+                  numberOfLines={2}
+                >
+                  {n.title}
+                </Text>
+                <Text style={{ fontSize: 11, marginTop: 4, color: textMuted }}>
+                  {new Date(n.createdAt).toLocaleDateString("hu-HU")}
+                </Text>
+              </View>
+              <Text style={{ color: "#7c3aed", fontSize: 16, marginLeft: 8 }}>
+                →
               </Text>
-              <Text className={`text-[11px] mt-1 ${textMuted}`}>
-                {new Date(n.createdAt).toLocaleDateString("hu-HU")}
-              </Text>
-            </View>
-            <Text className="text-[#7c3aed] text-base ml-2">→</Text>
-          </TouchableOpacity>
-        ))
+            </TouchableOpacity>
+          ))}
+        </View>
       )}
 
-      {/* CTA */}
+      {/* CTA card — mirrors the web's purple tinted service cards */}
       <TouchableOpacity
-        className={`mx-5 mt-3.5 ${
-          isDark
-            ? "bg-[rgba(124,58,237,0.15)] border-[rgba(124,58,237,0.35)]"
-            : "bg-[rgba(124,58,237,0.08)] border-[rgba(124,58,237,0.25)]"
-        } border rounded-[18px] p-5 flex-row items-center gap-3.5`}
+        style={{
+          marginHorizontal: 20,
+          marginTop: 16,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.12)"
+            : "rgba(124,58,237,0.07)",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(124,58,237,0.3)" : "rgba(124,58,237,0.2)",
+          borderRadius: 20,
+          padding: 20,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+        }}
         onPress={() => navigation.navigate("Vásárlás" as never)}
         activeOpacity={0.8}
       >
-        <Text className="text-3xl">🎟️</Text>
-        <View className="flex-1">
-          <Text className={`text-sm font-bold ${textPrimary}`}>
+        <Text style={{ fontSize: 32 }}></Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15, fontWeight: "700", color: textPrimary }}>
             Jegy vásárlása
           </Text>
-          <Text className={`text-xs mt-0.5 ${textSub}`}>
+          <Text style={{ fontSize: 12, marginTop: 3, color: textSub }}>
             Napi, havi és éves bérletek
           </Text>
         </View>
-        <Text className="text-[#7c3aed] text-lg">→</Text>
+        <Text style={{ color: "#7c3aed", fontSize: 18 }}>→</Text>
       </TouchableOpacity>
     </ScrollView>
   );

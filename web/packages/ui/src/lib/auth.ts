@@ -21,7 +21,7 @@ export const authTokens = {
     localStorage.setItem("refreshToken", refreshToken)
   },
   clearTokens: () => {
-    localStorage.removeItem("accessToken")
+    localStorage.setItem("accessToken", "")
     localStorage.removeItem("refreshToken")
   },
 }

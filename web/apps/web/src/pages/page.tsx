@@ -7,6 +7,7 @@ import BlogContentLimited from "@workspace/ui/components/creative-tim/blocks/blo
 import Hero from "@workspace/ui/components/creative-tim/blocks/hero"
 import Passes from "@workspace/ui/components/creative-tim/blocks/passes"
 import Faq from "@workspace/ui/components/creative-tim/blocks/faq"
+import Footer from "@workspace/ui/components/footer"
 
 export default function Page() {
   return (
@@ -24,6 +25,7 @@ export default function Page() {
         <BlogContentLimited />
         <Passes />
         <Faq />
+        <Footer />
       </div>
     </SidebarProvider>
   )

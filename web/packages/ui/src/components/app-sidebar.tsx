@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Dumbbell, Home, Newspaper, Ticket, HelpCircle } from "lucide-react"
+import { Dumbbell, Home, Newspaper } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
@@ -41,38 +41,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { label: t("nav.news"), icon: Newspaper, sectionId: "/news" },
   ]
 
+  // Spotlight items link to different sections of the main page
   const spotlightItems = [
     {
-      label: t("sidebar.spotlight.classes.label"),
-      sublabel: t("sidebar.spotlight.classes.sublabel"),
-      description: t("sidebar.spotlight.classes.description"),
+      label: t("sidebar.spotlight.passes.label"),
+      sublabel: t("sidebar.spotlight.passes.sublabel"),
+      description: t("sidebar.spotlight.passes.description"),
+      image:
+        "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&w=600&q=75",
+      sectionId: "passes",
+    },
+    {
+      label: t("sidebar.spotlight.news.label"),
+      sublabel: t("sidebar.spotlight.news.sublabel"),
+      description: t("sidebar.spotlight.news.description"),
+      image:
+        "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
+      sectionId: "news",
+    },
+    {
+      label: t("sidebar.spotlight.faq.label"),
+      sublabel: t("sidebar.spotlight.faq.sublabel"),
+      description: t("sidebar.spotlight.faq.description"),
       image:
         "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&w=600&q=75",
-      sectionId: "hero",
-    },
-    {
-      label: t("sidebar.spotlight.equipment.label"),
-      sublabel: t("sidebar.spotlight.equipment.sublabel"),
-      description: t("sidebar.spotlight.equipment.description"),
-      image:
-        "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
-      sectionId: "news",
-    },
-    {
-      label: t("sidebar.spotlight.equipment.label"),
-      sublabel: t("sidebar.spotlight.equipment.sublabel"),
-      description: t("sidebar.spotlight.equipment.description"),
-      image:
-        "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
-      sectionId: "news",
-    },
-    {
-      label: t("sidebar.spotlight.equipment.label"),
-      sublabel: t("sidebar.spotlight.equipment.sublabel"),
-      description: t("sidebar.spotlight.equipment.description"),
-      image:
-        "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
-      sectionId: "news",
+      sectionId: "faq",
     },
   ]
 
@@ -117,24 +110,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         <div className="mx-3 my-1 border-t border-current opacity-[0.08]" />
 
-        {/* Hover-expand items — clicking scrolls to #news on home */}
+        {/* Spotlight items — each clicks to its respective section */}
         <SidebarGroup>
           <p className="mb-2 px-2 font-mono text-[10px] tracking-widest text-sidebar-foreground/40 uppercase">
             {t("nav.latest")}
           </p>
-          {spotlightItems.slice(0, 1).map(({ sectionId }) => (
-            <div
-              className="cursor-pointer rounded-md"
-              onClick={() => goToSection(sectionId)}
-            >
-              <HoverExpand
-                key={sectionId}
-                items={spotlightItems}
-                collapsedHeight={62}
-                expandedHeight={180}
-              />
-            </div>
-          ))}
+          <div className="flex flex-col gap-0">
+            {spotlightItems.map((item) => (
+              <div
+                key={item.sectionId}
+                className="cursor-pointer rounded-md"
+                onClick={() => goToSection(item.sectionId)}
+              >
+                <HoverExpand
+                  items={[item]}
+                  collapsedHeight={62}
+                  expandedHeight={160}
+                />
+              </div>
+            ))}
+          </div>
         </SidebarGroup>
       </SidebarContent>
 

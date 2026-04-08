@@ -12,7 +12,7 @@ import { Text } from "@/app/components/ui/text";
 import * as React from "react";
 import { type TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { api_endpoints } from "@/app/config/api";
+import { api_endpoints } from "@/app/utils/api";
 import { saveTokens } from "@/app/utils/auth";
 
 export function SignInForm() {
@@ -92,9 +92,7 @@ export function SignInForm() {
               Bejelentkezés
             </Button>
           </View>
-          {error ? (
-            <Text className="text-sm text-red-500">{error}</Text>
-          ) : null}
+          {error ? <Text className="text-sm text-red-500">{error}</Text> : null}
         </CardContent>
       </Card>
     </View>

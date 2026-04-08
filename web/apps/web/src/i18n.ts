@@ -148,16 +148,62 @@ const en = {
   },
   sidebar: {
     spotlight: {
+      passes: {
+        label: "Passes & Tickets",
+        sublabel: "Get started",
+        description: "Flexible plans for every goal and schedule",
+      },
+      faq: {
+        label: "FAQ",
+        sublabel: "Learn more",
+        description: "Answers to common questions about membership",
+      },
+      news: {
+        label: "Latest News",
+        sublabel: "Stay updated",
+        description: "Updates and announcements from Suplex Gym",
+      },
       classes: {
         label: "New summer classes",
         sublabel: "June 2025",
         description: "12 new group sessions added to the timetable",
       },
-      equipment: {
-        label: "Equipment upgrade",
-        sublabel: "May 2025",
-        description: "40 new machines installed across the main floor",
-      },
+    },
+  },
+  footer: {
+    tagline: "A space defined by focus.",
+    hours: "Opening Hours",
+    hoursWeekdays: "Mon–Fri: 5:30 am – 9:30 pm",
+    hoursWeekends: "Sat: 7 am – 8 pm · Sun: 8 am – 6 pm",
+    contact: "Contact",
+    address: "123 Gym Street, Budapest",
+    phone: "+36 1 234 5678",
+    email: "hello@suplexgym.hu",
+    social: "Follow us",
+    rights: "All rights reserved.",
+    links: {
+      privacy: "Privacy Policy",
+      terms: "Terms of Use",
+      cookies: "Cookies",
+    },
+  },
+  login: {
+    title: "Sign In",
+    subtitle: "Enter your email and password to sign in",
+    email: "Email",
+    emailPlaceholder: "user@example.com",
+    password: "Password",
+    submit: "Sign In",
+    errorPermission: "Permission denied. Use admin account to access this page.",
+    errorDefault: "Invalid email or password. Please try again.",
+  },
+  admin: {
+    title: "Admin Panel",
+    sections: {
+      users: "Manage Users",
+      news: "Manage News",
+      items: "Manage Items",
+      equipment: "Manage Equipment",
     },
   },
 }
@@ -309,16 +355,62 @@ const hu: typeof en = {
   },
   sidebar: {
     spotlight: {
+      passes: {
+        label: "Bérletek",
+        sublabel: "Kezdj el",
+        description: "Rugalmas csomagok minden célhoz",
+      },
+      faq: {
+        label: "GYIK",
+        sublabel: "Tudj meg többet",
+        description: "Válaszok a tagsággal kapcsolatos kérdésekre",
+      },
+      news: {
+        label: "Legfrissebb hírek",
+        sublabel: "Maradj naprakész",
+        description: "Hírek és bejelentések a Suplex Edzőteremből",
+      },
       classes: {
         label: "Nyári edzések",
         sublabel: "2025. június",
         description: "12 új csoportos edzés a menetrendben",
       },
-      equipment: {
-        label: "Gépcsere befejezve",
-        sublabel: "2025. május",
-        description: "40 új gép a főteremben",
-      },
+    },
+  },
+  footer: {
+    tagline: "Fókuszra tervezett tér.",
+    hours: "Nyitvatartás",
+    hoursWeekdays: "H–P: 5:30 – 21:30",
+    hoursWeekends: "Szo: 7:00 – 20:00 · V: 8:00 – 18:00",
+    contact: "Kapcsolat",
+    address: "1234 Budapest, Edzőterem utca 123.",
+    phone: "+36 1 234 5678",
+    email: "hello@suplexgym.hu",
+    social: "Kövess minket",
+    rights: "Minden jog fenntartva.",
+    links: {
+      privacy: "Adatvédelem",
+      terms: "Felhasználási feltételek",
+      cookies: "Sütik",
+    },
+  },
+  login: {
+    title: "Bejelentkezés",
+    subtitle: "Add meg az e-mail címed és jelszavad",
+    email: "E-mail",
+    emailPlaceholder: "felhasznalo@example.com",
+    password: "Jelszó",
+    submit: "Bejelentkezés",
+    errorPermission: "Hozzáférés megtagadva. Használj admin fiókot.",
+    errorDefault: "Hibás e-mail vagy jelszó. Kérjük, próbáld újra.",
+  },
+  admin: {
+    title: "Admin Panel",
+    sections: {
+      users: "Felhasználók kezelése",
+      news: "Hírek kezelése",
+      items: "Termékek kezelése",
+      equipment: "Felszerelés kezelése",
     },
   },
 }

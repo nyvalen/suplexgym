@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../theme/ThemeContext";
+import { Dumbbell } from "lucide-react-native";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -26,117 +27,213 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fade, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.spring(slide, { toValue: 0, tension: 60, friction: 12, useNativeDriver: true }),
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 700,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slide, {
+        toValue: 0,
+        tension: 60,
+        friction: 12,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
+  const bg = isDark ? "#09090b" : "#fafafa";
+  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)";
+  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const textPrimary = isDark ? "#fafafa" : "#09090b";
+  const textSub = isDark ? "#a1a1aa" : "#52525b";
+  const textMuted = isDark ? "#71717a" : "#a1a1aa";
+
   return (
-    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
+    <View style={{ flex: 1, backgroundColor: bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
+        translucent
       />
 
-      {/* Glow blobs */}
+      {/* Radial gradient blobs — purple at top-left like the web */}
       <View
-        className="absolute -top-20 -left-20 w-[340px] h-[340px] rounded-full"
+        pointerEvents="none"
         style={{
-          backgroundColor: isDark ? "rgba(124,58,237,0.18)" : "rgba(124,58,237,0.07)",
+          position: "absolute",
+          top: -80,
+          left: -80,
+          width: 360,
+          height: 360,
+          borderRadius: 180,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.22)"
+            : "rgba(124,58,237,0.08)",
         }}
       />
       <View
-        className="absolute -bottom-12 -right-12 w-[220px] h-[220px] rounded-full"
+        pointerEvents="none"
         style={{
-          backgroundColor: isDark ? "rgba(124,58,237,0.08)" : "rgba(124,58,237,0.04)",
+          position: "absolute",
+          bottom: -60,
+          right: -60,
+          width: 240,
+          height: 240,
+          borderRadius: 120,
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.1)"
+            : "rgba(124,58,237,0.05)",
         }}
       />
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 72, paddingBottom: 48 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingTop: 72,
+          paddingBottom: 48,
+        }}
         showsVerticalScrollIndicator={false}
       >
         <Animated.View
-          className="flex-1"
-          style={{ opacity: fade, transform: [{ translateY: slide }] }}
+          style={{ flex: 1, opacity: fade, transform: [{ translateY: slide }] }}
         >
-          {/* Badge */}
-          <View className="flex-row items-center gap-2.5 mb-12">
+          {/* Badge / logo */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 52,
+            }}
+          >
             <View
-              className={`w-[42px] h-[42px] rounded-xl items-center justify-center border ${
-                isDark
-                  ? "bg-[rgba(124,58,237,0.15)] border-[rgba(124,58,237,0.35)]"
-                  : "bg-[rgba(124,58,237,0.08)] border-[rgba(124,58,237,0.25)]"
-              }`}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                backgroundColor: isDark
+                  ? "rgba(124,58,237,0.25)"
+                  : "rgba(124,58,237,0.1)",
+                borderWidth: 1,
+                borderColor: isDark
+                  ? "rgba(124,58,237,0.45)"
+                  : "rgba(124,58,237,0.25)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              <Text className="text-xl">💪</Text>
+              <Dumbbell color="white" size={20} />
             </View>
             <View>
               <Text
-                className={`text-xs font-bold tracking-[3px] uppercase ${
-                  isDark ? "text-[#fafafa]" : "text-[#09090b]"
-                }`}
+                style={{
+                  fontSize: 11,
+                  fontWeight: "700",
+                  letterSpacing: 3,
+                  color: isDark ? "#fafafa" : "#09090b",
+                  textTransform: "uppercase",
+                }}
               >
                 SUPLEX GYM
               </Text>
               <Text
-                className={`text-[10px] tracking-[1px] ${
-                  isDark ? "text-[#71717a]" : "text-[#a1a1aa]"
-                }`}
+                style={{ fontSize: 10, letterSpacing: 1, color: textMuted }}
               >
                 Alapítva 2017
               </Text>
             </View>
           </View>
 
-          {/* Hero text */}
-          <View className="mb-10">
+          {/* Hero text — mirrors the web's italic headline */}
+          <View style={{ marginBottom: 40 }}>
             <Text
-              className={`text-lg font-normal mb-1 ${
-                isDark ? "text-[#a1a1aa]" : "text-[#52525b]"
-              }`}
+              style={{
+                fontSize: 17,
+                fontWeight: "400",
+                color: textSub,
+                marginBottom: 2,
+              }}
             >
               Épülve
             </Text>
-            <Text className="text-[#7c3aed] text-5xl font-extrabold italic -tracking-wider leading-[52px]">
+            <Text
+              style={{
+                fontSize: 46,
+                fontWeight: "800",
+                fontStyle: "italic",
+                color: "#7c3aed",
+                letterSpacing: -1,
+                lineHeight: 50,
+              }}
+            >
               határtalan
             </Text>
             <Text
-              className={`text-4xl font-bold -tracking-wide leading-[42px] opacity-85 ${
-                isDark ? "text-[#fafafa]" : "text-[#09090b]"
-              }`}
+              style={{
+                fontSize: 36,
+                fontWeight: "700",
+                color: textPrimary,
+                letterSpacing: -0.5,
+                lineHeight: 42,
+                opacity: 0.85,
+              }}
             >
               lehetőségre.
             </Text>
             <Text
-              className={`text-sm leading-[22px] mt-3.5 max-w-[280px] ${
-                isDark ? "text-[#71717a]" : "text-[#a1a1aa]"
-              }`}
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                marginTop: 14,
+                maxWidth: 280,
+                color: textMuted,
+              }}
             >
-              Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges — csak ami számít.
+              Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges —
+              csak ami számít.
             </Text>
           </View>
 
-          {/* Stats */}
-          <View className="flex-row flex-wrap gap-2 mb-10">
+          {/* Stats grid — glassy cards */}
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 8,
+              marginBottom: 40,
+            }}
+          >
             {STATS.map((s) => (
               <View
                 key={s.label}
-                className={`flex-1 min-w-[45%] border rounded-2xl py-3.5 items-center ${
-                  isDark
-                    ? "bg-[#18181b] border-[#3f3f46]"
-                    : "bg-white border-[#e4e4e7]"
-                }`}
+                style={{
+                  flex: 1,
+                  minWidth: "45%",
+                  backgroundColor: surface,
+                  borderWidth: 1,
+                  borderColor: surfaceBorder,
+                  borderRadius: 16,
+                  paddingVertical: 14,
+                  alignItems: "center",
+                }}
               >
                 <Text
-                  className={`text-xl font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "700",
+                    color: textPrimary,
+                  }}
                 >
                   {s.value}
                 </Text>
                 <Text
-                  className={`text-[10px] mt-0.5 text-center ${
-                    isDark ? "text-[#71717a]" : "text-[#a1a1aa]"
-                  }`}
+                  style={{
+                    fontSize: 10,
+                    marginTop: 2,
+                    textAlign: "center",
+                    color: textMuted,
+                  }}
                 >
                   {s.label}
                 </Text>
@@ -145,40 +242,58 @@ export default function WelcomeScreen() {
           </View>
 
           {/* CTA buttons */}
-          <View className="gap-3 mb-8">
+          <View style={{ gap: 12, marginBottom: 32 }}>
             <Pressable
-              className="rounded-2xl py-[18px] items-center border border-[rgba(124,58,237,0.35)] bg-[#7c3aed]"
-              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+              style={({ pressed }) => ({
+                borderRadius: 18,
+                paddingVertical: 18,
+                alignItems: "center",
+                backgroundColor: "#7c3aed",
+                borderWidth: 1,
+                borderColor: "rgba(124,58,237,0.5)",
+                opacity: pressed ? 0.8 : 1,
+              })}
               onPress={() => navigation.navigate("SignIn" as never)}
             >
-              <Text className="text-white text-base font-bold tracking-wide">
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  letterSpacing: 0.3,
+                }}
+              >
                 Bejelentkezés
               </Text>
             </Pressable>
 
             <Pressable
-              className={`rounded-2xl py-[18px] items-center border ${
-                isDark
-                  ? "bg-[#18181b] border-[#3f3f46]"
-                  : "bg-white border-[#e4e4e7]"
-              }`}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              style={({ pressed }) => ({
+                borderRadius: 18,
+                paddingVertical: 18,
+                alignItems: "center",
+                backgroundColor: surface,
+                borderWidth: 1,
+                borderColor: surfaceBorder,
+                opacity: pressed ? 0.7 : 1,
+              })}
               onPress={() => navigation.navigate("SignUp" as never)}
             >
-              <Text
-                className={`text-base font-semibold ${
-                  isDark ? "text-[#a1a1aa]" : "text-[#52525b]"
-                }`}
-              >
+              <Text style={{ fontSize: 16, fontWeight: "600", color: textSub }}>
                 Fiók létrehozása
               </Text>
             </Pressable>
           </View>
 
+          {/* Quote */}
           <Text
-            className={`text-xs text-center italic leading-[18px] ${
-              isDark ? "text-[#71717a]" : "text-[#a1a1aa]"
-            }`}
+            style={{
+              fontSize: 12,
+              textAlign: "center",
+              fontStyle: "italic",
+              lineHeight: 18,
+              color: textMuted,
+            }}
           >
             „Az erő következetességben gyökerezik."
           </Text>
