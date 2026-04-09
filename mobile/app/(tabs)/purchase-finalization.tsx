@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+
+import { router, useLocalSearchParams } from "expo-router";
 import { authFetch, ENDPOINTS } from "../utils/auth";
-import type { CartItem } from "./PurchaseTicketsScreen";
+import type { CartItem } from "./purchase";
 import { useTheme, tokens } from "../theme/ThemeContext";
 
 const CATEGORY_COLORS: Record<number, string> = {
@@ -19,12 +20,12 @@ const CATEGORY_COLORS: Record<number, string> = {
   3: "#7c3aed",
 };
 
-export default function PurchaseFinalizationScreen({ route }: any) {
-  const navigation = useNavigation();
+export default function PurchaseFinalizationScreen() {
   const { isDark } = useTheme();
   const t = isDark ? tokens.dark : tokens.light;
 
-  const cart: CartItem[] = route?.params?.cart ?? [];
+  const { cart: cartParam } = useLocalSearchParams<{ cart: string }>();
+  const cart: CartItem[] = cartParam ? JSON.parse(cartParam) : [];
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errMsg, setErrMsg] = useState("");
@@ -34,9 +35,6 @@ export default function PurchaseFinalizationScreen({ route }: any) {
 
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
 
   const showSuccess = () => {
     setSuccess(true);
@@ -53,11 +51,7 @@ export default function PurchaseFinalizationScreen({ route }: any) {
         useNativeDriver: true,
       }),
     ]).start();
-    setTimeout(
-      () =>
-        navigation.navigate("NavTabs" as never, { screen: "Jegyek" } as never),
-      2200,
-    );
+    setTimeout(() => router.replace("/(tabs)/main"), 2200);
   };
 
   const handleCheckout = async () => {
@@ -88,53 +82,36 @@ export default function PurchaseFinalizationScreen({ route }: any) {
   if (success) {
     return (
       <View
-        style={{
-          flex: 1,
-          backgroundColor: t.bg,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: t.bg }}
       >
         <StatusBar
           barStyle={isDark ? "light-content" : "dark-content"}
           backgroundColor={t.bg}
         />
-
-        {/* Blob */}
         <View
           pointerEvents="none"
+          className="absolute rounded-full w-[300px] h-[300px] -ml-[150px]"
           style={{
-            position: "absolute",
             top: "20%",
             left: "50%",
-            width: 300,
-            height: 300,
-            borderRadius: 150,
-            marginLeft: -150,
             backgroundColor: isDark
               ? "rgba(74,222,128,0.08)"
               : "rgba(22,163,74,0.05)",
           }}
         />
-
         <Animated.View
+          className="items-center"
           style={{
             transform: [{ scale: successScale }],
             opacity: successOpacity,
-            alignItems: "center",
           }}
         >
           <View
+            className="w-[110px] h-[110px] rounded-full items-center justify-center border-2 mb-7"
             style={{
-              width: 110,
-              height: 110,
-              borderRadius: 55,
               backgroundColor: t.success + "22",
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 2,
               borderColor: t.success + "55",
-              marginBottom: 28,
               shadowColor: t.success,
               shadowOffset: { width: 0, height: 12 },
               shadowOpacity: 0.3,
@@ -142,19 +119,17 @@ export default function PurchaseFinalizationScreen({ route }: any) {
               elevation: 12,
             }}
           >
-            <Text style={{ fontSize: 50, color: t.success }}>✓</Text>
+            <Text className="text-[50px]" style={{ color: t.success }}>
+              ✓
+            </Text>
           </View>
           <Text
-            style={{
-              fontSize: 30,
-              fontWeight: "800",
-              color: t.text,
-              marginBottom: 8,
-            }}
+            className="text-[30px] font-extrabold mb-2"
+            style={{ color: t.text }}
           >
             Sikeres vásárlás!
           </Text>
-          <Text style={{ fontSize: 16, color: t.textSub }}>
+          <Text className="text-base" style={{ color: t.textSub }}>
             {totalItems} db jegy hozzáadva a fiókodhoz
           </Text>
         </Animated.View>
@@ -163,7 +138,7 @@ export default function PurchaseFinalizationScreen({ route }: any) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View className="flex-1" style={{ backgroundColor: t.bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor={t.bg}
@@ -172,62 +147,43 @@ export default function PurchaseFinalizationScreen({ route }: any) {
       {/* Blob */}
       <View
         pointerEvents="none"
+        className="absolute -top-10 -right-10 w-[220px] h-[220px] rounded-full"
         style={{
-          position: "absolute",
-          top: -40,
-          right: -40,
-          width: 220,
-          height: 220,
-          borderRadius: 110,
           backgroundColor: isDark
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
         }}
       />
 
-      <View
-        style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 }}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ marginBottom: 12 }}
-        >
-          <Text style={{ color: "#7c3aed", fontSize: 15, fontWeight: "600" }}>
+      <View className="px-5 pt-[60px] pb-5">
+        <TouchableOpacity onPress={() => router.back()} className="mb-3">
+          <Text className="text-[#7c3aed] text-[15px] font-semibold">
             ← Vissza
           </Text>
         </TouchableOpacity>
         <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "800",
-            color: t.text,
-            letterSpacing: -0.5,
-          }}
+          className="text-[28px] font-extrabold tracking-[-0.5px]"
+          style={{ color: t.text }}
         >
           Rendelés összesítő
         </Text>
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
+        className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
         {cart.length === 0 ? (
-          <View style={{ alignItems: "center", marginTop: 80, gap: 16 }}>
-            <Text style={{ fontSize: 18, color: t.textSub }}>
+          <View className="items-center mt-20 gap-4">
+            <Text className="text-lg" style={{ color: t.textSub }}>
               A kosarad üres
             </Text>
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                backgroundColor: "#7c3aed",
-                paddingHorizontal: 24,
-                paddingVertical: 14,
-                borderRadius: 16,
-              }}
+              onPress={() => router.back()}
+              className="bg-[#7c3aed] px-6 py-3.5 rounded-2xl"
             >
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
+              <Text className="text-white font-bold text-[15px]">
                 Böngészés
               </Text>
             </TouchableOpacity>
@@ -235,14 +191,8 @@ export default function PurchaseFinalizationScreen({ route }: any) {
         ) : (
           <>
             <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "700",
-                color: t.textMuted,
-                letterSpacing: 2,
-                textTransform: "uppercase",
-                marginBottom: 12,
-              }}
+              className="text-[11px] font-bold tracking-[2px] uppercase mb-3"
+              style={{ color: t.textMuted }}
             >
               Tételek
             </Text>
@@ -250,48 +200,41 @@ export default function PurchaseFinalizationScreen({ route }: any) {
             {cart.map((item) => (
               <View
                 key={item.itemId}
+                className="rounded-[18px] border flex-row overflow-hidden mb-2.5"
                 style={{
-                  backgroundColor: surface,
-                  borderRadius: 18,
-                  borderWidth: 1,
-                  borderColor: surfaceBorder,
-                  flexDirection: "row",
-                  overflow: "hidden",
-                  marginBottom: 10,
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(255,255,255,0.9)",
+                  borderColor: isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.06)",
                 }}
               >
                 <View
+                  className="w-1"
                   style={{
-                    width: 4,
                     backgroundColor: CATEGORY_COLORS[item.type_id] ?? "#7c3aed",
                   }}
                 />
-                <View style={{ flex: 1, padding: 14 }}>
+                <View className="flex-1 p-3.5">
                   <Text
-                    style={{ fontSize: 15, fontWeight: "700", color: t.text }}
+                    className="text-[15px] font-bold"
+                    style={{ color: t.text }}
                   >
                     {item.name}
                   </Text>
-                  <Text
-                    style={{ fontSize: 12, color: t.textSub, marginTop: 3 }}
-                  >
+                  <Text className="text-xs mt-0.5" style={{ color: t.textSub }}>
                     {item.price.toLocaleString("hu-HU")} Ft / db ·{" "}
                     {item.validityDays} nap
                   </Text>
                 </View>
-                <View
-                  style={{
-                    padding: 14,
-                    alignItems: "flex-end",
-                    justifyContent: "center",
-                    gap: 6,
-                  }}
-                >
-                  <Text style={{ fontSize: 12, color: t.textSub }}>
+                <View className="p-3.5 items-end justify-center gap-1.5">
+                  <Text className="text-xs" style={{ color: t.textSub }}>
                     × {item.quantity}
                   </Text>
                   <Text
-                    style={{ fontSize: 15, fontWeight: "700", color: t.text }}
+                    className="text-[15px] font-bold"
+                    style={{ color: t.text }}
                   >
                     {(item.price * item.quantity).toLocaleString("hu-HU")} Ft
                   </Text>
@@ -301,54 +244,40 @@ export default function PurchaseFinalizationScreen({ route }: any) {
 
             {/* Summary card */}
             <View
+              className="rounded-[20px] border p-[18px] mt-2 gap-2.5"
               style={{
-                backgroundColor: surface,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: surfaceBorder,
-                padding: 18,
-                marginTop: 8,
-                gap: 10,
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(255,255,255,0.9)",
+                borderColor: isDark
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.06)",
               }}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={{ fontSize: 14, color: t.textSub }}>
+              <View className="flex-row justify-between">
+                <Text className="text-sm" style={{ color: t.textSub }}>
                   Tételek száma
                 </Text>
                 <Text
-                  style={{ fontSize: 14, color: t.text, fontWeight: "600" }}
+                  className="text-sm font-semibold"
+                  style={{ color: t.text }}
                 >
                   {totalItems} db
                 </Text>
               </View>
               <View
+                className="h-px"
                 style={{
-                  height: 1,
                   backgroundColor: isDark
                     ? "rgba(255,255,255,0.06)"
                     : "rgba(0,0,0,0.05)",
                 }}
               />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: "700", color: t.text }}
-                >
+              <View className="flex-row justify-between items-center">
+                <Text className="text-base font-bold" style={{ color: t.text }}>
                   Összesen
                 </Text>
-                <Text
-                  style={{ fontSize: 22, fontWeight: "800", color: "#7c3aed" }}
-                >
+                <Text className="text-[22px] font-extrabold text-[#7c3aed]">
                   {total.toLocaleString("hu-HU")} Ft
                 </Text>
               </View>
@@ -356,21 +285,19 @@ export default function PurchaseFinalizationScreen({ route }: any) {
 
             {!!errMsg && (
               <View
+                className="rounded-xl p-3.5 mt-3.5 border"
                 style={{
                   backgroundColor: isDark
                     ? "rgba(248,113,113,0.1)"
                     : "rgba(220,38,38,0.07)",
-                  borderRadius: 12,
-                  padding: 14,
-                  marginTop: 14,
-                  borderWidth: 1,
                   borderColor: isDark
                     ? "rgba(248,113,113,0.25)"
                     : "rgba(220,38,38,0.2)",
                 }}
               >
                 <Text
-                  style={{ color: t.danger, fontSize: 13, textAlign: "center" }}
+                  className="text-[13px] text-center"
+                  style={{ color: t.danger }}
                 >
                   {errMsg}
                 </Text>
@@ -381,17 +308,11 @@ export default function PurchaseFinalizationScreen({ route }: any) {
       </ScrollView>
 
       {cart.length > 0 && (
-        <View style={{ position: "absolute", bottom: 24, left: 20, right: 20 }}>
+        <View className="absolute bottom-6 left-5 right-5">
           <TouchableOpacity
+            className="bg-[#7c3aed] rounded-[22px] py-5 px-[26px] flex-row justify-between items-center"
             style={[
               {
-                backgroundColor: "#7c3aed",
-                borderRadius: 22,
-                paddingVertical: 20,
-                paddingHorizontal: 26,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
                 shadowColor: "#7c3aed",
                 shadowOffset: { width: 0, height: 12 },
                 shadowOpacity: 0.45,
@@ -408,14 +329,10 @@ export default function PurchaseFinalizationScreen({ route }: any) {
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Text
-                  style={{ fontSize: 17, fontWeight: "700", color: "#fff" }}
-                >
+                <Text className="text-[17px] font-bold text-white">
                   Fizetés megerősítése
                 </Text>
-                <Text
-                  style={{ fontSize: 17, fontWeight: "800", color: "#fff" }}
-                >
+                <Text className="text-[17px] font-extrabold text-white">
                   {total.toLocaleString("hu-HU")} Ft
                 </Text>
               </>

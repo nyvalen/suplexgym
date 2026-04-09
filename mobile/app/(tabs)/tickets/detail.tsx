@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useTheme, tokens } from "../theme/ThemeContext";
+import { useTheme, tokens } from "../../theme/ThemeContext";
 
 const { width } = Dimensions.get("window");
 const QR_SIZE = width - 80;
@@ -69,11 +69,8 @@ export default function TicketsDetailsScreen({ route }: any) {
     ]).start();
   }, []);
 
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View className="flex-1" style={{ backgroundColor: t.bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -83,13 +80,8 @@ export default function TicketsDetailsScreen({ route }: any) {
       {/* Blob */}
       <View
         pointerEvents="none"
+        className="absolute -top-[30px] -right-[30px] w-[200px] h-[200px] rounded-full"
         style={{
-          position: "absolute",
-          top: -30,
-          right: -30,
-          width: 200,
-          height: 200,
-          borderRadius: 100,
           backgroundColor: isDark
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
@@ -97,36 +89,27 @@ export default function TicketsDetailsScreen({ route }: any) {
       />
 
       {/* Header */}
-      <View
-        style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16 }}
-      >
+      <View className="px-5 pt-[60px] pb-4">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ marginBottom: 10 }}
+          className="mb-2.5"
           activeOpacity={0.7}
         >
-          <Text style={{ color: "#7c3aed", fontSize: 15, fontWeight: "600" }}>
+          <Text className="text-[#7c3aed] text-[15px] font-semibold">
             ← Vissza
           </Text>
         </TouchableOpacity>
         <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "800",
-            color: t.text,
-            letterSpacing: -0.5,
-          }}
+          className="text-[28px] font-extrabold tracking-[-0.5px]"
+          style={{ color: t.text }}
         >
           Belépőjegy
         </Text>
       </View>
 
       <Animated.View
-        style={{
-          flex: 1,
-          opacity: fadeIn,
-          transform: [{ translateY: slideUp }],
-        }}
+        className="flex-1"
+        style={{ opacity: fadeIn, transform: [{ translateY: slideUp }] }}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -134,106 +117,69 @@ export default function TicketsDetailsScreen({ route }: any) {
         >
           {/* Ticket card */}
           <View
+            className="mx-5 rounded-[24px] border overflow-hidden items-center pb-6"
             style={{
-              marginHorizontal: 20,
-              backgroundColor: surface,
-              borderRadius: 24,
-              borderWidth: 1,
-              borderColor: surfaceBorder,
-              overflow: "hidden",
-              alignItems: "center",
-              paddingBottom: 24,
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(255,255,255,0.9)",
+              borderColor: isDark
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(0,0,0,0.06)",
             }}
           >
             {/* Color top strip */}
             <View
-              style={{ width: "100%", height: 4, backgroundColor: statusColor }}
+              className="w-full h-1"
+              style={{ backgroundColor: statusColor }}
             />
-            {/* Purple accent below strip */}
             <View
-              style={{
-                width: "100%",
-                height: 2,
-                backgroundColor: "rgba(124,58,237,0.3)",
-                marginBottom: 20,
-              }}
+              className="w-full h-0.5 mb-5"
+              style={{ backgroundColor: "rgba(124,58,237,0.3)" }}
             />
 
             <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "800",
-                color: t.textMuted,
-                letterSpacing: 3,
-                marginBottom: 4,
-              }}
+              className="text-[11px] font-extrabold tracking-[3px] mb-1"
+              style={{ color: t.textMuted }}
             >
               SUPLEX GYM
             </Text>
             <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "800",
-                color: t.text,
-                letterSpacing: -0.5,
-                marginBottom: 14,
-                textAlign: "center",
-                paddingHorizontal: 20,
-              }}
+              className="text-[22px] font-extrabold tracking-[-0.5px] mb-3.5 text-center px-5"
+              style={{ color: t.text }}
             >
               {article.itemName}
             </Text>
 
             {/* Status chip */}
             <View
+              className="flex-row items-center gap-2 px-3.5 py-2 rounded-[20px] mb-[18px] border"
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                borderRadius: 20,
                 backgroundColor: statusColor + "18",
-                borderWidth: 1,
                 borderColor: statusColor + "44",
-                marginBottom: 18,
               }}
             >
               <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: statusColor,
-                }}
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: statusColor }}
               />
               <Text
-                style={{ fontSize: 13, fontWeight: "700", color: statusColor }}
+                className="text-[13px] font-bold"
+                style={{ color: statusColor }}
               >
                 {expired ? "Lejárt" : `${days} nap van hátra`}
               </Text>
             </View>
 
             {/* Perforations */}
-            <View
-              style={{
-                flexDirection: "row",
-                width: "100%",
-                justifyContent: "center",
-                marginBottom: 20,
-                gap: 5,
-              }}
-            >
+            <View className="flex-row w-full justify-center mb-5 gap-[5px]">
               {Array.from({ length: 20 }).map((_, i) => (
                 <View
                   key={i}
+                  className="w-2.5 h-0.5 rounded-sm"
                   style={{
-                    width: 10,
-                    height: 2,
                     backgroundColor: isDark
                       ? "rgba(255,255,255,0.1)"
                       : "rgba(0,0,0,0.08)",
-                    borderRadius: 1,
                   }}
                 />
               ))}
@@ -242,15 +188,10 @@ export default function TicketsDetailsScreen({ route }: any) {
             {/* QR code */}
             {article.qrCodeBase64 ? (
               <View
+                className="bg-white rounded-[20px] overflow-hidden items-center justify-center border-2"
                 style={{
                   width: QR_SIZE,
                   height: QR_SIZE,
-                  backgroundColor: "#fff",
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 2,
                   borderColor: "rgba(124,58,237,0.3)",
                 }}
               >
@@ -265,24 +206,10 @@ export default function TicketsDetailsScreen({ route }: any) {
                   resizeMode="contain"
                 />
                 {expired && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: "rgba(0,0,0,0.55)",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 18,
-                    }}
-                  >
+                  <View className="absolute w-full h-full items-center justify-center rounded-[18px] bg-black/55">
                     <Text
-                      style={{
-                        fontSize: 30,
-                        fontWeight: "900",
-                        color: t.danger,
-                        letterSpacing: 4,
-                      }}
+                      className="text-[30px] font-black tracking-[4px]"
+                      style={{ color: t.danger }}
                     >
                       LEJÁRT
                     </Text>
@@ -291,16 +218,13 @@ export default function TicketsDetailsScreen({ route }: any) {
               </View>
             ) : (
               <View
+                className="rounded-[20px] items-center justify-center border"
                 style={{
                   width: QR_SIZE,
                   height: QR_SIZE,
                   backgroundColor: isDark
                     ? "rgba(255,255,255,0.05)"
                     : "rgba(0,0,0,0.03)",
-                  borderRadius: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
                   borderColor: isDark
                     ? "rgba(255,255,255,0.08)"
                     : "rgba(0,0,0,0.06)",
@@ -311,12 +235,8 @@ export default function TicketsDetailsScreen({ route }: any) {
             )}
 
             <Text
-              style={{
-                fontSize: 12,
-                color: t.textMuted,
-                marginTop: 16,
-                letterSpacing: 0.5,
-              }}
+              className="text-xs mt-4 tracking-[0.5px]"
+              style={{ color: t.textMuted }}
             >
               Mutasd be a belépéshez
             </Text>
@@ -324,14 +244,14 @@ export default function TicketsDetailsScreen({ route }: any) {
 
           {/* Details card */}
           <View
+            className="mx-5 mt-3.5 rounded-[18px] border p-[18px]"
             style={{
-              marginHorizontal: 20,
-              marginTop: 14,
-              backgroundColor: surface,
-              borderRadius: 18,
-              borderWidth: 1,
-              borderColor: surfaceBorder,
-              padding: 18,
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(255,255,255,0.9)",
+              borderColor: isDark
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(0,0,0,0.06)",
             }}
           >
             {[
@@ -349,39 +269,24 @@ export default function TicketsDetailsScreen({ route }: any) {
               <View key={row.label}>
                 {i > 0 && (
                   <View
+                    className="h-px"
                     style={{
-                      height: 1,
                       backgroundColor: isDark
                         ? "rgba(255,255,255,0.06)"
                         : "rgba(0,0,0,0.05)",
                     }}
                   />
                 )}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    paddingVertical: 10,
-                  }}
-                >
+                <View className="flex-row justify-between py-2.5">
                   <Text
-                    style={{
-                      fontSize: 13,
-                      color: t.textMuted,
-                      fontWeight: "600",
-                    }}
+                    className="text-[13px] font-semibold"
+                    style={{ color: t.textMuted }}
                   >
                     {row.label}
                   </Text>
                   <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: "600",
-                      color: row.color,
-                      textAlign: "right",
-                      flex: 1,
-                      marginLeft: 12,
-                    }}
+                    className="text-[13px] font-semibold text-right flex-1 ml-3"
+                    style={{ color: row.color }}
                   >
                     {row.value}
                   </Text>

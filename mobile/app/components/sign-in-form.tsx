@@ -12,7 +12,7 @@ import { Text } from "@/app/components/ui/text";
 import * as React from "react";
 import { type TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { api_endpoints } from "@/app/utils/api";
+import { ENDPOINTS } from "@/app/utils/auth";
 import { saveTokens } from "@/app/utils/auth";
 
 export function SignInForm() {
@@ -29,7 +29,7 @@ export function SignInForm() {
   const handleSubmit = async () => {
     setError("");
     try {
-      const response = await fetch(api_endpoints.login, {
+      const response = await fetch(ENDPOINTS.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

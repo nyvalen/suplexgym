@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://10.224.48.186:5103";
+  process.env.EXPO_PUBLIC_API_URL || "http://10.224.48.201:5103";
 
 export const ENDPOINTS = {
   login: `${API_BASE_URL}/api/auth/login`,

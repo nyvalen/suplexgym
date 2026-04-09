@@ -10,9 +10,9 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { authFetch, ENDPOINTS } from "../utils/auth";
 import { useTheme, tokens } from "../theme/ThemeContext";
+import { router } from "expo-router";
 
 interface TicketItem {
   id: number;
@@ -55,9 +55,6 @@ const CATEGORY_COLORS: Record<Category, string> = {
 function CategoryChip({ cat, active, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
   const color = CATEGORY_COLORS[cat as Category];
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
 
   const press = () => {
     Animated.sequence([
@@ -76,23 +73,24 @@ function CategoryChip({ cat, active, onPress, isDark }: any) {
       <TouchableOpacity
         onPress={press}
         activeOpacity={0.85}
+        className="px-4 py-[9px] rounded-[22px] border-2"
         style={{
-          paddingHorizontal: 16,
-          paddingVertical: 9,
-          borderRadius: 22,
-          borderWidth: 1.5,
-          backgroundColor: active ? color : surface,
-          borderColor: active ? color : surfaceBorder,
+          backgroundColor: active
+            ? color
+            : isDark
+              ? "rgba(255,255,255,0.05)"
+              : "rgba(0,0,0,0.03)",
+          borderColor: active
+            ? color
+            : isDark
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(0,0,0,0.08)",
         }}
       >
-        {/* Fix: explicit minWidth prevents text from being clipped on "Összes" */}
         <Text
           numberOfLines={1}
-          style={{
-            fontSize: 13,
-            fontWeight: "400",
-            color: active ? "#fff" : textSub,
-          }}
+          className="text-[13px] font-normal"
+          style={{ color: active ? "#fff" : isDark ? "#a1a1aa" : "#52525b" }}
         >
           {CATEGORY_LABELS[cat as Category]}
         </Text>
@@ -104,117 +102,67 @@ function CategoryChip({ cat, active, onPress, isDark }: any) {
 function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
   const cat: Category = TYPE_MAP[item.type_id] ?? "all";
   const color = CATEGORY_COLORS[cat];
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const textPrimary = isDark ? "#fafafa" : "#09090b";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
-  const textMuted = isDark ? "#71717a" : "#a1a1aa";
 
   return (
     <View
+      className="rounded-[20px] border flex-row overflow-hidden"
       style={{
-        backgroundColor: surface,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: surfaceBorder,
-        flexDirection: "row",
-        overflow: "hidden",
+        backgroundColor: isDark
+          ? "rgba(255,255,255,0.05)"
+          : "rgba(255,255,255,0.9)",
+        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
       }}
     >
       {/* Color accent strip */}
-      <View style={{ width: 4, backgroundColor: color }} />
-      <View style={{ flex: 1, padding: 16, gap: 6 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+      <View className="w-1" style={{ backgroundColor: color }} />
+      <View className="flex-1 p-4 gap-1.5">
+        <View className="flex-row justify-between items-center">
           <View
-            style={{
-              backgroundColor: color + "22",
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: color + "44",
-            }}
+            className="px-2 py-1 rounded-lg border"
+            style={{ backgroundColor: color + "22", borderColor: color + "44" }}
           >
             <Text
-              style={{
-                fontSize: 10,
-                fontWeight: "800",
-                color,
-                letterSpacing: 0.5,
-              }}
+              className="text-[10px] font-extrabold tracking-[0.5px]"
+              style={{ color }}
             >
               {CATEGORY_LABELS[cat].toUpperCase()}
             </Text>
           </View>
-          <Text style={{ fontSize: 17, fontWeight: "800", color: textPrimary }}>
+          <Text
+            className={`text-[17px] font-extrabold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+          >
             {item.price.toLocaleString("hu-HU")} Ft
           </Text>
         </View>
 
-        <Text style={{ fontSize: 16, fontWeight: "700", color: textPrimary }}>
+        <Text
+          className={`text-base font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+        >
           {item.name}
         </Text>
         <Text
-          style={{ fontSize: 13, color: textSub, lineHeight: 18 }}
+          className={`text-[13px] leading-[18px] ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           numberOfLines={2}
         >
           {item.description || `Érvényes ${item.validityDays} napig`}
         </Text>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: 4,
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <Text style={{ fontSize: 12, color: textMuted }}>
-              ⏱ {item.validityDays} nap
-            </Text>
-          </View>
+        <View className="flex-row justify-between items-center mt-1">
+          <Text
+            className={`text-xs ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+          >
+            ⏱ {item.validityDays} nap
+          </Text>
           <TouchableOpacity
             onPress={onAdd}
             disabled={adding}
             activeOpacity={0.85}
-            style={[
-              {
-                width: 42,
-                height: 42,
-                borderRadius: 13,
-                backgroundColor: color,
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-              },
-              adding && { opacity: 0.6 },
-            ]}
+            className="w-[42px] h-[42px] rounded-[13px] items-center justify-center relative"
+            style={[{ backgroundColor: color }, adding && { opacity: 0.6 }]}
           >
             {qty > 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: -7,
-                  right: -7,
-                  backgroundColor: "#ef4444",
-                  width: 19,
-                  height: 19,
-                  borderRadius: 9.5,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 1,
-                }}
-              >
-                <Text
-                  style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}
-                >
+              <View className="absolute -top-[7px] -right-[7px] bg-red-500 w-[19px] h-[19px] rounded-[9.5px] items-center justify-center z-10">
+                <Text className="text-white text-[10px] font-extrabold">
                   {qty}
                 </Text>
               </View>
@@ -222,14 +170,7 @@ function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
             {adding ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  fontWeight: "300",
-                  lineHeight: 28,
-                }}
-              >
+              <Text className="text-white text-[24px] font-light leading-7">
                 +
               </Text>
             )}
@@ -259,76 +200,34 @@ function CartBar({ cart, onCheckout, isDark }: any) {
 
   return (
     <Animated.View
-      style={[
-        {
-          position: "absolute",
-          bottom: 24,
-          left: 20,
-          right: 20,
-          backgroundColor: "#7c3aed",
-          borderRadius: 22,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingVertical: 18,
-          paddingHorizontal: 22,
-          shadowColor: "#7c3aed",
-          shadowOffset: { width: 0, height: 12 },
-          shadowOpacity: 0.5,
-          shadowRadius: 24,
-          elevation: 16,
-        },
-        { transform: [{ translateY }] },
-      ]}
+      className="absolute bottom-6 left-5 right-5 bg-[#7c3aed] rounded-[22px] flex-row items-center justify-between py-[18px] px-[22px]"
+      style={{
+        shadowColor: "#7c3aed",
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.5,
+        shadowRadius: 24,
+        elevation: 16,
+        transform: [{ translateY }],
+      }}
       pointerEvents={cart.length > 0 ? "auto" : "none"}
     >
       <View>
-        <Text
-          style={{
-            fontSize: 11,
-            color: "rgba(255,255,255,0.6)",
-            fontWeight: "600",
-            letterSpacing: 1,
-          }}
-        >
+        <Text className="text-[11px] text-white/60 font-semibold tracking-[1px]">
           KOSÁR ÖSSZESEN
         </Text>
-        <Text style={{ fontSize: 21, fontWeight: "800", color: "#fff" }}>
+        <Text className="text-[21px] font-extrabold text-white">
           {total.toLocaleString("hu-HU")} Ft
         </Text>
       </View>
       <TouchableOpacity
         onPress={onCheckout}
-        style={{
-          backgroundColor: "rgba(255,255,255,0.18)",
-          borderRadius: 14,
-          paddingHorizontal: 18,
-          paddingVertical: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 8,
-          borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.25)",
-        }}
+        className="bg-white/20 rounded-xl px-[18px] py-3 flex-row items-center gap-2 border border-white/25"
         activeOpacity={0.85}
       >
-        <View
-          style={{
-            backgroundColor: "#fff",
-            width: 24,
-            height: 24,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "#7c3aed", fontSize: 12, fontWeight: "800" }}>
-            {count}
-          </Text>
+        <View className="bg-white w-6 h-6 rounded-full items-center justify-center">
+          <Text className="text-[#7c3aed] text-xs font-extrabold">{count}</Text>
         </View>
-        <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
-          Fizetés →
-        </Text>
+        <Text className="text-white text-[15px] font-bold">Fizetés →</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -341,15 +240,7 @@ export default function PurchaseTicketsScreen() {
   const [category, setCategory] = useState<Category>("all");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [adding, setAdding] = useState<Record<number, boolean>>({});
-  const navigation = useNavigation();
   const { isDark } = useTheme();
-
-  const bg = isDark ? "#09090b" : "#fafafa";
-  const inputBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.9)";
-  const inputBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const textPrimary = isDark ? "#fafafa" : "#09090b";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
-  const textMuted = isDark ? "#71717a" : "#a1a1aa";
 
   useEffect(() => {
     authFetch(ENDPOINTS.items)
@@ -400,15 +291,16 @@ export default function PurchaseTicketsScreen() {
   const filtered = items.filter((item) => {
     const catMatch = category === "all" || TYPE_MAP[item.type_id] === category;
     const q = search.toLowerCase();
-    const srch =
-      !q ||
-      item.name.toLowerCase().includes(q) ||
-      (item.description ?? "").toLowerCase().includes(q);
-    return catMatch && srch;
+    return (
+      catMatch &&
+      (!q ||
+        item.name.toLowerCase().includes(q) ||
+        (item.description ?? "").toLowerCase().includes(q))
+    );
   });
 
   return (
-    <View style={{ flex: 1, backgroundColor: bg }}>
+    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -418,67 +310,53 @@ export default function PurchaseTicketsScreen() {
       {/* Purple blob */}
       <View
         pointerEvents="none"
+        className="absolute -top-10 -right-10 w-[220px] h-[220px] rounded-full"
         style={{
-          position: "absolute",
-          top: -40,
-          right: -40,
-          width: 220,
-          height: 220,
-          borderRadius: 110,
           backgroundColor: isDark
             ? "rgba(124,58,237,0.12)"
             : "rgba(124,58,237,0.06)",
         }}
       />
 
-      <View
-        style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 12 }}
-      >
+      <View className="px-5 pt-16 pb-3">
         <Text
-          style={{
-            fontSize: 30,
-            fontWeight: "800",
-            color: textPrimary,
-            letterSpacing: -0.5,
-          }}
+          className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
           Jegyvásárlás
         </Text>
-        <Text style={{ fontSize: 14, color: textSub, marginTop: 3 }}>
+        <Text
+          className={`text-sm mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+        >
           Válassz bérletet vagy belépőt
         </Text>
       </View>
 
       {/* Search bar */}
-      <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
+      <View className="px-5 pb-3">
         <View
+          className="rounded-2xl px-4 py-3.5 flex-row items-center gap-2.5 border"
           style={{
-            backgroundColor: inputBg,
-            borderWidth: 1,
-            borderColor: inputBorder,
-            borderRadius: 16,
-            paddingHorizontal: 16,
-            paddingVertical: 13,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
+            backgroundColor: isDark
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.9)",
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
           }}
         >
           <TextInput
-            style={{ flex: 1, color: textPrimary, fontSize: 15 }}
+            className={`flex-1 text-[15px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
             placeholder="Keresés..."
-            placeholderTextColor={textMuted}
+            placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
             value={search}
             onChangeText={setSearch}
           />
         </View>
       </View>
 
-      {/* Category chips — fixed with proper flex/shrink */}
+      {/* Category chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0, marginBottom: 14 }}
+        className="flex-grow-0 mb-3.5"
         contentContainerStyle={{
           paddingHorizontal: 20,
           gap: 8,
@@ -498,7 +376,7 @@ export default function PurchaseTicketsScreen() {
       </ScrollView>
 
       {loading ? (
-        <ActivityIndicator color="#7c3aed" style={{ flex: 1 }} />
+        <ActivityIndicator color="#7c3aed" className="flex-1" />
       ) : (
         <FlatList
           data={filtered}
@@ -520,12 +398,7 @@ export default function PurchaseTicketsScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <Text
-              style={{
-                textAlign: "center",
-                color: textSub,
-                marginTop: 60,
-                fontSize: 15,
-              }}
+              className={`text-center mt-[60px] text-[15px] ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
               Nincs találat
             </Text>
@@ -538,10 +411,10 @@ export default function PurchaseTicketsScreen() {
         isDark={isDark}
         onCheckout={() =>
           cart.length > 0 &&
-          navigation.navigate(
-            "PurchaseFinalization" as never,
-            { cart } as never,
-          )
+          router.push({
+            pathname: "/(tabs)/purchase-finalization",
+            params: { cart: JSON.stringify(cart) },
+          })
         }
       />
     </View>

@@ -14,11 +14,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
 import { useLanguage } from "../i18n/LanguageContext";
 import { Language } from "../i18n";
-import { api_endpoints } from "../config/api";
+import { ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
+import { router } from "expo-router";
 
 interface UserProfile {
   name: string;
@@ -35,7 +35,6 @@ interface BillingAddress {
 }
 
 export default function ProfileScreen() {
-  const navigation = useNavigation();
   const { locale, setLocale } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
 
@@ -70,7 +69,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     (async () => {
       const token = await AsyncStorage.getItem("accessToken");
-      const res = await fetch(api_endpoints.user, {
+      const res = await fetch(ENDPOINTS.user, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -97,7 +96,7 @@ export default function ProfileScreen() {
     setProfileLoading(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
-      const res = await fetch(api_endpoints.user, {
+      const res = await fetch(ENDPOINTS.user, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +118,7 @@ export default function ProfileScreen() {
     setPwLoading(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
-      const res = await fetch(api_endpoints.password, {
+      const res = await fetch(ENDPOINTS.password, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +143,7 @@ export default function ProfileScreen() {
     setBillingLoading(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
-      await fetch(api_endpoints.billingaddress, {
+      await fetch(ENDPOINTS.billing, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -168,29 +167,21 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("accessToken");
-    navigation.navigate("Welcome" as never);
+    router.push("/");
   };
 
-  const bg = isDark ? "#09090b" : "#fafafa";
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const inputBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)";
-  const inputBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const textPrimary = isDark ? "#fafafa" : "#09090b";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
-  const textMuted = isDark ? "#71717a" : "#a1a1aa";
+  const inputStyle = {
+    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)",
+    borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+  };
 
   const ActionButton = ({ label, onPress, loading: l, danger }: any) => (
     <TouchableOpacity
       onPress={onPress}
       disabled={l}
       activeOpacity={0.75}
+      className="rounded-2xl py-3.5 items-center mt-3.5 border"
       style={{
-        borderRadius: 16,
-        paddingVertical: 14,
-        alignItems: "center",
-        marginTop: 14,
-        borderWidth: 1,
         backgroundColor: danger
           ? isDark
             ? "rgba(248,113,113,0.1)"
@@ -214,10 +205,8 @@ export default function ProfileScreen() {
         />
       ) : (
         <Text
+          className="text-sm font-bold tracking-[0.3px]"
           style={{
-            fontSize: 14,
-            fontWeight: "700",
-            letterSpacing: 0.3,
             color: danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed",
           }}
         >
@@ -229,13 +218,12 @@ export default function ProfileScreen() {
 
   const Card = ({ children }: { children: React.ReactNode }) => (
     <View
+      className="rounded-[20px] border p-5 mb-4"
       style={{
-        backgroundColor: surface,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: surfaceBorder,
-        padding: 20,
-        marginBottom: 16,
+        backgroundColor: isDark
+          ? "rgba(255,255,255,0.05)"
+          : "rgba(255,255,255,0.9)",
+        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
       }}
     >
       {children}
@@ -243,66 +231,32 @@ export default function ProfileScreen() {
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <Text
-      style={{
-        fontSize: 11,
-        fontWeight: "800",
-        color: "#7c3aed",
-        letterSpacing: 2,
-        textTransform: "uppercase",
-        marginBottom: 16,
-      }}
-    >
+    <Text className="text-[11px] font-extrabold text-[#7c3aed] tracking-[2px] uppercase mb-4">
       {title}
     </Text>
   );
 
   const FieldLabel = ({ label }: { label: string }) => (
     <Text
-      style={{
-        fontSize: 11,
-        fontWeight: "600",
-        letterSpacing: 1,
-        textTransform: "uppercase",
-        marginBottom: 6,
-        marginTop: 10,
-        color: textSub,
-      }}
+      className={`text-[11px] font-semibold tracking-[1px] uppercase mb-1.5 mt-2.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
     >
       {label}
     </Text>
   );
 
-  const inputStyle = {
-    backgroundColor: inputBg,
-    borderWidth: 1,
-    borderColor: inputBorder,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: textPrimary,
-    marginBottom: 4,
-  };
-
   return (
-    <View style={{ flex: 1, backgroundColor: bg }}>
+    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
         translucent
       />
 
-      {/* Blobs */}
+      {/* Blob */}
       <View
         pointerEvents="none"
+        className="absolute -top-10 -left-10 w-60 h-60 rounded-full"
         style={{
-          position: "absolute",
-          top: -40,
-          left: -40,
-          width: 240,
-          height: 240,
-          borderRadius: 120,
           backgroundColor: isDark
             ? "rgba(124,58,237,0.12)"
             : "rgba(124,58,237,0.05)",
@@ -310,59 +264,34 @@ export default function ProfileScreen() {
       />
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <Animated.View className="flex-1" style={{ opacity: fadeAnim }}>
           <ScrollView
             contentContainerStyle={{ padding: 20, paddingTop: 64 }}
             showsVerticalScrollIndicator={false}
           >
             {/* Avatar header */}
-            <View style={{ alignItems: "center", marginBottom: 28 }}>
-              <View
-                style={{
-                  width: 88,
-                  height: 88,
-                  borderRadius: 44,
-                  borderWidth: 2.5,
-                  borderColor: "#7c3aed",
-                  padding: 3,
-                  marginBottom: 14,
-                }}
-              >
+            <View className="items-center mb-7">
+              <View className="w-[88px] h-[88px] rounded-full border-[2.5px] border-[#7c3aed] p-[3px] mb-3.5">
                 <View
-                  style={{
-                    flex: 1,
-                    borderRadius: 41,
-                    backgroundColor: "rgba(124,58,237,0.15)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className="flex-1 rounded-full items-center justify-center"
+                  style={{ backgroundColor: "rgba(124,58,237,0.15)" }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 30,
-                      fontWeight: "800",
-                      color: "#7c3aed",
-                    }}
-                  >
+                  <Text className="text-[30px] font-extrabold text-[#7c3aed]">
                     {profile.name?.charAt(0)?.toUpperCase() || "?"}
                   </Text>
                 </View>
               </View>
               <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  letterSpacing: 0.3,
-                  marginBottom: 4,
-                  color: textPrimary,
-                }}
+                className={`text-xl font-bold tracking-[0.3px] mb-1 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
               >
                 {profile.name || profile.username}
               </Text>
-              <Text style={{ fontSize: 12, color: textSub }}>
+              <Text
+                className={`text-xs ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+              >
                 {profile.email}
               </Text>
             </View>
@@ -371,7 +300,14 @@ export default function ProfileScreen() {
             <Card>
               <SectionTitle title="Megjelenés" />
               {[
-                { label: "Sötét mód", value: isDark, onChange: toggleTheme },
+                {
+                  label: "Sötét mód",
+                  value: isDark,
+                  onChange: () => {
+                    console.log("Dark: ", isDark);
+                    toggleTheme();
+                  },
+                },
                 {
                   label: "Animációk",
                   value: animationsOn,
@@ -380,25 +316,11 @@ export default function ProfileScreen() {
               ].map((row) => (
                 <View
                   key={row.label}
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    backgroundColor: inputBg,
-                    borderWidth: 1,
-                    borderColor: inputBorder,
-                    borderRadius: 14,
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                    marginBottom: 10,
-                  }}
+                  className="flex-row justify-between items-center rounded-xl px-3.5 py-3 mb-2.5 border"
+                  style={inputStyle}
                 >
                   <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "500",
-                      color: textPrimary,
-                    }}
+                    className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                   >
                     {row.label}
                   </Text>
@@ -418,48 +340,43 @@ export default function ProfileScreen() {
                 </View>
               ))}
 
+              {/* Language */}
               <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  backgroundColor: inputBg,
-                  borderWidth: 1,
-                  borderColor: inputBorder,
-                  borderRadius: 14,
-                  paddingHorizontal: 14,
-                  paddingVertical: 10,
-                }}
+                className="flex-row justify-between items-center rounded-xl px-3.5 py-2.5 border"
+                style={inputStyle}
               >
                 <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "500",
-                    color: textPrimary,
-                  }}
+                  className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                 >
                   Nyelv
                 </Text>
-                <View style={{ flexDirection: "row", gap: 8 }}>
+                <View className="flex-row gap-2">
                   {(["en", "hu"] as Language[]).map((lang) => (
                     <TouchableOpacity
                       key={lang}
                       onPress={() => setLocale(lang)}
                       activeOpacity={0.8}
+                      className="px-4 py-2 rounded-full border"
                       style={{
-                        paddingHorizontal: 16,
-                        paddingVertical: 8,
-                        borderRadius: 20,
-                        backgroundColor: locale === lang ? "#7c3aed" : inputBg,
-                        borderWidth: 1,
-                        borderColor: locale === lang ? "#7c3aed" : inputBorder,
+                        backgroundColor:
+                          locale === lang ? "#7c3aed" : "transparent",
+                        borderColor:
+                          locale === lang
+                            ? "#7c3aed"
+                            : isDark
+                              ? "rgba(255,255,255,0.1)"
+                              : "rgba(0,0,0,0.08)",
                       }}
                     >
                       <Text
+                        className="text-xs font-bold"
                         style={{
-                          fontSize: 12,
-                          fontWeight: "700",
-                          color: locale === lang ? "#fff" : textSub,
+                          color:
+                            locale === lang
+                              ? "#fff"
+                              : isDark
+                                ? "#a1a1aa"
+                                : "#52525b",
                         }}
                       >
                         {lang === "en" ? "EN" : "HU"}
@@ -485,9 +402,10 @@ export default function ProfileScreen() {
                     onChangeText={(v) =>
                       setProfile((p) => ({ ...p, [key]: v }))
                     }
+                    className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                     style={inputStyle}
                     placeholder={label}
-                    placeholderTextColor={textMuted}
+                    placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                     keyboardType={key === "email" ? "email-address" : "default"}
                   />
                 </React.Fragment>
@@ -508,18 +426,20 @@ export default function ProfileScreen() {
                 onChangeText={(v) =>
                   setPasswords((p) => ({ ...p, current: v }))
                 }
+                className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                 style={inputStyle}
                 placeholder="••••••••"
-                placeholderTextColor={textMuted}
+                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                 secureTextEntry
               />
               <FieldLabel label="Új Jelszó" />
               <TextInput
                 value={passwords.next}
                 onChangeText={(v) => setPasswords((p) => ({ ...p, next: v }))}
+                className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                 style={inputStyle}
                 placeholder="••••••••"
-                placeholderTextColor={textMuted}
+                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                 secureTextEntry
               />
               <ActionButton
@@ -549,9 +469,10 @@ export default function ProfileScreen() {
                     onChangeText={(v) =>
                       setBilling((b) => ({ ...b, [field]: v }))
                     }
+                    className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                     style={inputStyle}
                     placeholder={label}
-                    placeholderTextColor={textMuted}
+                    placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                     keyboardType={kb}
                   />
                 </React.Fragment>
@@ -564,7 +485,7 @@ export default function ProfileScreen() {
             </Card>
 
             <ActionButton label="Kijelentkezés" onPress={handleLogout} danger />
-            <View style={{ height: 20 }} />
+            <View className="h-5" />
           </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>

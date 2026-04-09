@@ -9,9 +9,9 @@ import {
   StatusBar,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { api_endpoints } from "../config/api";
-import { useTheme } from "../theme/ThemeContext";
+import { ENDPOINTS } from "@/app/utils/auth";
+import { useTheme } from "../../theme/ThemeContext";
+import { router } from "expo-router";
 
 const FALLBACK =
   "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
@@ -26,7 +26,6 @@ interface NewsItem {
 
 function FeaturedCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
 
   return (
     <TouchableOpacity
@@ -44,77 +43,36 @@ function FeaturedCard({ item, onPress, isDark }: any) {
       }
     >
       <Animated.View
+        className="h-60 rounded-[22px] overflow-hidden mb-2 border"
         style={{
-          height: 240,
-          borderRadius: 22,
-          overflow: "hidden",
-          marginBottom: 8,
-          borderWidth: 1,
-          borderColor: surfaceBorder,
+          borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)",
           transform: [{ scale }],
         }}
       >
         <Image
           source={{ uri: item.imagePath || FALLBACK }}
-          style={{ position: "absolute", width: "100%", height: "100%" }}
+          className="absolute w-full h-full"
           resizeMode="cover"
         />
-        {/* Gradient-like overlay — two layered semi-transparent views */}
+        <View className="absolute inset-0 bg-black/45" />
         <View
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.45)",
-          }}
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(124,58,237,0.15)" }}
         />
-        <View
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(124,58,237,0.15)",
-          }}
-        />
-        <View style={{ flex: 1, justifyContent: "flex-end", padding: 20 }}>
-          <View
-            style={{
-              backgroundColor: "#7c3aed",
-              alignSelf: "flex-start",
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 8,
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 10,
-                fontWeight: "800",
-                letterSpacing: 1.5,
-              }}
-            >
+        <View className="flex-1 justify-end p-5">
+          <View className="bg-[#7c3aed] self-start px-2.5 py-1 rounded-lg mb-2">
+            <Text className="text-white text-[10px] font-extrabold tracking-[1.5px]">
               KIEMELT
             </Text>
           </View>
           <Text
-            style={{
-              fontSize: 22,
-              fontWeight: "800",
-              color: "#fff",
-              lineHeight: 28,
-            }}
+            className="text-[22px] font-extrabold text-white leading-7"
             numberOfLines={2}
           >
             {item.title}
           </Text>
           {item.createdAt && (
-            <Text
-              style={{
-                fontSize: 11,
-                color: "rgba(255,255,255,0.6)",
-                marginTop: 6,
-              }}
-            >
+            <Text className="text-[11px] text-white/60 mt-1.5">
               {new Date(item.createdAt).toLocaleDateString("hu-HU")}
             </Text>
           )}
@@ -126,10 +84,6 @@ function FeaturedCard({ item, onPress, isDark }: any) {
 
 function NewsCard({ item, onPress, isDark }: any) {
   const scale = useRef(new Animated.Value(1)).current;
-  const surface = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.9)";
-  const surfaceBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const textPrimary = isDark ? "#fafafa" : "#09090b";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
 
   return (
     <TouchableOpacity
@@ -147,14 +101,12 @@ function NewsCard({ item, onPress, isDark }: any) {
       }
     >
       <Animated.View
+        className="rounded-[18px] overflow-hidden h-[110px] flex-row border"
         style={{
-          borderRadius: 18,
-          overflow: "hidden",
-          height: 110,
-          flexDirection: "row",
-          borderWidth: 1,
-          borderColor: surfaceBorder,
-          backgroundColor: surface,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.05)"
+            : "rgba(255,255,255,0.9)",
           transform: [{ scale }],
         }}
       >
@@ -163,39 +115,25 @@ function NewsCard({ item, onPress, isDark }: any) {
           style={{ width: 110, height: "100%" }}
           resizeMode="cover"
         />
-        {/* Purple tint on image */}
         <View
-          style={{
-            position: "absolute",
-            width: 110,
-            height: "100%",
-            backgroundColor: "rgba(124,58,237,0.08)",
-          }}
+          className="absolute w-[110px] h-full"
+          style={{ backgroundColor: "rgba(124,58,237,0.08)" }}
         />
-        <View style={{ flex: 1, padding: 14, justifyContent: "space-between" }}>
+        <View className="flex-1 p-3.5 justify-between">
           <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "700",
-              lineHeight: 18,
-              color: textPrimary,
-            }}
+            className={`text-[13px] font-bold leading-[18px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
             numberOfLines={2}
           >
             {item.title}
           </Text>
           <View>
-            <Text style={{ fontSize: 11, color: textSub }} numberOfLines={2}>
+            <Text
+              className={`text-[11px] ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+              numberOfLines={2}
+            >
               {item.content}
             </Text>
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "700",
-                color: "#7c3aed",
-                marginTop: 4,
-              }}
-            >
+            <Text className="text-[11px] font-bold text-[#7c3aed] mt-1">
               Olvasd tovább →
             </Text>
           </View>
@@ -208,11 +146,10 @@ function NewsCard({ item, onPress, isDark }: any) {
 export default function NewsListScreen() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
   const { isDark } = useTheme();
 
   useEffect(() => {
-    fetch(api_endpoints.news)
+    fetch(ENDPOINTS.news)
       .then((r) => (r.ok ? r.json() : []))
       .then(setNews)
       .catch(() => {})
@@ -222,12 +159,8 @@ export default function NewsListScreen() {
   const featured = news[0] ?? null;
   const rest = news.slice(1);
 
-  const bg = isDark ? "#09090b" : "#fafafa";
-  const textPrimary = isDark ? "#fafafa" : "#09090b";
-  const textSub = isDark ? "#a1a1aa" : "#52525b";
-
   return (
-    <View style={{ flex: 1, backgroundColor: bg }}>
+    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -237,50 +170,35 @@ export default function NewsListScreen() {
       {/* Gradient blob */}
       <View
         pointerEvents="none"
+        className="absolute -top-[30px] -right-[30px] w-[200px] h-[200px] rounded-full"
         style={{
-          position: "absolute",
-          top: -30,
-          right: -30,
-          width: 200,
-          height: 200,
-          borderRadius: 100,
           backgroundColor: isDark
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
         }}
       />
 
-      <View
-        style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 16 }}
-      >
+      <View className="px-5 pt-16 pb-4">
         <Text
-          style={{
-            fontSize: 30,
-            fontWeight: "800",
-            letterSpacing: -0.5,
-            color: textPrimary,
-          }}
+          className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
           Hírek
         </Text>
-        <Text style={{ fontSize: 12, marginTop: 2, color: textSub }}>
+        <Text
+          className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+        >
           Suplex Gym értesítők
         </Text>
       </View>
 
       {loading ? (
-        <ActivityIndicator color="#7c3aed" style={{ flex: 1 }} />
+        <ActivityIndicator color="#7c3aed" className="flex-1" />
       ) : news.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-          }}
-        >
-          <Text style={{ fontSize: 48 }}>📰</Text>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: textPrimary }}>
+        <View className="flex-1 items-center justify-center gap-3">
+          <Text className="text-5xl">📰</Text>
+          <Text
+            className={`text-lg font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+          >
             Nincs elérhető hír
           </Text>
         </View>
@@ -292,12 +210,7 @@ export default function NewsListScreen() {
             <NewsCard
               item={item}
               isDark={isDark}
-              onPress={() =>
-                navigation.navigate(
-                  "NewsDetail" as never,
-                  { article: item } as never,
-                )
-              }
+              onPress={() => router.push("/(tabs)/news/[id]")}
             />
           )}
           ListHeaderComponent={
