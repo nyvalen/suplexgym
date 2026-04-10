@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://10.224.48.201:5103";
+  process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.84:5103";
 
 export const ENDPOINTS = {
   login: `${API_BASE_URL}/api/auth/login`,
@@ -24,16 +24,19 @@ export const ENDPOINTS = {
   news: `${API_BASE_URL}/api/news`,
 };
 
+export const AccessTokenKey = "accessToken";
+export const RefreshTokenKey = "refreshToken";
+
 /** Save both tokens after login/register */
 export async function saveTokens(access: string, refresh: string) {
   await AsyncStorage.multiSet([
-    ["accessToken", access],
-    ["refreshToken", refresh],
+    [AccessTokenKey, access],
+    [RefreshTokenKey, refresh],
   ]);
 }
 
 export async function clearTokens() {
-  await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
+  await AsyncStorage.multiRemove([AccessTokenKey, RefreshTokenKey]);
 }
 
 /**
@@ -44,7 +47,7 @@ export async function authFetch(
   url: string,
   options: RequestInit = {},
 ): Promise<Response> {
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await AsyncStorage.getItem(AccessTokenKey);
 
   const doFetch = (t: string) =>
     fetch(url, {

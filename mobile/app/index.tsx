@@ -12,6 +12,7 @@ import { useTheme } from "./theme/ThemeContext";
 import { Dumbbell } from "lucide-react-native";
 import { TabBarContext } from "./context/tab-bar-context";
 import { useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -32,6 +33,16 @@ export default function WelcomeScreen() {
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(40)).current;
+
+  useEffect(() => {
+    const forwardUser = async () => {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (token !== null && token !== "") {
+        router.replace("/(tabs)/main");
+      }
+    };
+    forwardUser();
+  }, []);
 
   useEffect(() => {
     Animated.parallel([

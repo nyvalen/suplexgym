@@ -36,7 +36,7 @@ interface BillingAddress {
 
 export default function ProfileScreen() {
   const { locale, setLocale } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -300,14 +300,6 @@ export default function ProfileScreen() {
             <Card>
               <SectionTitle title="Megjelenés" />
               {[
-                {
-                  label: "Sötét mód",
-                  value: isDark,
-                  onChange: () => {
-                    console.log("Dark: ", isDark);
-                    toggleTheme();
-                  },
-                },
                 {
                   label: "Animációk",
                   value: animationsOn,

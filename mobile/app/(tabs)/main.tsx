@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -91,7 +92,9 @@ export default function MainScreen() {
   return (
     <ScrollView
       className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
-      contentContainerStyle={{ paddingBottom: 32 }}
+      contentContainerStyle={{
+        paddingBottom: Platform.OS === "android" ? 140 : 8,
+      }}
       showsVerticalScrollIndicator={false}
     >
       <StatusBar
@@ -364,18 +367,32 @@ export default function MainScreen() {
                   }}
                 />
                 {h.isOpen ? (
-                  <Text
-                    className="text-[8px] mt-1 font-semibold"
-                    style={{
-                      color: isToday
-                        ? "rgba(255,255,255,0.7)"
-                        : isDark
-                          ? "#71717a"
-                          : "#a1a1aa",
-                    }}
-                  >
-                    {h.open?.slice(0, 5)}
-                  </Text>
+                  <>
+                    <Text
+                      className="text-[8px] mt-1 font-semibold"
+                      style={{
+                        color: isToday
+                          ? "rgba(255,255,255,0.7)"
+                          : isDark
+                            ? "#71717a"
+                            : "#a1a1aa",
+                      }}
+                    >
+                      {h.open?.slice(0, 5)}
+                    </Text>
+                    <Text
+                      className="text-[8px] font-semibold"
+                      style={{
+                        color: isToday
+                          ? "rgba(255,255,255,0.7)"
+                          : isDark
+                            ? "#71717a"
+                            : "#a1a1aa",
+                      }}
+                    >
+                      {h.close?.slice(0, 5)}
+                    </Text>
+                  </>
                 ) : (
                   <Text
                     className="text-[8px] mt-1 font-semibold"
@@ -452,8 +469,7 @@ export default function MainScreen() {
         onPress={() => router.push("/(tabs)/purchase")}
         activeOpacity={0.8}
       >
-        <Text className="text-[32px]">🎟</Text>
-        <View className="flex-1">
+        <View className="flex-1 ml-6">
           <Text
             className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >

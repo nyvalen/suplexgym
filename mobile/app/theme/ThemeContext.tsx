@@ -1,38 +1,23 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-export type ColorScheme = "light" | "dark";
+import { ColorSchemeName, useColorScheme } from "react-native";
 
 interface ThemeContextType {
-  colorScheme: ColorScheme;
-  toggleTheme: () => void;
+  colorScheme: ColorSchemeName;
   isDark: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   colorScheme: "dark",
-  toggleTheme: () => {},
   isDark: true,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [colorScheme, setColorScheme] = useState<ColorScheme>("dark");
-
-  useEffect(() => {
-    AsyncStorage.getItem("colorScheme").then((stored) => {
-      if (stored === "light" || stored === "dark") setColorScheme(stored);
-    });
-  }, []);
-
-  const toggleTheme = () => {
-    const next: ColorScheme = colorScheme === "dark" ? "light" : "dark";
-    setColorScheme(next);
-    AsyncStorage.setItem("colorScheme", next);
-  };
+  const colorScheme = useColorScheme();
 
   return (
     <ThemeContext.Provider
-      value={{ colorScheme, toggleTheme, isDark: colorScheme === "dark" }}
+      value={{ colorScheme, isDark: colorScheme === "dark" }}
     >
       {children}
     </ThemeContext.Provider>

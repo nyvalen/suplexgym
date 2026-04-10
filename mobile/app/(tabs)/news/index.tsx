@@ -210,7 +210,7 @@ export default function NewsListScreen() {
             <NewsCard
               item={item}
               isDark={isDark}
-              onPress={() => router.push("/(tabs)/news/[id]")}
+              onPress={() => router.push("/(tabs)/news/detail")}
             />
           )}
           ListHeaderComponent={

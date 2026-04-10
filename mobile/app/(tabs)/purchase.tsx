@@ -89,7 +89,7 @@ function CategoryChip({ cat, active, onPress, isDark }: any) {
       >
         <Text
           numberOfLines={1}
-          className="text-[13px] font-normal"
+          className="text-[13px] font-normal h-4"
           style={{ color: active ? "#fff" : isDark ? "#a1a1aa" : "#52525b" }}
         >
           {CATEGORY_LABELS[cat as Category]}
@@ -191,7 +191,7 @@ function CartBar({ cart, onCheckout, isDark }: any) {
 
   useEffect(() => {
     Animated.spring(translateY, {
-      toValue: cart.length > 0 ? 0 : 120,
+      toValue: cart.length > 0 ? 0 : 250,
       useNativeDriver: true,
       tension: 80,
       friction: 12,
@@ -200,7 +200,7 @@ function CartBar({ cart, onCheckout, isDark }: any) {
 
   return (
     <Animated.View
-      className="absolute bottom-6 left-5 right-5 bg-[#7c3aed] rounded-[22px] flex-row items-center justify-between py-[18px] px-[22px]"
+      className="absolute ios:bottom-24 android:bottom-32 left-5 right-5 bg-[#7c3aed] rounded-[22px] flex-row items-center justify-between py-[18px] px-[22px]"
       style={{
         shadowColor: "#7c3aed",
         shadowOffset: { width: 0, height: 12 },

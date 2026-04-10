@@ -6,6 +6,7 @@ import { PortalHost } from "@rn-primitives/portal";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { ThemeProvider } from "./theme/ThemeContext";
 import "./global.css";
+import { View } from "react-native";
 
 export default function RootLayout() {
   return (

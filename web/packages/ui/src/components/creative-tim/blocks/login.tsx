@@ -63,8 +63,8 @@ export default function Login({
   }, [isLoggedIn])
 
   return (
-    <div className="grid min-h-screen min-w-screen place-items-center bg-white bg-radial-[at_-200%_50%] from-purple-900 to-80% p-4 dark:bg-zinc-900 dark:from-purple-500 dark:to-70%">
-      <div className="absolute top-4">
+    <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70% p-4">
+      <div className="absolute top-4 left-4">
         <Link
           to="/"
           className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70"
