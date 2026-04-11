@@ -8,17 +8,21 @@ import {
   Animated,
   StatusBar,
 } from "react-native";
-import { useTheme, tokens } from "../../theme/ThemeContext";
-import { router, useLocalSearchParams } from "expo-router";
+import { useTheme, tokens } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
+import { useNewsStore } from "./store";
+import { router } from "expo-router";
 
 const FALLBACK =
   "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
 
 export default function NewsDetailsScreen() {
   const { isDark } = useTheme();
-  const t = isDark ? tokens.dark : tokens.light;
-  const { article: articleParam } = useLocalSearchParams<{ article: string }>();
-  const article = articleParam ? JSON.parse(articleParam) : null;
+  const { t } = useLanguage();
+  const tokenSet = isDark ? tokens.dark : tokens.light;
+
+  // Read from Zustand — no route params needed
+  const article = useNewsStore((s) => s.selectedArticle);
 
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(30)).current;
@@ -39,8 +43,24 @@ export default function NewsDetailsScreen() {
     ]).start();
   }, []);
 
+  if (!article) {
+    return (
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: tokenSet.bg }}
+      >
+        <Text style={{ color: tokenSet.textSub }}>{t("common.error")}</Text>
+        <TouchableOpacity onPress={() => router.back()} className="mt-4">
+          <Text className="text-[#7c3aed] font-semibold">
+            {t("common.back")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1" style={{ backgroundColor: t.bg }}>
+    <View className="flex-1" style={{ backgroundColor: tokenSet.bg }}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
@@ -74,12 +94,11 @@ export default function NewsDetailsScreen() {
       <Animated.View
         className="-mt-7 flex-1 rounded-tl-[28px] rounded-tr-[28px] overflow-hidden"
         style={{
-          backgroundColor: t.bg,
+          backgroundColor: tokenSet.bg,
           opacity: fadeIn,
           transform: [{ translateY: slideUp }],
         }}
       >
-        {/* Purple accent bar */}
         <View className="h-[3px] bg-[#7c3aed] mx-6 rounded-sm mt-[18px]" />
 
         <ScrollView
@@ -92,7 +111,7 @@ export default function NewsDetailsScreen() {
         >
           <Text
             className="text-[26px] font-extrabold tracking-[-0.5px] leading-[34px] mb-2.5"
-            style={{ color: t.text }}
+            style={{ color: tokenSet.text }}
           >
             {article.title}
           </Text>
@@ -110,7 +129,7 @@ export default function NewsDetailsScreen() {
               }}
             >
               <Text className="text-[#8b5cf6] text-xs font-semibold">
-                {new Date(article.createdAt).toLocaleDateString("hu-HU", {
+                {new Date(article.createdAt).toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
@@ -130,7 +149,7 @@ export default function NewsDetailsScreen() {
 
           <Text
             className="text-base leading-7 tracking-[0.1px]"
-            style={{ color: t.textSub }}
+            style={{ color: tokenSet.textSub }}
           >
             {article.content}
           </Text>

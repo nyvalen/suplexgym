@@ -35,7 +35,7 @@ interface BillingAddress {
 }
 
 export default function ProfileScreen() {
-  const { locale, setLocale } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
   const { isDark } = useTheme();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -89,6 +89,9 @@ export default function ProfileScreen() {
           state: data.billingAddress.state ?? "",
         });
       }
+      if (data.settings?.language) {
+        setLocale(data.settings.language as Language);
+      }
     })();
   }, []);
 
@@ -104,10 +107,10 @@ export default function ProfileScreen() {
         },
         body: JSON.stringify(profile),
       });
-      if (res.ok) Alert.alert("✓", "Profil mentve");
-      else Alert.alert("Hiba", "Nem sikerült menteni.");
+      if (res.ok) Alert.alert(t("profile.saved"), t("profile.profileSaved"));
+      else Alert.alert(t("common.error"), t("profile.saveError"));
     } catch {
-      Alert.alert("Hiba", "Hálózati hiba.");
+      Alert.alert(t("common.error"), t("profile.networkError"));
     } finally {
       setProfileLoading(false);
     }
@@ -130,10 +133,17 @@ export default function ProfileScreen() {
         }),
       });
       if (res.ok) {
-        Alert.alert("✓", "Jelszó frissítve");
+        Alert.alert(t("profile.saved"), t("profile.passwordUpdated"));
         setPasswords({ current: "", next: "" });
-      } else Alert.alert("Hiba", "Nem sikerült frissíteni.");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        Alert.alert(
+          t("common.error"),
+          data?.message ?? t("profile.wrongPassword"),
+        );
+      }
     } catch {
+      Alert.alert(t("common.error"), t("profile.networkError"));
     } finally {
       setPwLoading(false);
     }
@@ -158,16 +168,38 @@ export default function ProfileScreen() {
           state: billing.state,
         }),
       });
-      Alert.alert("✓", "Számlázási cím mentve");
+      Alert.alert(t("profile.saved"), t("profile.billingSaved"));
     } catch {
+      Alert.alert(t("common.error"), t("profile.networkError"));
     } finally {
       setBillingLoading(false);
     }
   };
 
+  const saveLanguageToServer = async (lang: Language) => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      await fetch(ENDPOINTS.settings, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          darkMode: isDark,
+          animation: animationsOn,
+          language: lang,
+        }),
+      });
+    } catch {
+      // silently ignore
+    }
+  };
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem("accessToken");
-    router.push("/");
+    await AsyncStorage.removeItem("refreshToken");
+    router.replace("/");
   };
 
   const inputStyle = {
@@ -252,7 +284,6 @@ export default function ProfileScreen() {
         translucent
       />
 
-      {/* Blob */}
       <View
         pointerEvents="none"
         className="absolute -top-10 -left-10 w-60 h-60 rounded-full"
@@ -298,39 +329,30 @@ export default function ProfileScreen() {
 
             {/* Appearance */}
             <Card>
-              <SectionTitle title="Megjelenés" />
-              {[
-                {
-                  label: "Animációk",
-                  value: animationsOn,
-                  onChange: setAnimationsOn,
-                },
-              ].map((row) => (
-                <View
-                  key={row.label}
-                  className="flex-row justify-between items-center rounded-xl px-3.5 py-3 mb-2.5 border"
-                  style={inputStyle}
+              <SectionTitle title={t("profile.appearance")} />
+              <View
+                className="flex-row justify-between items-center rounded-xl px-3.5 py-3 mb-2.5 border"
+                style={inputStyle}
+              >
+                <Text
+                  className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                 >
-                  <Text
-                    className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                  >
-                    {row.label}
-                  </Text>
-                  <Switch
-                    value={row.value}
-                    onValueChange={row.onChange}
-                    trackColor={{
-                      false: isDark
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.1)",
-                      true: "rgba(124,58,237,0.5)",
-                    }}
-                    thumbColor={
-                      row.value ? "#7c3aed" : isDark ? "#71717a" : "#a1a1aa"
-                    }
-                  />
-                </View>
-              ))}
+                  {t("profile.animations")}
+                </Text>
+                <Switch
+                  value={animationsOn}
+                  onValueChange={setAnimationsOn}
+                  trackColor={{
+                    false: isDark
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.1)",
+                    true: "rgba(124,58,237,0.5)",
+                  }}
+                  thumbColor={
+                    animationsOn ? "#7c3aed" : isDark ? "#71717a" : "#a1a1aa"
+                  }
+                />
+              </View>
 
               {/* Language */}
               <View
@@ -340,13 +362,16 @@ export default function ProfileScreen() {
                 <Text
                   className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
                 >
-                  Nyelv
+                  {t("profile.language")}
                 </Text>
                 <View className="flex-row gap-2">
                   {(["en", "hu"] as Language[]).map((lang) => (
                     <TouchableOpacity
                       key={lang}
-                      onPress={() => setLocale(lang)}
+                      onPress={() => {
+                        setLocale(lang);
+                        saveLanguageToServer(lang);
+                      }}
                       activeOpacity={0.8}
                       className="px-4 py-2 rounded-full border"
                       style={{
@@ -381,11 +406,11 @@ export default function ProfileScreen() {
 
             {/* Personal Info */}
             <Card>
-              <SectionTitle title="Személyes Adatok" />
+              <SectionTitle title={t("profile.personalInfo")} />
               {[
-                ["Teljes Név", "name"],
-                ["Felhasználónév", "username"],
-                ["E-mail", "email"],
+                [t("profile.fullName"), "name"],
+                [t("profile.username"), "username"],
+                [t("profile.email"), "email"],
               ].map(([label, key]) => (
                 <React.Fragment key={key}>
                   <FieldLabel label={label} />
@@ -403,7 +428,7 @@ export default function ProfileScreen() {
                 </React.Fragment>
               ))}
               <ActionButton
-                label="Módosítások Mentése"
+                label={t("profile.saveChanges")}
                 onPress={saveProfile}
                 loading={profileLoading}
               />
@@ -411,8 +436,8 @@ export default function ProfileScreen() {
 
             {/* Password */}
             <Card>
-              <SectionTitle title="Jelszó Módosítása" />
-              <FieldLabel label="Jelenlegi Jelszó" />
+              <SectionTitle title={t("profile.changePassword")} />
+              <FieldLabel label={t("profile.currentPassword")} />
               <TextInput
                 value={passwords.current}
                 onChangeText={(v) =>
@@ -424,7 +449,7 @@ export default function ProfileScreen() {
                 placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                 secureTextEntry
               />
-              <FieldLabel label="Új Jelszó" />
+              <FieldLabel label={t("profile.newPassword")} />
               <TextInput
                 value={passwords.next}
                 onChangeText={(v) => setPasswords((p) => ({ ...p, next: v }))}
@@ -435,7 +460,7 @@ export default function ProfileScreen() {
                 secureTextEntry
               />
               <ActionButton
-                label="Jelszó Frissítése"
+                label={t("profile.updatePassword")}
                 onPress={savePassword}
                 loading={pwLoading}
               />
@@ -443,15 +468,15 @@ export default function ProfileScreen() {
 
             {/* Billing */}
             <Card>
-              <SectionTitle title="Számlázási Cím" />
+              <SectionTitle title={t("profile.billingAddress")} />
               {(
                 [
-                  ["Irányítószám", "zipCode", "numeric"],
-                  ["Név", "name", "default"],
-                  ["Város", "city", "default"],
-                  ["Utca, Házszám", "streetAddress", "default"],
-                  ["Emelet, Ajtó", "apartmentNumber", "default"],
-                  ["Megye", "state", "default"],
+                  [t("profile.zipCode"), "zipCode", "numeric"],
+                  [t("profile.name"), "name", "default"],
+                  [t("profile.city"), "city", "default"],
+                  [t("profile.street"), "streetAddress", "default"],
+                  [t("profile.apartment"), "apartmentNumber", "default"],
+                  [t("profile.state"), "state", "default"],
                 ] as [string, keyof BillingAddress, any][]
               ).map(([label, field, kb]) => (
                 <React.Fragment key={field}>
@@ -470,13 +495,17 @@ export default function ProfileScreen() {
                 </React.Fragment>
               ))}
               <ActionButton
-                label="Számlázási Cím Mentése"
+                label={t("profile.saveBilling")}
                 onPress={saveBilling}
                 loading={billingLoading}
               />
             </Card>
 
-            <ActionButton label="Kijelentkezés" onPress={handleLogout} danger />
+            <ActionButton
+              label={t("profile.logout")}
+              onPress={handleLogout}
+              danger
+            />
             <View className="h-5" />
           </ScrollView>
         </Animated.View>

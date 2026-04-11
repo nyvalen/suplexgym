@@ -11,7 +11,9 @@ import {
   ScrollView,
 } from "react-native";
 import { authFetch, ENDPOINTS } from "../utils/auth";
-import { useTheme, tokens } from "../theme/ThemeContext";
+import { useTheme } from "../theme/ThemeContext";
+import { useLanguage } from "../i18n/LanguageContext";
+import { useCartStore } from "../store";
 import { router } from "expo-router";
 
 interface TicketItem {
@@ -23,27 +25,12 @@ interface TicketItem {
   typeName: string;
   type_id: number;
 }
-export interface CartItem {
-  itemId: number;
-  name: string;
-  price: number;
-  validityDays: number;
-  typeName: string;
-  type_id: number;
-  quantity: number;
-}
 
 type Category = "all" | "daily" | "monthly" | "yearly";
 const TYPE_MAP: Record<number, Category> = {
   1: "daily",
   2: "monthly",
   3: "yearly",
-};
-const CATEGORY_LABELS: Record<Category, string> = {
-  all: "Összes",
-  daily: "Napi",
-  monthly: "Havi",
-  yearly: "Éves",
 };
 const CATEGORY_COLORS: Record<Category, string> = {
   all: "#6366f1",
@@ -52,7 +39,7 @@ const CATEGORY_COLORS: Record<Category, string> = {
   yearly: "#7c3aed",
 };
 
-function CategoryChip({ cat, active, onPress, isDark }: any) {
+function CategoryChip({ cat, active, onPress, isDark, label }: any) {
   const scale = useRef(new Animated.Value(1)).current;
   const color = CATEGORY_COLORS[cat as Category];
 
@@ -92,14 +79,23 @@ function CategoryChip({ cat, active, onPress, isDark }: any) {
           className="text-[13px] font-normal h-4"
           style={{ color: active ? "#fff" : isDark ? "#a1a1aa" : "#52525b" }}
         >
-          {CATEGORY_LABELS[cat as Category]}
+          {label}
         </Text>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
-function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
+function TicketCard({
+  item,
+  qty,
+  onAdd,
+  onDecrement,
+  onRemove,
+  adding,
+  isDark,
+  t,
+}: any) {
   const cat: Category = TYPE_MAP[item.type_id] ?? "all";
   const color = CATEGORY_COLORS[cat];
 
@@ -113,7 +109,6 @@ function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
         borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
       }}
     >
-      {/* Color accent strip */}
       <View className="w-1" style={{ backgroundColor: color }} />
       <View className="flex-1 p-4 gap-1.5">
         <View className="flex-row justify-between items-center">
@@ -125,13 +120,13 @@ function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
               className="text-[10px] font-extrabold tracking-[0.5px]"
               style={{ color }}
             >
-              {CATEGORY_LABELS[cat].toUpperCase()}
+              {item.typeName?.toUpperCase() ?? cat.toUpperCase()}
             </Text>
           </View>
           <Text
             className={`text-[17px] font-extrabold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            {item.price.toLocaleString("hu-HU")} Ft
+            {item.price.toLocaleString()} Ft
           </Text>
         </View>
 
@@ -144,50 +139,116 @@ function TicketCard({ item, qty, onAdd, adding, isDark }: any) {
           className={`text-[13px] leading-[18px] ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           numberOfLines={2}
         >
-          {item.description || `Érvényes ${item.validityDays} napig`}
+          {item.description ||
+            `${t("purchase.validFor")} ${item.validityDays} ${t("purchase.days")}`}
         </Text>
 
         <View className="flex-row justify-between items-center mt-1">
           <Text
             className={`text-xs ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
           >
-            ⏱ {item.validityDays} nap
+            ⏱ {item.validityDays} {t("purchase.days")}
           </Text>
-          <TouchableOpacity
-            onPress={onAdd}
-            disabled={adding}
-            activeOpacity={0.85}
-            className="w-[42px] h-[42px] rounded-[13px] items-center justify-center relative"
-            style={[{ backgroundColor: color }, adding && { opacity: 0.6 }]}
-          >
-            {qty > 0 && (
-              <View className="absolute -top-[7px] -right-[7px] bg-red-500 w-[19px] h-[19px] rounded-[9.5px] items-center justify-center z-10">
-                <Text className="text-white text-[10px] font-extrabold">
+
+          {qty > 0 ? (
+            /* ── In-cart controls: remove / count / add ── */
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity
+                onPress={qty === 1 ? onRemove : onDecrement}
+                activeOpacity={0.8}
+                className="w-[36px] h-[36px] rounded-[11px] items-center justify-center border"
+                style={{
+                  borderColor:
+                    qty === 1
+                      ? isDark
+                        ? "rgba(248,113,113,0.4)"
+                        : "rgba(220,38,38,0.3)"
+                      : isDark
+                        ? "rgba(255,255,255,0.15)"
+                        : "rgba(0,0,0,0.12)",
+                  backgroundColor:
+                    qty === 1
+                      ? isDark
+                        ? "rgba(248,113,113,0.1)"
+                        : "rgba(220,38,38,0.06)"
+                      : isDark
+                        ? "rgba(255,255,255,0.07)"
+                        : "rgba(0,0,0,0.04)",
+                }}
+              >
+                <Text
+                  className="text-[18px] font-bold leading-5"
+                  style={{
+                    color:
+                      qty === 1
+                        ? isDark
+                          ? "#f87171"
+                          : "#dc2626"
+                        : isDark
+                          ? "#a1a1aa"
+                          : "#52525b",
+                  }}
+                >
+                  {qty === 1 ? "✕" : "−"}
+                </Text>
+              </TouchableOpacity>
+
+              <View
+                className="w-[32px] h-[32px] rounded-[10px] items-center justify-center border"
+                style={{
+                  borderColor: color + "55",
+                  backgroundColor: color + "18",
+                }}
+              >
+                <Text className="text-[14px] font-extrabold" style={{ color }}>
                   {qty}
                 </Text>
               </View>
-            )}
-            {adding ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text className="text-white text-[24px] font-light leading-7">
-                +
-              </Text>
-            )}
-          </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={onAdd}
+                disabled={adding}
+                activeOpacity={0.85}
+                className="w-[36px] h-[36px] rounded-[11px] items-center justify-center"
+                style={[{ backgroundColor: color }, adding && { opacity: 0.6 }]}
+              >
+                {adding ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text className="text-white text-[22px] font-light leading-6">
+                    +
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* ── Not in cart — single add button ── */
+            <TouchableOpacity
+              onPress={onAdd}
+              disabled={adding}
+              activeOpacity={0.85}
+              className="w-[42px] h-[42px] rounded-[13px] items-center justify-center"
+              style={[{ backgroundColor: color }, adding && { opacity: 0.6 }]}
+            >
+              {adding ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-white text-[24px] font-light leading-7">
+                  +
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
   );
 }
 
-function CartBar({ cart, onCheckout, isDark }: any) {
+function CartBar({ cart, onCheckout, isDark, t }: any) {
   const translateY = useRef(new Animated.Value(100)).current;
-  const total = cart.reduce(
-    (s: number, i: CartItem) => s + i.price * i.quantity,
-    0,
-  );
-  const count = cart.reduce((s: number, i: CartItem) => s + i.quantity, 0);
+  const total = cart.reduce((s: number, i: any) => s + i.price * i.quantity, 0);
+  const count = cart.reduce((s: number, i: any) => s + i.quantity, 0);
 
   useEffect(() => {
     Animated.spring(translateY, {
@@ -213,10 +274,10 @@ function CartBar({ cart, onCheckout, isDark }: any) {
     >
       <View>
         <Text className="text-[11px] text-white/60 font-semibold tracking-[1px]">
-          KOSÁR ÖSSZESEN
+          {t("purchase.cartTotal")}
         </Text>
         <Text className="text-[21px] font-extrabold text-white">
-          {total.toLocaleString("hu-HU")} Ft
+          {total.toLocaleString()} Ft
         </Text>
       </View>
       <TouchableOpacity
@@ -227,7 +288,9 @@ function CartBar({ cart, onCheckout, isDark }: any) {
         <View className="bg-white w-6 h-6 rounded-full items-center justify-center">
           <Text className="text-[#7c3aed] text-xs font-extrabold">{count}</Text>
         </View>
-        <Text className="text-white text-[15px] font-bold">Fizetés →</Text>
+        <Text className="text-white text-[15px] font-bold">
+          {t("purchase.checkout")}
+        </Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -238,9 +301,22 @@ export default function PurchaseTicketsScreen() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category>("all");
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [adding, setAdding] = useState<Record<number, boolean>>({});
+
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+
+  const cart = useCartStore((s) => s.cart);
+  const addItem = useCartStore((s) => s.addItem);
+  const decrementItem = useCartStore((s) => s.decrementItem);
+  const removeItem = useCartStore((s) => s.removeItem);
+
+  const CATEGORY_LABELS: Record<Category, string> = {
+    all: t("purchase.all"),
+    daily: t("purchase.daily"),
+    monthly: t("purchase.monthly"),
+    yearly: t("purchase.yearly"),
+  };
 
   useEffect(() => {
     authFetch(ENDPOINTS.items)
@@ -250,6 +326,7 @@ export default function PurchaseTicketsScreen() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Add one to server cart + Zustand
   const addToCart = useCallback(
     async (item: TicketItem) => {
       if (adding[item.id]) return;
@@ -260,24 +337,14 @@ export default function PurchaseTicketsScreen() {
           body: JSON.stringify({ item_id: item.id, quantity: 1 }),
         });
         if (res.ok) {
-          setCart((prev) => {
-            const ex = prev.find((c) => c.itemId === item.id);
-            if (ex)
-              return prev.map((c) =>
-                c.itemId === item.id ? { ...c, quantity: c.quantity + 1 } : c,
-              );
-            return [
-              ...prev,
-              {
-                itemId: item.id,
-                name: item.name,
-                price: item.price,
-                validityDays: item.validityDays,
-                typeName: item.typeName,
-                type_id: item.type_id,
-                quantity: 1,
-              },
-            ];
+          addItem({
+            itemId: item.id,
+            name: item.name,
+            price: item.price,
+            validityDays: item.validityDays,
+            typeName: item.typeName,
+            type_id: item.type_id,
+            quantity: 1,
           });
         }
       } catch {
@@ -285,7 +352,60 @@ export default function PurchaseTicketsScreen() {
         setAdding((prev) => ({ ...prev, [item.id]: false }));
       }
     },
-    [adding],
+    [adding, addItem],
+  );
+
+  // Decrement by 1 (optimistic, then sync)
+  const decrementFromCart = useCallback(
+    async (item: TicketItem) => {
+      const cartItem = cart.find((c) => c.itemId === item.id);
+      if (!cartItem || cartItem.quantity <= 1) return;
+      decrementItem(item.id);
+      try {
+        const cartRes = await authFetch(ENDPOINTS.cart);
+        if (cartRes.ok) {
+          const serverCart = await cartRes.json();
+          const serverItem = serverCart.items?.find(
+            (i: any) => i.item_id === item.id,
+          );
+          if (serverItem) {
+            await authFetch(ENDPOINTS.cartItem(serverItem.id), {
+              method: "PUT",
+              body: JSON.stringify({ quantity: cartItem.quantity - 1 }),
+            });
+          }
+        }
+      } catch {
+        addItem({ ...cartItem, quantity: 1 });
+      }
+    },
+    [cart, decrementItem, addItem],
+  );
+
+  // Remove entirely (optimistic, then sync)
+  const removeFromCart = useCallback(
+    async (item: TicketItem) => {
+      const cartItem = cart.find((c) => c.itemId === item.id);
+      if (!cartItem) return;
+      removeItem(item.id);
+      try {
+        const cartRes = await authFetch(ENDPOINTS.cart);
+        if (cartRes.ok) {
+          const serverCart = await cartRes.json();
+          const serverItem = serverCart.items?.find(
+            (i: any) => i.item_id === item.id,
+          );
+          if (serverItem) {
+            await authFetch(ENDPOINTS.cartItem(serverItem.id), {
+              method: "DELETE",
+            });
+          }
+        }
+      } catch {
+        addItem(cartItem);
+      }
+    },
+    [cart, removeItem, addItem],
   );
 
   const filtered = items.filter((item) => {
@@ -307,7 +427,6 @@ export default function PurchaseTicketsScreen() {
         translucent
       />
 
-      {/* Purple blob */}
       <View
         pointerEvents="none"
         className="absolute -top-10 -right-10 w-[220px] h-[220px] rounded-full"
@@ -322,16 +441,16 @@ export default function PurchaseTicketsScreen() {
         <Text
           className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
-          Jegyvásárlás
+          {t("purchase.title")}
         </Text>
         <Text
           className={`text-sm mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
         >
-          Válassz bérletet vagy belépőt
+          {t("purchase.subtitle")}
         </Text>
       </View>
 
-      {/* Search bar */}
+      {/* Search */}
       <View className="px-5 pb-3">
         <View
           className="rounded-2xl px-4 py-3.5 flex-row items-center gap-2.5 border"
@@ -344,7 +463,7 @@ export default function PurchaseTicketsScreen() {
         >
           <TextInput
             className={`flex-1 text-[15px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-            placeholder="Keresés..."
+            placeholder={t("purchase.searchPlaceholder")}
             placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
             value={search}
             onChangeText={setSearch}
@@ -370,6 +489,7 @@ export default function PurchaseTicketsScreen() {
             cat={cat}
             active={category === cat}
             isDark={isDark}
+            label={CATEGORY_LABELS[cat]}
             onPress={() => setCategory(cat)}
           />
         ))}
@@ -381,15 +501,21 @@ export default function PurchaseTicketsScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(i) => String(i.id)}
-          renderItem={({ item }) => (
-            <TicketCard
-              item={item}
-              qty={cart.find((c) => c.itemId === item.id)?.quantity ?? 0}
-              adding={!!adding[item.id]}
-              isDark={isDark}
-              onAdd={() => addToCart(item)}
-            />
-          )}
+          renderItem={({ item }) => {
+            const qty = cart.find((c) => c.itemId === item.id)?.quantity ?? 0;
+            return (
+              <TicketCard
+                item={item}
+                qty={qty}
+                adding={!!adding[item.id]}
+                isDark={isDark}
+                t={t}
+                onAdd={() => addToCart(item)}
+                onDecrement={() => decrementFromCart(item)}
+                onRemove={() => removeFromCart(item)}
+              />
+            );
+          }}
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingBottom: 130,
@@ -400,7 +526,7 @@ export default function PurchaseTicketsScreen() {
             <Text
               className={`text-center mt-[60px] text-[15px] ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              Nincs találat
+              {t("purchase.noResults")}
             </Text>
           }
         />
@@ -409,12 +535,9 @@ export default function PurchaseTicketsScreen() {
       <CartBar
         cart={cart}
         isDark={isDark}
+        t={t}
         onCheckout={() =>
-          cart.length > 0 &&
-          router.push({
-            pathname: "/(tabs)/purchase-finalization",
-            params: { cart: JSON.stringify(cart) },
-          })
+          cart.length > 0 && router.push("/purchase-finalization")
         }
       />
     </View>

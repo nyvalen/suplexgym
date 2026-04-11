@@ -16,7 +16,6 @@ import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "./theme/ThemeContext";
 
 export default function SignInScreen() {
-  console.log("fasz in");
   const { isDark } = useTheme();
 
   const [email, setEmail] = useState("");

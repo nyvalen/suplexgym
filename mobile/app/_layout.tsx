@@ -21,6 +21,9 @@ export default function RootLayout() {
                 options={{ presentation: "modal" }}
               />
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="purchase-finalization" />
+              <Stack.Screen name="news-detail" />
+              <Stack.Screen name="tickets-detail" />
             </Stack>
             <PortalHost />
           </GestureHandlerRootView>

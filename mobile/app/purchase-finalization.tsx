@@ -8,11 +8,11 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-
-import { router, useLocalSearchParams } from "expo-router";
-import { authFetch, ENDPOINTS } from "../utils/auth";
-import type { CartItem } from "./purchase";
-import { useTheme, tokens } from "../theme/ThemeContext";
+import { router } from "expo-router";
+import { authFetch, ENDPOINTS } from "./utils/auth";
+import { useCartStore } from "./store";
+import { useTheme, tokens } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
 
 const CATEGORY_COLORS: Record<number, string> = {
   1: "#f59e0b",
@@ -22,10 +22,13 @@ const CATEGORY_COLORS: Record<number, string> = {
 
 export default function PurchaseFinalizationScreen() {
   const { isDark } = useTheme();
-  const t = isDark ? tokens.dark : tokens.light;
+  const { t } = useLanguage();
+  const tokenSet = isDark ? tokens.dark : tokens.light;
 
-  const { cart: cartParam } = useLocalSearchParams<{ cart: string }>();
-  const cart: CartItem[] = cartParam ? JSON.parse(cartParam) : [];
+  // Read cart from Zustand — no route params needed
+  const cart = useCartStore((s) => s.cart);
+  const clearCart = useCartStore((s) => s.clearCart);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errMsg, setErrMsg] = useState("");
@@ -38,6 +41,7 @@ export default function PurchaseFinalizationScreen() {
 
   const showSuccess = () => {
     setSuccess(true);
+    clearCart(); // wipe Zustand cart immediately
     Animated.parallel([
       Animated.spring(successScale, {
         toValue: 1,
@@ -51,7 +55,8 @@ export default function PurchaseFinalizationScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-    setTimeout(() => router.replace("/(tabs)/main"), 2200);
+    // Redirect to tickets so the user sees their new ticket
+    setTimeout(() => router.replace("/tickets-list"), 2200);
   };
 
   const handleCheckout = async () => {
@@ -63,31 +68,33 @@ export default function PurchaseFinalizationScreen() {
         method: "POST",
         body: JSON.stringify({}),
       });
-      if (res.ok) showSuccess();
-      else {
+      if (res.ok) {
+        showSuccess();
+      } else {
         const err = await res.json().catch(() => ({}));
-        setErrMsg(err?.message ?? "Hiba a fizetés során. Próbáld újra.");
+        setErrMsg(err?.message ?? t("finalization.paymentError"));
       }
     } catch (e: any) {
       setErrMsg(
         e?.message === "SESSION_EXPIRED"
-          ? "Lejárt a munkamenet."
-          : "Hálózati hiba. Próbáld újra.",
+          ? t("finalization.sessionExpired")
+          : t("finalization.networkError"),
       );
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Success splash ───────────────────────────────────────────────────────────
   if (success) {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: t.bg }}
+        style={{ backgroundColor: tokenSet.bg }}
       >
         <StatusBar
           barStyle={isDark ? "light-content" : "dark-content"}
-          backgroundColor={t.bg}
+          backgroundColor={tokenSet.bg}
         />
         <View
           pointerEvents="none"
@@ -110,38 +117,42 @@ export default function PurchaseFinalizationScreen() {
           <View
             className="w-[110px] h-[110px] rounded-full items-center justify-center border-2 mb-7"
             style={{
-              backgroundColor: t.success + "22",
-              borderColor: t.success + "55",
-              shadowColor: t.success,
+              backgroundColor: tokenSet.success + "22",
+              borderColor: tokenSet.success + "55",
+              shadowColor: tokenSet.success,
               shadowOffset: { width: 0, height: 12 },
               shadowOpacity: 0.3,
               shadowRadius: 24,
               elevation: 12,
             }}
           >
-            <Text className="text-[50px]" style={{ color: t.success }}>
+            <Text className="text-[50px]" style={{ color: tokenSet.success }}>
               ✓
             </Text>
           </View>
           <Text
             className="text-[30px] font-extrabold mb-2"
-            style={{ color: t.text }}
+            style={{ color: tokenSet.text }}
           >
-            Sikeres vásárlás!
+            {t("finalization.successTitle")}
           </Text>
-          <Text className="text-base" style={{ color: t.textSub }}>
-            {totalItems} db jegy hozzáadva a fiókodhoz
+          <Text className="text-base" style={{ color: tokenSet.textSub }}>
+            {t("finalization.successMessage").replace(
+              "{{count}}",
+              String(totalItems),
+            )}
           </Text>
         </Animated.View>
       </View>
     );
   }
 
+  // ── Main view ────────────────────────────────────────────────────────────────
   return (
-    <View className="flex-1" style={{ backgroundColor: t.bg }}>
+    <View className="flex-1" style={{ backgroundColor: tokenSet.bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={t.bg}
+        backgroundColor={tokenSet.bg}
       />
 
       {/* Blob */}
@@ -158,14 +169,14 @@ export default function PurchaseFinalizationScreen() {
       <View className="px-5 pt-[60px] pb-5">
         <TouchableOpacity onPress={() => router.back()} className="mb-3">
           <Text className="text-[#7c3aed] text-[15px] font-semibold">
-            ← Vissza
+            {t("finalization.back")}
           </Text>
         </TouchableOpacity>
         <Text
           className="text-[28px] font-extrabold tracking-[-0.5px]"
-          style={{ color: t.text }}
+          style={{ color: tokenSet.text }}
         >
-          Rendelés összesítő
+          {t("finalization.title")}
         </Text>
       </View>
 
@@ -176,15 +187,15 @@ export default function PurchaseFinalizationScreen() {
       >
         {cart.length === 0 ? (
           <View className="items-center mt-20 gap-4">
-            <Text className="text-lg" style={{ color: t.textSub }}>
-              A kosarad üres
+            <Text className="text-lg" style={{ color: tokenSet.textSub }}>
+              {t("finalization.cartEmpty")}
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}
               className="bg-[#7c3aed] px-6 py-3.5 rounded-2xl"
             >
               <Text className="text-white font-bold text-[15px]">
-                Böngészés
+                {t("finalization.browse")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -192,9 +203,9 @@ export default function PurchaseFinalizationScreen() {
           <>
             <Text
               className="text-[11px] font-bold tracking-[2px] uppercase mb-3"
-              style={{ color: t.textMuted }}
+              style={{ color: tokenSet.textMuted }}
             >
-              Tételek
+              {t("finalization.items")}
             </Text>
 
             {cart.map((item) => (
@@ -219,30 +230,33 @@ export default function PurchaseFinalizationScreen() {
                 <View className="flex-1 p-3.5">
                   <Text
                     className="text-[15px] font-bold"
-                    style={{ color: t.text }}
+                    style={{ color: tokenSet.text }}
                   >
                     {item.name}
                   </Text>
-                  <Text className="text-xs mt-0.5" style={{ color: t.textSub }}>
-                    {item.price.toLocaleString("hu-HU")} Ft / db ·{" "}
-                    {item.validityDays} nap
+                  <Text
+                    className="text-xs mt-0.5"
+                    style={{ color: tokenSet.textSub }}
+                  >
+                    {item.price.toLocaleString()} Ft / db · {item.validityDays}{" "}
+                    {t("purchase.days")}
                   </Text>
                 </View>
                 <View className="p-3.5 items-end justify-center gap-1.5">
-                  <Text className="text-xs" style={{ color: t.textSub }}>
+                  <Text className="text-xs" style={{ color: tokenSet.textSub }}>
                     × {item.quantity}
                   </Text>
                   <Text
                     className="text-[15px] font-bold"
-                    style={{ color: t.text }}
+                    style={{ color: tokenSet.text }}
                   >
-                    {(item.price * item.quantity).toLocaleString("hu-HU")} Ft
+                    {(item.price * item.quantity).toLocaleString()} Ft
                   </Text>
                 </View>
               </View>
             ))}
 
-            {/* Summary card */}
+            {/* Summary */}
             <View
               className="rounded-[20px] border p-[18px] mt-2 gap-2.5"
               style={{
@@ -255,12 +269,12 @@ export default function PurchaseFinalizationScreen() {
               }}
             >
               <View className="flex-row justify-between">
-                <Text className="text-sm" style={{ color: t.textSub }}>
-                  Tételek száma
+                <Text className="text-sm" style={{ color: tokenSet.textSub }}>
+                  {t("finalization.itemCount")}
                 </Text>
                 <Text
                   className="text-sm font-semibold"
-                  style={{ color: t.text }}
+                  style={{ color: tokenSet.text }}
                 >
                   {totalItems} db
                 </Text>
@@ -274,11 +288,14 @@ export default function PurchaseFinalizationScreen() {
                 }}
               />
               <View className="flex-row justify-between items-center">
-                <Text className="text-base font-bold" style={{ color: t.text }}>
-                  Összesen
+                <Text
+                  className="text-base font-bold"
+                  style={{ color: tokenSet.text }}
+                >
+                  {t("finalization.total")}
                 </Text>
                 <Text className="text-[22px] font-extrabold text-[#7c3aed]">
-                  {total.toLocaleString("hu-HU")} Ft
+                  {total.toLocaleString()} Ft
                 </Text>
               </View>
             </View>
@@ -297,7 +314,7 @@ export default function PurchaseFinalizationScreen() {
               >
                 <Text
                   className="text-[13px] text-center"
-                  style={{ color: t.danger }}
+                  style={{ color: tokenSet.danger }}
                 >
                   {errMsg}
                 </Text>
@@ -330,10 +347,10 @@ export default function PurchaseFinalizationScreen() {
             ) : (
               <>
                 <Text className="text-[17px] font-bold text-white">
-                  Fizetés megerősítése
+                  {t("finalization.confirm")}
                 </Text>
                 <Text className="text-[17px] font-extrabold text-white">
-                  {total.toLocaleString("hu-HU")} Ft
+                  {total.toLocaleString()} Ft
                 </Text>
               </>
             )}

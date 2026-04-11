@@ -10,33 +10,23 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { authFetch, decodeJwt, ENDPOINTS } from "../utils/auth";
+import { decodeJwt, ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
-
-interface NewsItem {
-  id: number;
-  title: string;
-  createdAt: string;
-}
+import { useLanguage } from "../i18n/LanguageContext";
+import { useNewsStore, NewsArticle } from "../store";
 
 const OPENING_HOURS = [
-  { day: "Hétfő", short: "H", open: "06:00", close: "22:00", isOpen: true },
-  { day: "Kedd", short: "K", open: "06:00", close: "22:00", isOpen: true },
-  { day: "Szerda", short: "Sz", open: "06:00", close: "22:00", isOpen: true },
-  {
-    day: "Csütörtök",
-    short: "Cs",
-    open: "06:00",
-    close: "22:00",
-    isOpen: true,
-  },
-  { day: "Péntek", short: "P", open: "06:00", close: "21:00", isOpen: true },
-  { day: "Szombat", short: "Szo", open: "08:00", close: "18:00", isOpen: true },
-  { day: "Vasárnap", short: "V", open: null, close: null, isOpen: false },
+  { open: "06:00", close: "22:00", isOpen: true },
+  { open: "06:00", close: "22:00", isOpen: true },
+  { open: "06:00", close: "22:00", isOpen: true },
+  { open: "06:00", close: "22:00", isOpen: true },
+  { open: "06:00", close: "21:00", isOpen: true },
+  { open: "08:00", close: "18:00", isOpen: true },
+  { open: null, close: null, isOpen: false },
 ];
 
 function getCurrentDayIndex() {
-  const jsDay = new Date().getDay(); // 0=Sun, 1=Mon ...
+  const jsDay = new Date().getDay();
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
@@ -51,7 +41,6 @@ function isCurrentlyOpen() {
   return nowMins >= oh * 60 + om && nowMins < ch * 60 + cm;
 }
 
-/** Convert "HH:MM" to fraction 0–1 of [06:00–22:00] window */
 function timeFrac(time: string) {
   const [h, m] = time.split(":").map(Number);
   return Math.max(0, Math.min(1, (h * 60 + m - 360) / (22 * 60 - 360)));
@@ -59,10 +48,12 @@ function timeFrac(time: string) {
 
 export default function MainScreen() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const setSelectedArticle = useNewsStore((s) => s.setSelectedArticle);
 
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
 
   useEffect(() => {
@@ -81,13 +72,29 @@ export default function MainScreen() {
     });
     fetch(ENDPOINTS.news)
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: NewsItem[]) => setNews(data.slice(0, 3)))
+      .then((data: NewsArticle[]) => setNews(data.slice(0, 3)))
       .catch(() => {})
       .finally(() => setNewsLoading(false));
   }, []);
 
+  const navigateToArticle = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    router.push("/news-detail");
+    console.log("miert");
+  };
+
   const todayIdx = getCurrentDayIndex();
   const gymOpen = isCurrentlyOpen();
+  const today = OPENING_HOURS[todayIdx];
+
+  const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
+  const STATS = [
+    { value: "1 240", label: t("main.stats.members") },
+    { value: "34", label: t("main.stats.workouts") },
+    { value: "12", label: t("main.stats.trainers") },
+    { value: "8", label: t("main.stats.years") },
+  ];
 
   return (
     <ScrollView
@@ -124,13 +131,15 @@ export default function MainScreen() {
         }}
       />
 
-      {/* Header */}
+      {/* ── Header ────────────────────────────────────────────── */}
       <View className="flex-row justify-between items-start px-5 pt-16 pb-6">
         <View>
           <Text
             className={`text-xs mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
-            {username ? `Üdvözlünk, ${username}` : "Üdvözlünk"}
+            {username
+              ? t("main.welcomeUser").replace("{{name}}", username)
+              : t("main.welcome")}
           </Text>
           <Text
             className={`text-[22px] font-extrabold tracking-[3px] uppercase ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
@@ -151,20 +160,15 @@ export default function MainScreen() {
             }}
           >
             <Text className="text-[#c4b5fd] text-[11px] font-bold tracking-[1px]">
-              Admin
+              {t("main.adminBadge")}
             </Text>
           </View>
         )}
       </View>
 
-      {/* Stats grid */}
+      {/* ── Stats grid ────────────────────────────────────────── */}
       <View className="flex-row flex-wrap gap-2.5 px-5 mb-7">
-        {[
-          { value: "1 240", label: "Aktív tagok" },
-          { value: "34", label: "Heti edzések" },
-          { value: "12", label: "Edzők" },
-          { value: "8", label: "Évek óta" },
-        ].map((s) => (
+        {STATS.map((s) => (
           <View
             key={s.label}
             className="rounded-[20px] p-4 border"
@@ -192,11 +196,11 @@ export default function MainScreen() {
         ))}
       </View>
 
-      {/* ── OPENING HOURS ─────────────────────────────────── */}
+      {/* ── Opening hours ─────────────────────────────────────── */}
       <Text
         className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
       >
-        Nyitvatartás
+        {t("main.openingHours")}
       </Text>
 
       <View
@@ -246,20 +250,20 @@ export default function MainScreen() {
                     : "#dc2626",
               }}
             >
-              {gymOpen ? "Most nyitva" : "Most zárva"}
+              {gymOpen ? t("main.openNow") : t("main.closedNow")}
             </Text>
           </View>
           <Text
             className={`text-[11px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
           >
-            {OPENING_HOURS[todayIdx].isOpen
-              ? `${OPENING_HOURS[todayIdx].open} – ${OPENING_HOURS[todayIdx].close}`
-              : "Zárva"}
+            {today.isOpen && today.open && today.close
+              ? `${today.open} – ${today.close}`
+              : t("main.closed")}
           </Text>
         </View>
 
-        {/* Timeline bar for today */}
-        {OPENING_HOURS[todayIdx].isOpen && (
+        {/* Timeline bar */}
+        {today.isOpen && today.open && today.close && (
           <View className="px-5 pt-4 pb-2">
             <View className="flex-row justify-between mb-1.5">
               <Text
@@ -281,12 +285,11 @@ export default function MainScreen() {
                   : "rgba(0,0,0,0.06)",
               }}
             >
-              {/* Open span */}
               <View
                 className="absolute h-full rounded-full"
                 style={{
-                  left: `${timeFrac(OPENING_HOURS[todayIdx].open!) * 100}%`,
-                  right: `${(1 - timeFrac(OPENING_HOURS[todayIdx].close!)) * 100}%`,
+                  left: `${timeFrac(today.open!) * 100}%`,
+                  right: `${(1 - timeFrac(today.close!)) * 100}%`,
                   backgroundColor: gymOpen
                     ? isDark
                       ? "rgba(74,222,128,0.7)"
@@ -296,7 +299,6 @@ export default function MainScreen() {
                       : "rgba(124,58,237,0.4)",
                 }}
               />
-              {/* Current time needle */}
               {(() => {
                 const now = new Date();
                 const nowMins = now.getHours() * 60 + now.getMinutes();
@@ -318,19 +320,19 @@ export default function MainScreen() {
             <Text
               className={`text-[10px] mt-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
             >
-              Mai nyitvatartás: {OPENING_HOURS[todayIdx].open} –{" "}
-              {OPENING_HOURS[todayIdx].close}
+              {t("main.todayHours")}: {today.open} – {today.close}
             </Text>
           </View>
         )}
 
-        {/* Weekly day chips */}
+        {/* Weekly chips */}
         <View className="flex-row px-4 pb-4 pt-2 gap-1.5 justify-between">
           {OPENING_HOURS.map((h, i) => {
             const isToday = i === todayIdx;
+            const dayKey = DAY_KEYS[i];
             return (
               <View
-                key={h.short}
+                key={i}
                 className="flex-1 items-center rounded-xl py-2"
                 style={{
                   backgroundColor: isToday
@@ -350,7 +352,7 @@ export default function MainScreen() {
                     color: isToday ? "#fff" : isDark ? "#a1a1aa" : "#52525b",
                   }}
                 >
-                  {h.short}
+                  {t(`main.days.${dayKey}`)}
                 </Text>
                 <View
                   className="w-1.5 h-1.5 rounded-full"
@@ -366,7 +368,7 @@ export default function MainScreen() {
                           : "#dc2626",
                   }}
                 />
-                {h.isOpen ? (
+                {h.isOpen && h.open && h.close ? (
                   <>
                     <Text
                       className="text-[8px] mt-1 font-semibold"
@@ -378,7 +380,7 @@ export default function MainScreen() {
                             : "#a1a1aa",
                       }}
                     >
-                      {h.open?.slice(0, 5)}
+                      {h.open}
                     </Text>
                     <Text
                       className="text-[8px] font-semibold"
@@ -390,7 +392,7 @@ export default function MainScreen() {
                             : "#a1a1aa",
                       }}
                     >
-                      {h.close?.slice(0, 5)}
+                      {h.close}
                     </Text>
                   </>
                 ) : (
@@ -398,7 +400,7 @@ export default function MainScreen() {
                     className="text-[8px] mt-1 font-semibold"
                     style={{ color: isDark ? "#f87171" : "#dc2626" }}
                   >
-                    Zárva
+                    {t("main.closed")}
                   </Text>
                 )}
               </View>
@@ -406,13 +408,12 @@ export default function MainScreen() {
           })}
         </View>
       </View>
-      {/* ── END OPENING HOURS ─────────────────────────────── */}
 
-      {/* News section */}
+      {/* ── Latest news ───────────────────────────────────────── */}
       <Text
         className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
       >
-        Legfrissebb hírek
+        {t("main.latestNews")}
       </Text>
 
       {newsLoading ? (
@@ -431,7 +432,7 @@ export default function MainScreen() {
                   ? "rgba(255,255,255,0.08)"
                   : "rgba(0,0,0,0.06)",
               }}
-              onPress={() => router.push("/(tabs)/news/detail")}
+              onPress={() => navigateToArticle(n)}
               activeOpacity={0.75}
             >
               <View
@@ -448,7 +449,7 @@ export default function MainScreen() {
                 <Text
                   className={`text-[11px] mt-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
                 >
-                  {new Date(n.createdAt).toLocaleDateString("hu-HU")}
+                  {new Date(n.createdAt).toLocaleDateString()}
                 </Text>
               </View>
               <Text className="text-[#7c3aed] text-base ml-2">→</Text>
@@ -457,7 +458,7 @@ export default function MainScreen() {
         </View>
       )}
 
-      {/* CTA card */}
+      {/* ── CTA card ──────────────────────────────────────────── */}
       <TouchableOpacity
         className="mx-5 mt-4 rounded-[20px] p-5 flex-row items-center gap-3.5 border"
         style={{
@@ -466,19 +467,19 @@ export default function MainScreen() {
             : "rgba(124,58,237,0.07)",
           borderColor: isDark ? "rgba(124,58,237,0.3)" : "rgba(124,58,237,0.2)",
         }}
-        onPress={() => router.push("/(tabs)/purchase")}
+        onPress={() => router.push("/purchase")}
         activeOpacity={0.8}
       >
         <View className="flex-1 ml-6">
           <Text
             className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            Jegy vásárlása
+            {t("main.buyTicket")}
           </Text>
           <Text
             className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
-            Napi, havi és éves bérletek
+            {t("main.buyTicketSub")}
           </Text>
         </View>
         <Text className="text-[#7c3aed] text-lg">→</Text>

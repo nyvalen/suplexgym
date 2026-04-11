@@ -1,11 +1,11 @@
 import { NativeTabs, Label, Icon } from "expo-router/unstable-native-tabs";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { TabBarContext } from "../context/tab-bar-context";
-import { House } from "lucide-react-native";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function TabLayout() {
   const [isTabBarHidden, setIsTabBarHidden] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <TabBarContext value={{ setIsTabBarHidden }}>
@@ -15,23 +15,23 @@ export default function TabLayout() {
             sf={{ default: "house", selected: "house.fill" }}
             androidSrc={require("./house.svg")}
           />
-          <Label>Főoldal</Label>
+          <Label>{t("tabs.home")}</Label>
         </NativeTabs.Trigger>
 
-        <NativeTabs.Trigger name="news/index">
+        <NativeTabs.Trigger name="news-list">
           <Icon
             sf={{ default: "newspaper", selected: "newspaper.fill" }}
             drawable="custom_newspaper_drawable"
           />
-          <Label>Hírek</Label>
+          <Label>{t("tabs.news")}</Label>
         </NativeTabs.Trigger>
 
-        <NativeTabs.Trigger name="tickets/index">
+        <NativeTabs.Trigger name="tickets-list">
           <Icon
             sf={{ default: "wallet.pass", selected: "wallet.pass.fill" }}
             drawable="custom_ticket_drawable"
           />
-          <Label>Jegyek</Label>
+          <Label>{t("tabs.tickets")}</Label>
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="purchase">
@@ -39,15 +39,15 @@ export default function TabLayout() {
             sf={{ default: "cart", selected: "cart.fill" }}
             drawable="custom_cart_drawable"
           />
-          <Label>Vásárlás</Label>
+          <Label>{t("tabs.purchase")}</Label>
         </NativeTabs.Trigger>
 
         <NativeTabs.Trigger name="profile">
           <Icon
-            sf={{ default: "newspaper", selected: "newspaper.fill" }}
-            drawable="custom_newspaper_drawable"
+            sf={{ default: "person", selected: "person.fill" }}
+            drawable="custom_person_drawable"
           />
-          <Label>Profil</Label>
+          <Label>{t("tabs.profile")}</Label>
         </NativeTabs.Trigger>
       </NativeTabs>
     </TabBarContext>

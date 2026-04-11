@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,14 @@ import {
   StatusBar,
   Dimensions,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useTheme, tokens } from "../../theme/ThemeContext";
+import { router } from "expo-router";
+import { useTheme, tokens } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
+import { useTicketStore } from "./store";
+import { authFetch, ENDPOINTS } from "./utils/auth";
 
 const { width } = Dimensions.get("window");
 const QR_SIZE = width - 80;
@@ -25,7 +30,7 @@ function daysLeft(e: string) {
   );
 }
 function fmtDateTime(iso: string) {
-  return new Date(iso).toLocaleDateString("hu-HU", {
+  return new Date(iso).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -34,21 +39,26 @@ function fmtDateTime(iso: string) {
   });
 }
 
-export default function TicketsDetailsScreen({ route }: any) {
-  const navigation = useNavigation();
+export default function TicketsDetailsScreen() {
   const { isDark } = useTheme();
-  const t = isDark ? tokens.dark : tokens.light;
-  const { article } = route.params;
+  const { t } = useLanguage();
+  const tokenSet = isDark ? tokens.dark : tokens.light;
 
-  const expired = isExpired(article.expiresAt);
-  const days = daysLeft(article.expiresAt);
+  // Read from Zustand — no route params needed
+  const article = useTicketStore((s) => s.selectedTicket);
+  const orderId = useTicketStore((s) => s.selectedOrderId);
+
+  const [renewing, setRenewing] = useState(false);
+
+  const expired = article ? isExpired(article.expiresAt) : false;
+  const days = article ? daysLeft(article.expiresAt) : 0;
   const statusColor = expired
-    ? t.danger
+    ? tokenSet.danger
     : days <= 3
       ? "#f97316"
       : days <= 7
-        ? t.warning
-        : t.success;
+        ? tokenSet.warning
+        : tokenSet.success;
 
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(40)).current;
@@ -69,8 +79,46 @@ export default function TicketsDetailsScreen({ route }: any) {
     ]).start();
   }, []);
 
+  const handleRenew = async () => {
+    if (!article?.id) return;
+    setRenewing(true);
+    try {
+      const res = await authFetch(ENDPOINTS.renew(article.id), {
+        method: "POST",
+      });
+      if (res.ok) {
+        Alert.alert("✓", t("tickets.renewSuccess"), [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        Alert.alert(t("common.error"), err?.message ?? t("common.error"));
+      }
+    } catch {
+      Alert.alert(t("common.error"), t("common.error"));
+    } finally {
+      setRenewing(false);
+    }
+  };
+
+  if (!article) {
+    return (
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: tokenSet.bg }}
+      >
+        <Text style={{ color: tokenSet.textSub }}>{t("common.error")}</Text>
+        <TouchableOpacity onPress={() => router.back()} className="mt-4">
+          <Text className="text-[#7c3aed] font-semibold">
+            {t("common.back")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1" style={{ backgroundColor: t.bg }}>
+    <View className="flex-1" style={{ backgroundColor: tokenSet.bg }}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -91,19 +139,19 @@ export default function TicketsDetailsScreen({ route }: any) {
       {/* Header */}
       <View className="px-5 pt-[60px] pb-4">
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
           className="mb-2.5"
           activeOpacity={0.7}
         >
           <Text className="text-[#7c3aed] text-[15px] font-semibold">
-            ← Vissza
+            {t("common.back")}
           </Text>
         </TouchableOpacity>
         <Text
           className="text-[28px] font-extrabold tracking-[-0.5px]"
-          style={{ color: t.text }}
+          style={{ color: tokenSet.text }}
         >
-          Belépőjegy
+          {t("tickets.ticketTitle")}
         </Text>
       </View>
 
@@ -115,7 +163,7 @@ export default function TicketsDetailsScreen({ route }: any) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
-          {/* Ticket card */}
+          {/* ── Ticket card ─────────────────────────────────────── */}
           <View
             className="mx-5 rounded-[24px] border overflow-hidden items-center pb-6"
             style={{
@@ -127,7 +175,7 @@ export default function TicketsDetailsScreen({ route }: any) {
                 : "rgba(0,0,0,0.06)",
             }}
           >
-            {/* Color top strip */}
+            {/* Colour top strip */}
             <View
               className="w-full h-1"
               style={{ backgroundColor: statusColor }}
@@ -139,13 +187,13 @@ export default function TicketsDetailsScreen({ route }: any) {
 
             <Text
               className="text-[11px] font-extrabold tracking-[3px] mb-1"
-              style={{ color: t.textMuted }}
+              style={{ color: tokenSet.textMuted }}
             >
-              SUPLEX GYM
+              {t("tickets.gymBrand")}
             </Text>
             <Text
               className="text-[22px] font-extrabold tracking-[-0.5px] mb-3.5 text-center px-5"
-              style={{ color: t.text }}
+              style={{ color: tokenSet.text }}
             >
               {article.itemName}
             </Text>
@@ -166,7 +214,9 @@ export default function TicketsDetailsScreen({ route }: any) {
                 className="text-[13px] font-bold"
                 style={{ color: statusColor }}
               >
-                {expired ? "Lejárt" : `${days} nap van hátra`}
+                {expired
+                  ? t("tickets.expiredStatus")
+                  : t("tickets.daysLeft").replace("{{days}}", String(days))}
               </Text>
             </View>
 
@@ -209,9 +259,9 @@ export default function TicketsDetailsScreen({ route }: any) {
                   <View className="absolute w-full h-full items-center justify-center rounded-[18px] bg-black/55">
                     <Text
                       className="text-[30px] font-black tracking-[4px]"
-                      style={{ color: t.danger }}
+                      style={{ color: tokenSet.danger }}
                     >
-                      LEJÁRT
+                      {t("tickets.expiredLabel")}
                     </Text>
                   </View>
                 )}
@@ -230,19 +280,21 @@ export default function TicketsDetailsScreen({ route }: any) {
                     : "rgba(0,0,0,0.06)",
                 }}
               >
-                <Text style={{ fontSize: 80, color: t.textMuted }}>▦</Text>
+                <Text style={{ fontSize: 80, color: tokenSet.textMuted }}>
+                  ▦
+                </Text>
               </View>
             )}
 
             <Text
               className="text-xs mt-4 tracking-[0.5px]"
-              style={{ color: t.textMuted }}
+              style={{ color: tokenSet.textMuted }}
             >
-              Mutasd be a belépéshez
+              {t("tickets.scanToEnter")}
             </Text>
           </View>
 
-          {/* Details card */}
+          {/* ── Details card ────────────────────────────────────── */}
           <View
             className="mx-5 mt-3.5 rounded-[18px] border p-[18px]"
             style={{
@@ -256,12 +308,12 @@ export default function TicketsDetailsScreen({ route }: any) {
           >
             {[
               {
-                label: "Aktiválva",
+                label: t("tickets.activatedLabel"),
                 value: fmtDateTime(article.activatedAt),
-                color: t.text,
+                color: tokenSet.text,
               },
               {
-                label: "Lejárat",
+                label: t("tickets.expiresLabel"),
                 value: fmtDateTime(article.expiresAt),
                 color: statusColor,
               },
@@ -280,7 +332,7 @@ export default function TicketsDetailsScreen({ route }: any) {
                 <View className="flex-row justify-between py-2.5">
                   <Text
                     className="text-[13px] font-semibold"
-                    style={{ color: t.textMuted }}
+                    style={{ color: tokenSet.textMuted }}
                   >
                     {row.label}
                   </Text>
@@ -294,6 +346,33 @@ export default function TicketsDetailsScreen({ route }: any) {
               </View>
             ))}
           </View>
+
+          {/* ── Renew button (expired tickets only) ─────────────── */}
+          {expired && (
+            <TouchableOpacity
+              onPress={handleRenew}
+              disabled={renewing}
+              activeOpacity={0.8}
+              className="mx-5 mt-3.5 rounded-[18px] py-4 items-center border"
+              style={{
+                backgroundColor: isDark
+                  ? "rgba(124,58,237,0.15)"
+                  : "rgba(124,58,237,0.08)",
+                borderColor: isDark
+                  ? "rgba(124,58,237,0.35)"
+                  : "rgba(124,58,237,0.25)",
+                opacity: renewing ? 0.6 : 1,
+              }}
+            >
+              {renewing ? (
+                <ActivityIndicator color="#7c3aed" />
+              ) : (
+                <Text className="text-[#7c3aed] text-[15px] font-bold">
+                  {t("tickets.renew")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </Animated.View>
     </View>

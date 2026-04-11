@@ -10,21 +10,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { ENDPOINTS } from "@/app/utils/auth";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../theme/ThemeContext";
+import { useLanguage } from "../i18n/LanguageContext";
+import { useNewsStore, NewsArticle } from "../store";
 import { router } from "expo-router";
 
 const FALLBACK =
   "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
 
-interface NewsItem {
-  id: number;
-  title: string;
-  content: string;
-  imagePath: string;
-  createdAt?: string;
-}
-
-function FeaturedCard({ item, onPress, isDark }: any) {
+function FeaturedCard({ item, onPress, isDark, t }: any) {
   const scale = useRef(new Animated.Value(1)).current;
 
   return (
@@ -62,7 +56,7 @@ function FeaturedCard({ item, onPress, isDark }: any) {
         <View className="flex-1 justify-end p-5">
           <View className="bg-[#7c3aed] self-start px-2.5 py-1 rounded-lg mb-2">
             <Text className="text-white text-[10px] font-extrabold tracking-[1.5px]">
-              KIEMELT
+              {t("news.featured")}
             </Text>
           </View>
           <Text
@@ -73,7 +67,7 @@ function FeaturedCard({ item, onPress, isDark }: any) {
           </Text>
           {item.createdAt && (
             <Text className="text-[11px] text-white/60 mt-1.5">
-              {new Date(item.createdAt).toLocaleDateString("hu-HU")}
+              {new Date(item.createdAt).toLocaleDateString()}
             </Text>
           )}
         </View>
@@ -82,7 +76,7 @@ function FeaturedCard({ item, onPress, isDark }: any) {
   );
 }
 
-function NewsCard({ item, onPress, isDark }: any) {
+function NewsCard({ item, onPress, isDark, t }: any) {
   const scale = useRef(new Animated.Value(1)).current;
 
   return (
@@ -134,7 +128,7 @@ function NewsCard({ item, onPress, isDark }: any) {
               {item.content}
             </Text>
             <Text className="text-[11px] font-bold text-[#7c3aed] mt-1">
-              Olvasd tovább →
+              {t("news.readMore")}
             </Text>
           </View>
         </View>
@@ -144,9 +138,11 @@ function NewsCard({ item, onPress, isDark }: any) {
 }
 
 export default function NewsListScreen() {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const setSelectedArticle = useNewsStore((s) => s.setSelectedArticle);
 
   useEffect(() => {
     fetch(ENDPOINTS.news)
@@ -155,6 +151,11 @@ export default function NewsListScreen() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const navigateToDetail = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    router.push("/news-detail");
+  };
 
   const featured = news[0] ?? null;
   const rest = news.slice(1);
@@ -167,7 +168,6 @@ export default function NewsListScreen() {
         translucent
       />
 
-      {/* Gradient blob */}
       <View
         pointerEvents="none"
         className="absolute -top-[30px] -right-[30px] w-[200px] h-[200px] rounded-full"
@@ -182,12 +182,12 @@ export default function NewsListScreen() {
         <Text
           className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
-          Hírek
+          {t("news.title")}
         </Text>
         <Text
           className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
         >
-          Suplex Gym értesítők
+          {t("news.subtitle")}
         </Text>
       </View>
 
@@ -199,7 +199,7 @@ export default function NewsListScreen() {
           <Text
             className={`text-lg font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            Nincs elérhető hír
+            {t("news.noNews")}
           </Text>
         </View>
       ) : (
@@ -210,7 +210,8 @@ export default function NewsListScreen() {
             <NewsCard
               item={item}
               isDark={isDark}
-              onPress={() => router.push("/(tabs)/news/detail")}
+              t={t}
+              onPress={() => navigateToDetail(item)}
             />
           )}
           ListHeaderComponent={
@@ -218,12 +219,8 @@ export default function NewsListScreen() {
               <FeaturedCard
                 item={featured}
                 isDark={isDark}
-                onPress={() =>
-                  navigation.navigate(
-                    "NewsDetail" as never,
-                    { article: featured } as never,
-                  )
-                }
+                t={t}
+                onPress={() => navigateToDetail(featured)}
               />
             ) : null
           }

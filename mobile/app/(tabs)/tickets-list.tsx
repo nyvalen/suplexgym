@@ -8,20 +8,17 @@ import {
   ActivityIndicator,
   Animated,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { authFetch } from "../../utils/auth";
-import { ENDPOINTS } from "../../utils/auth";
-import { useTheme } from "../../theme/ThemeContext";
+import { authFetch, ENDPOINTS } from "../utils/auth";
+import { useTheme } from "../theme/ThemeContext";
+import { useLanguage } from "../i18n/LanguageContext";
+import { useTicketStore, TicketItem } from "../store";
+import { router } from "expo-router";
 
-interface PurchaseItem {
-  itemName: string;
-  qrCodeBase64: string;
-  activatedAt: string;
-  expiresAt: string;
-}
 interface Order {
   id: number;
-  items: PurchaseItem[];
+  total: number;
+  created: string;
+  items: TicketItem[];
 }
 
 function isExpired(e: string) {
@@ -34,14 +31,14 @@ function daysLeft(e: string) {
   );
 }
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("hu-HU", {
+  return new Date(iso).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 }
 
-function TicketCard({ item, orderId, onPress, isDark }: any) {
+function TicketCard({ item, orderId, onPress, isDark, t }: any) {
   const scale = useRef(new Animated.Value(1)).current;
   const expired = isExpired(item.expiresAt);
   const days = daysLeft(item.expiresAt);
@@ -110,7 +107,7 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
             #{orderId}
           </Text>
           <Text className="text-[8px] font-bold" style={{ color: statusColor }}>
-            {expired ? "LEJÁRT" : "AKTÍV"}
+            {expired ? t("tickets.expiredLabel") : t("tickets.activeLabel")}
           </Text>
         </View>
 
@@ -143,7 +140,7 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
               <Text
                 className={`text-[10px] font-semibold tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
               >
-                AKTIVÁLVA
+                {t("tickets.activatedLabel")}
               </Text>
               <Text
                 className={`text-[11px] font-semibold ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
@@ -155,7 +152,7 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
               <Text
                 className={`text-[10px] font-semibold tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
               >
-                LEJÁRAT
+                {t("tickets.expiresLabel")}
               </Text>
               <Text
                 className="text-[11px] font-semibold"
@@ -165,6 +162,7 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
               </Text>
             </View>
           </View>
+
           {/* Status pill */}
           <View
             className="flex-row items-center gap-1.5 self-start px-2.5 py-[5px] rounded-xl mt-2 border"
@@ -181,7 +179,9 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
               className="text-[11px] font-bold"
               style={{ color: statusColor }}
             >
-              {expired ? "Lejárt" : `${days} nap van hátra`}
+              {expired
+                ? t("tickets.expiredStatus")
+                : t("tickets.daysLeft").replace("{{days}}", String(days))}
             </Text>
           </View>
         </View>
@@ -209,8 +209,9 @@ function TicketCard({ item, orderId, onPress, isDark }: any) {
 export default function TicketsListScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const setSelectedTicket = useTicketStore((s) => s.setSelectedTicket);
 
   useEffect(() => {
     authFetch(ENDPOINTS.orders)
@@ -229,6 +230,11 @@ export default function TicketsListScreen() {
   const successColor = isDark ? "#4ade80" : "#16a34a";
   const dangerColor = isDark ? "#f87171" : "#dc2626";
 
+  const navigateToDetail = (item: TicketItem, orderId: number) => {
+    setSelectedTicket(item, orderId);
+    router.push("/tickets-detail");
+  };
+
   return (
     <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
       <StatusBar
@@ -237,7 +243,6 @@ export default function TicketsListScreen() {
         translucent
       />
 
-      {/* Blob */}
       <View
         pointerEvents="none"
         className="absolute -top-[30px] -right-[30px] w-[180px] h-[180px] rounded-full"
@@ -252,7 +257,7 @@ export default function TicketsListScreen() {
         <Text
           className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
-          Jegyeim
+          {t("tickets.title")}
         </Text>
         <View className="flex-row gap-3 mt-1.5">
           <View className="flex-row items-center gap-1.5">
@@ -263,7 +268,7 @@ export default function TicketsListScreen() {
             <Text
               className={`text-xs ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              {active.length} aktív
+              {active.length} {t("tickets.active")}
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5">
@@ -274,7 +279,7 @@ export default function TicketsListScreen() {
             <Text
               className={`text-xs ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              {expired.length} lejárt
+              {expired.length} {t("tickets.expired")}
             </Text>
           </View>
         </View>
@@ -287,12 +292,12 @@ export default function TicketsListScreen() {
           <Text
             className={`text-xl font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            Nincs még jegyed
+            {t("tickets.noTickets")}
           </Text>
           <Text
             className={`text-xs text-center px-10 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
-            Vásárolj bérletet vagy belépőt a Vásárlás fülön
+            {t("tickets.noTicketsSub")}
           </Text>
         </View>
       ) : (
@@ -309,7 +314,7 @@ export default function TicketsListScreen() {
               <Text
                 className={`text-[11px] font-bold tracking-[2px] uppercase mb-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
               >
-                Aktív jegyek
+                {t("tickets.activeLabel")}
               </Text>
               {active.map(({ item, orderId }, idx) => (
                 <TicketCard
@@ -317,12 +322,8 @@ export default function TicketsListScreen() {
                   item={item}
                   orderId={orderId}
                   isDark={isDark}
-                  onPress={() =>
-                    navigation.navigate(
-                      "TicketsDetail" as never,
-                      { article: item } as never,
-                    )
-                  }
+                  t={t}
+                  onPress={() => navigateToDetail(item, orderId)}
                 />
               ))}
             </>
@@ -332,7 +333,7 @@ export default function TicketsListScreen() {
               <Text
                 className={`text-[11px] font-bold tracking-[2px] uppercase mt-4 mb-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
               >
-                Lejárt
+                {t("tickets.expiredStatus")}
               </Text>
               {expired.map(({ item, orderId }, idx) => (
                 <TicketCard
@@ -340,12 +341,8 @@ export default function TicketsListScreen() {
                   item={item}
                   orderId={orderId}
                   isDark={isDark}
-                  onPress={() =>
-                    navigation.navigate(
-                      "TicketsDetail" as never,
-                      { article: item } as never,
-                    )
-                  }
+                  t={t}
+                  onPress={() => navigateToDetail(item, orderId)}
                 />
               ))}
             </>

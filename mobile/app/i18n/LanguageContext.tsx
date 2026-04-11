@@ -1,10 +1,17 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import i18n, { Language } from "./index";
+import { getLocales } from "expo-localization";
 
 interface LanguageContextType {
   locale: Language;
   setLocale: (lang: Language) => void;
-  t: (scope: string) => string;
+  t: (scope: string, options?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
@@ -13,19 +20,34 @@ const LanguageContext = createContext<LanguageContextType>({
   t: (scope) => scope,
 });
 
+function detectSystemLanguage(): Language {
+  const code = getLocales()[0]?.languageCode ?? "en";
+  return code === "hu" ? "hu" : "en";
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Language>(
-    (i18n.locale as Language) || "en",
-  );
+  const [locale, setLocaleState] = useState<Language>(() => {
+    const sys = detectSystemLanguage();
+    i18n.locale = sys;
+    return sys;
+  });
 
   const setLocale = useCallback((lang: Language) => {
     i18n.locale = lang;
     setLocaleState(lang);
   }, []);
 
+  // t is re-created whenever locale changes, so all consumers re-render
   const t = useCallback(
-    (scope: string) => i18n.t(scope),
-    [locale], // re-evaluates when locale changes
+    (scope: string, options?: Record<string, string | number>): string => {
+      try {
+        return i18n.t(scope, options) ?? scope;
+      } catch {
+        return scope;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale],
   );
 
   return (
