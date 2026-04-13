@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { ENDPOINTS, saveTokens } from "./utils/auth";
 import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "./theme/ThemeContext";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function SignInScreen() {
   const { isDark } = useTheme();
@@ -63,14 +64,18 @@ export default function SignInScreen() {
       />
 
       {/* Purple gradient blob */}
-      <View
-        pointerEvents="none"
-        className="absolute -top-16 -left-16 w-[320px] h-[320px] rounded-full"
+
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
         style={{
-          backgroundColor: isDark
-            ? "rgba(124,58,237,0.2)"
-            : "rgba(124,58,237,0.07)",
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 720,
         }}
+        start={{ x: 0.3, y: 0.1 }}
+        end={{ x: 0.7, y: 0.9 }}
       />
 
       <ScrollView

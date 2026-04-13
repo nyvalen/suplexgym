@@ -25,7 +25,6 @@ export default function PurchaseFinalizationScreen() {
   const { t } = useLanguage();
   const tokenSet = isDark ? tokens.dark : tokens.light;
 
-  // Read cart from Zustand — no route params needed
   const cart = useCartStore((s) => s.cart);
   const clearCart = useCartStore((s) => s.clearCart);
 
@@ -36,12 +35,12 @@ export default function PurchaseFinalizationScreen() {
   const successScale = useRef(new Animated.Value(0)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
 
-  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+  // Each cart item is exactly 1 ticket, so total = sum of prices
+  const total = cart.reduce((s, i) => s + i.price, 0);
 
   const showSuccess = () => {
     setSuccess(true);
-    clearCart(); // wipe Zustand cart immediately
+    clearCart();
     Animated.parallel([
       Animated.spring(successScale, {
         toValue: 1,
@@ -55,8 +54,7 @@ export default function PurchaseFinalizationScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-    // Redirect to tickets so the user sees their new ticket
-    setTimeout(() => router.replace("/tickets-list"), 2200);
+    setTimeout(() => router.replace("/(tabs)/tickets-list"), 2200);
   };
 
   const handleCheckout = async () => {
@@ -137,10 +135,7 @@ export default function PurchaseFinalizationScreen() {
             {t("finalization.successTitle")}
           </Text>
           <Text className="text-base" style={{ color: tokenSet.textSub }}>
-            {t("finalization.successMessage").replace(
-              "{{count}}",
-              String(totalItems),
-            )}
+            {`${t("finalization.successMessage")}`}
           </Text>
         </Animated.View>
       </View>
@@ -155,7 +150,6 @@ export default function PurchaseFinalizationScreen() {
         backgroundColor={tokenSet.bg}
       />
 
-      {/* Blob */}
       <View
         pointerEvents="none"
         className="absolute -top-10 -right-10 w-[220px] h-[220px] rounded-full"
@@ -177,6 +171,9 @@ export default function PurchaseFinalizationScreen() {
           style={{ color: tokenSet.text }}
         >
           {t("finalization.title")}
+        </Text>
+        <Text className="text-sm mt-0.5" style={{ color: tokenSet.textSub }}>
+          {cart.length} {t("finalization.ticketCount")}
         </Text>
       </View>
 
@@ -201,64 +198,53 @@ export default function PurchaseFinalizationScreen() {
           </View>
         ) : (
           <>
-            <Text
-              className="text-[11px] font-bold tracking-[2px] uppercase mb-3"
-              style={{ color: tokenSet.textMuted }}
-            >
-              {t("finalization.items")}
-            </Text>
-
-            {cart.map((item) => (
-              <View
-                key={item.itemId}
-                className="rounded-[18px] border flex-row overflow-hidden mb-2.5"
-                style={{
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.05)"
-                    : "rgba(255,255,255,0.9)",
-                  borderColor: isDark
-                    ? "rgba(255,255,255,0.08)"
-                    : "rgba(0,0,0,0.06)",
-                }}
-              >
+            {/* Ticket list */}
+            {cart.map((item) => {
+              const color = CATEGORY_COLORS[item.type_id] ?? "#7c3aed";
+              return (
                 <View
-                  className="w-1"
+                  key={item.itemId}
+                  className="rounded-[18px] border flex-row overflow-hidden mb-2.5"
                   style={{
-                    backgroundColor: CATEGORY_COLORS[item.type_id] ?? "#7c3aed",
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.05)"
+                      : "rgba(255,255,255,0.9)",
+                    borderColor: isDark
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(0,0,0,0.06)",
                   }}
-                />
-                <View className="flex-1 p-3.5">
-                  <Text
-                    className="text-[15px] font-bold"
-                    style={{ color: tokenSet.text }}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text
-                    className="text-xs mt-0.5"
-                    style={{ color: tokenSet.textSub }}
-                  >
-                    {item.price.toLocaleString()} Ft / db · {item.validityDays}{" "}
-                    {t("purchase.days")}
-                  </Text>
+                >
+                  <View className="w-1" style={{ backgroundColor: color }} />
+                  <View className="flex-1 p-4">
+                    <Text
+                      className="text-[15px] font-bold"
+                      style={{ color: tokenSet.text }}
+                    >
+                      {item.name}
+                    </Text>
+                    <Text
+                      className="text-xs mt-1"
+                      style={{ color: tokenSet.textSub }}
+                    >
+                      {t("purchase.validFor")} {item.validityDays}{" "}
+                      {t("purchase.days")}
+                    </Text>
+                  </View>
+                  <View className="p-4 items-end justify-center">
+                    <Text
+                      className="text-[16px] font-extrabold"
+                      style={{ color: tokenSet.text }}
+                    >
+                      {item.price.toLocaleString()} Ft
+                    </Text>
+                  </View>
                 </View>
-                <View className="p-3.5 items-end justify-center gap-1.5">
-                  <Text className="text-xs" style={{ color: tokenSet.textSub }}>
-                    × {item.quantity}
-                  </Text>
-                  <Text
-                    className="text-[15px] font-bold"
-                    style={{ color: tokenSet.text }}
-                  >
-                    {(item.price * item.quantity).toLocaleString()} Ft
-                  </Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
 
-            {/* Summary */}
+            {/* Total summary */}
             <View
-              className="rounded-[20px] border p-[18px] mt-2 gap-2.5"
+              className="rounded-[20px] border p-[18px] mt-2"
               style={{
                 backgroundColor: isDark
                   ? "rgba(255,255,255,0.05)"
@@ -268,25 +254,6 @@ export default function PurchaseFinalizationScreen() {
                   : "rgba(0,0,0,0.06)",
               }}
             >
-              <View className="flex-row justify-between">
-                <Text className="text-sm" style={{ color: tokenSet.textSub }}>
-                  {t("finalization.itemCount")}
-                </Text>
-                <Text
-                  className="text-sm font-semibold"
-                  style={{ color: tokenSet.text }}
-                >
-                  {totalItems} db
-                </Text>
-              </View>
-              <View
-                className="h-px"
-                style={{
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(0,0,0,0.05)",
-                }}
-              />
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-base font-bold"
@@ -294,7 +261,7 @@ export default function PurchaseFinalizationScreen() {
                 >
                   {t("finalization.total")}
                 </Text>
-                <Text className="text-[22px] font-extrabold text-[#7c3aed]">
+                <Text className="text-[24px] font-extrabold text-[#7c3aed]">
                   {total.toLocaleString()} Ft
                 </Text>
               </View>

@@ -14,6 +14,7 @@ import { ENDPOINTS } from "./utils/auth";
 import { useTheme } from "./theme/ThemeContext";
 import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function SignUpScreen() {
   const { isDark } = useTheme();
@@ -101,14 +102,17 @@ export default function SignUpScreen() {
         translucent
       />
 
-      <View
-        pointerEvents="none"
-        className="absolute -top-16 -right-16 w-[300px] h-[300px] rounded-full"
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
         style={{
-          backgroundColor: isDark
-            ? "rgba(124,58,237,0.16)"
-            : "rgba(124,58,237,0.06)",
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 720,
         }}
+        start={{ x: 0.3, y: 0.1 }}
+        end={{ x: 0.7, y: 0.9 }}
       />
 
       <ScrollView

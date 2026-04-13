@@ -13,6 +13,7 @@ import { Dumbbell } from "lucide-react-native";
 import { TabBarContext } from "./context/tab-bar-context";
 import { useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -86,6 +87,30 @@ export default function WelcomeScreen() {
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
         }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 560,
+        }}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 0.4, y: 0.9 }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 600,
+          height: 560,
+        }}
+        start={{ x: 1, y: 0.5 }}
+        end={{ x: 0.8, y: 0.1 }}
       />
 
       <ScrollView

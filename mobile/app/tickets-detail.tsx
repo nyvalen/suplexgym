@@ -16,6 +16,7 @@ import { useTheme, tokens } from "./theme/ThemeContext";
 import { useLanguage } from "./i18n/LanguageContext";
 import { useTicketStore } from "./store";
 import { authFetch, ENDPOINTS } from "./utils/auth";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 const QR_SIZE = width - 80;
@@ -87,7 +88,7 @@ export default function TicketsDetailsScreen() {
         method: "POST",
       });
       if (res.ok) {
-        Alert.alert("✓", t("tickets.renewSuccess"), [
+        Alert.alert("", t("tickets.renewSuccess"), [
           { text: "OK", onPress: () => router.back() },
         ]);
       } else {
@@ -134,6 +135,18 @@ export default function TicketsDetailsScreen() {
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
         }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
+        start={{ x: 0, y: 0.9 }}
+        end={{ x: 0, y: 0 }}
       />
 
       {/* Header */}
@@ -216,7 +229,7 @@ export default function TicketsDetailsScreen() {
               >
                 {expired
                   ? t("tickets.expiredStatus")
-                  : t("tickets.daysLeft").replace("{{days}}", String(days))}
+                  : `${String(days)} ${t("tickets.daysLeft")}`}
               </Text>
             </View>
 

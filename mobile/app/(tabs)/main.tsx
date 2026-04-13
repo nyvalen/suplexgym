@@ -15,6 +15,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useNewsStore, NewsArticle } from "../store";
 
+import { LinearGradient } from "expo-linear-gradient";
 const OPENING_HOURS = [
   { open: "06:00", close: "22:00", isOpen: true },
   { open: "06:00", close: "22:00", isOpen: true },
@@ -80,7 +81,6 @@ export default function MainScreen() {
   const navigateToArticle = (article: NewsArticle) => {
     setSelectedArticle(article);
     router.push("/news-detail");
-    console.log("miert");
   };
 
   const todayIdx = getCurrentDayIndex();
@@ -100,7 +100,7 @@ export default function MainScreen() {
     <ScrollView
       className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
       contentContainerStyle={{
-        paddingBottom: Platform.OS === "android" ? 140 : 8,
+        paddingBottom: Platform.OS === "android" ? 140 : 20,
       }}
       showsVerticalScrollIndicator={false}
     >
@@ -130,6 +130,18 @@ export default function MainScreen() {
             : "rgba(124,58,237,0.04)",
         }}
       />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
+        start={{ x: 0, y: 0.9 }}
+        end={{ x: 0, y: 0 }}
+      />
 
       {/* ── Header ────────────────────────────────────────────── */}
       <View className="flex-row justify-between items-start px-5 pt-16 pb-6">
@@ -138,7 +150,7 @@ export default function MainScreen() {
             className={`text-xs mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
             {username
-              ? t("main.welcomeUser").replace("{{name}}", username)
+              ? `${t("main.welcomeUser")}, ${username}`
               : t("main.welcome")}
           </Text>
           <Text
@@ -435,19 +447,28 @@ export default function MainScreen() {
               onPress={() => navigateToArticle(n)}
               activeOpacity={0.75}
             >
-              <View
-                className="absolute left-0 top-0 bottom-0 w-[50px] rounded-l-2xl"
-                style={{ backgroundColor: "rgba(124,58,237,0.4)" }}
+              <View className="absolute left-0 top-0 bottom-0 w-[50px] rounded-l-2xl" />
+              <LinearGradient
+                colors={["rgba(124,58,237,0.8)", "rgba(124,58,237,0.3)"]}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  height: 70,
+                }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
               />
               <View className="flex-1 pl-2">
                 <Text
-                  className={`text-sm font-semibold leading-5 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+                  className={`text-sm font-semibold leading-5 ${isDark ? "text-[#bbbbbe]" : "text-[#2e2e2e]"}`}
                   numberOfLines={2}
                 >
                   {n.title}
                 </Text>
                 <Text
-                  className={`text-[11px] mt-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+                  className={`text-[11px] mt-1 ${isDark ? "text-[#9d9dab]" : "text-[#e6e6ff]"}`}
                 >
                   {new Date(n.createdAt).toLocaleDateString()}
                 </Text>

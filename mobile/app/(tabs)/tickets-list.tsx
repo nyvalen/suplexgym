@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   StatusBar,
   ActivityIndicator,
   Animated,
+  Platform,
 } from "react-native";
 import { authFetch, ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTicketStore, TicketItem } from "../store";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface Order {
   id: number;
@@ -181,7 +183,7 @@ function TicketCard({ item, orderId, onPress, isDark, t }: any) {
             >
               {expired
                 ? t("tickets.expiredStatus")
-                : t("tickets.daysLeft").replace("{{days}}", String(days))}
+                : `${String(days)} ${t("tickets.daysLeft")}`}
             </Text>
           </View>
         </View>
@@ -213,13 +215,26 @@ export default function TicketsListScreen() {
   const { t } = useLanguage();
   const setSelectedTicket = useTicketStore((s) => s.setSelectedTicket);
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
+    setLoading(true);
     authFetch(ENDPOINTS.orders)
       .then((r) => (r.ok ? r.json() : []))
       .then(setOrders)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  // Reload whenever this screen comes back into focus (e.g. after renew)
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders();
+    }, [fetchOrders]),
+  );
 
   const allItems = orders.flatMap((o) =>
     o.items.map((item) => ({ item, orderId: o.id })),
@@ -236,7 +251,12 @@ export default function TicketsListScreen() {
   };
 
   return (
-    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
+    <View
+      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
+      style={{
+        paddingBottom: Platform.OS === "android" ? 140 : 60,
+      }}
+    >
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -254,6 +274,18 @@ export default function TicketsListScreen() {
       />
 
       <View className="px-5 pt-16 pb-5">
+        <LinearGradient
+          colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            height: 1200,
+          }}
+          start={{ x: 0, y: 0.9 }}
+          end={{ x: 0, y: 0 }}
+        />
         <Text
           className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >

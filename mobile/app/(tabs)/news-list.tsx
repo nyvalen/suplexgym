@@ -8,12 +8,14 @@ import {
   Animated,
   StatusBar,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { ENDPOINTS } from "@/app/utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useNewsStore, NewsArticle } from "../store";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 const FALLBACK =
   "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
@@ -161,7 +163,12 @@ export default function NewsListScreen() {
   const rest = news.slice(1);
 
   return (
-    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
+    <View
+      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
+      style={{
+        paddingBottom: Platform.OS === "android" ? 140 : 60,
+      }}
+    >
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -176,6 +183,18 @@ export default function NewsListScreen() {
             ? "rgba(124,58,237,0.1)"
             : "rgba(124,58,237,0.05)",
         }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
+        start={{ x: 0, y: 0.9 }}
+        end={{ x: 0, y: 0 }}
       />
 
       <View className="px-5 pt-16 pb-4">

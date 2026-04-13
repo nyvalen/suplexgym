@@ -9,12 +9,14 @@ import {
   StatusBar,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from "react-native";
 import { authFetch, ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useCartStore } from "../store";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface TicketItem {
   id: number;
@@ -86,16 +88,7 @@ function CategoryChip({ cat, active, onPress, isDark, label }: any) {
   );
 }
 
-function TicketCard({
-  item,
-  qty,
-  onAdd,
-  onDecrement,
-  onRemove,
-  adding,
-  isDark,
-  t,
-}: any) {
+function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
   const cat: Category = TYPE_MAP[item.type_id] ?? "all";
   const color = CATEGORY_COLORS[cat];
 
@@ -106,10 +99,15 @@ function TicketCard({
         backgroundColor: isDark
           ? "rgba(255,255,255,0.05)"
           : "rgba(255,255,255,0.9)",
-        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+        borderColor: inCart
+          ? color + "66"
+          : isDark
+            ? "rgba(255,255,255,0.08)"
+            : "rgba(0,0,0,0.06)",
       }}
     >
       <View className="w-1" style={{ backgroundColor: color }} />
+
       <View className="flex-1 p-4 gap-1.5">
         <View className="flex-row justify-between items-center">
           <View
@@ -150,79 +148,32 @@ function TicketCard({
             ⏱ {item.validityDays} {t("purchase.days")}
           </Text>
 
-          {qty > 0 ? (
-            /* ── In-cart controls: remove / count / add ── */
+          {inCart ? (
+            /* ── Already in cart — show "Added" chip + remove button ── */
             <View className="flex-row items-center gap-2">
               <TouchableOpacity
-                onPress={qty === 1 ? onRemove : onDecrement}
+                onPress={onRemove}
                 activeOpacity={0.8}
-                className="w-[36px] h-[36px] rounded-[11px] items-center justify-center border"
+                className="w-[42px] h-[42px] rounded-[11px] items-center justify-center border"
                 style={{
-                  borderColor:
-                    qty === 1
-                      ? isDark
-                        ? "rgba(248,113,113,0.4)"
-                        : "rgba(220,38,38,0.3)"
-                      : isDark
-                        ? "rgba(255,255,255,0.15)"
-                        : "rgba(0,0,0,0.12)",
-                  backgroundColor:
-                    qty === 1
-                      ? isDark
-                        ? "rgba(248,113,113,0.1)"
-                        : "rgba(220,38,38,0.06)"
-                      : isDark
-                        ? "rgba(255,255,255,0.07)"
-                        : "rgba(0,0,0,0.04)",
+                  borderColor: isDark
+                    ? "rgba(248,113,113,0.4)"
+                    : "rgba(220,38,38,0.3)",
+                  backgroundColor: isDark
+                    ? "rgba(248,113,113,0.1)"
+                    : "rgba(220,38,38,0.06)",
                 }}
               >
                 <Text
-                  className="text-[18px] font-bold leading-5"
-                  style={{
-                    color:
-                      qty === 1
-                        ? isDark
-                          ? "#f87171"
-                          : "#dc2626"
-                        : isDark
-                          ? "#a1a1aa"
-                          : "#52525b",
-                  }}
+                  className="text-[16px] font-bold"
+                  style={{ color: isDark ? "#f87171" : "#dc2626" }}
                 >
-                  {qty === 1 ? "✕" : "−"}
+                  ✕
                 </Text>
-              </TouchableOpacity>
-
-              <View
-                className="w-[32px] h-[32px] rounded-[10px] items-center justify-center border"
-                style={{
-                  borderColor: color + "55",
-                  backgroundColor: color + "18",
-                }}
-              >
-                <Text className="text-[14px] font-extrabold" style={{ color }}>
-                  {qty}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={onAdd}
-                disabled={adding}
-                activeOpacity={0.85}
-                className="w-[36px] h-[36px] rounded-[11px] items-center justify-center"
-                style={[{ backgroundColor: color }, adding && { opacity: 0.6 }]}
-              >
-                {adding ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text className="text-white text-[22px] font-light leading-6">
-                    +
-                  </Text>
-                )}
               </TouchableOpacity>
             </View>
           ) : (
-            /* ── Not in cart — single add button ── */
+            /* ── Not in cart — add button ── */
             <TouchableOpacity
               onPress={onAdd}
               disabled={adding}
@@ -247,8 +198,8 @@ function TicketCard({
 
 function CartBar({ cart, onCheckout, isDark, t }: any) {
   const translateY = useRef(new Animated.Value(100)).current;
-  const total = cart.reduce((s: number, i: any) => s + i.price * i.quantity, 0);
-  const count = cart.reduce((s: number, i: any) => s + i.quantity, 0);
+  const total = cart.reduce((s: number, i: any) => s + i.price, 0);
+  const count = cart.length;
 
   useEffect(() => {
     Animated.spring(translateY, {
@@ -308,7 +259,6 @@ export default function PurchaseTicketsScreen() {
 
   const cart = useCartStore((s) => s.cart);
   const addItem = useCartStore((s) => s.addItem);
-  const decrementItem = useCartStore((s) => s.decrementItem);
   const removeItem = useCartStore((s) => s.removeItem);
 
   const CATEGORY_LABELS: Record<Category, string> = {
@@ -326,10 +276,13 @@ export default function PurchaseTicketsScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Add one to server cart + Zustand
+  // Add one ticket to server cart + Zustand (quantity always 1)
   const addToCart = useCallback(
     async (item: TicketItem) => {
       if (adding[item.id]) return;
+      // Already in cart — do nothing (button is hidden, but guard anyway)
+      if (cart.find((c) => c.itemId === item.id)) return;
+
       setAdding((prev) => ({ ...prev, [item.id]: true }));
       try {
         const res = await authFetch(ENDPOINTS.cartAdd, {
@@ -352,37 +305,10 @@ export default function PurchaseTicketsScreen() {
         setAdding((prev) => ({ ...prev, [item.id]: false }));
       }
     },
-    [adding, addItem],
+    [adding, addItem, cart],
   );
 
-  // Decrement by 1 (optimistic, then sync)
-  const decrementFromCart = useCallback(
-    async (item: TicketItem) => {
-      const cartItem = cart.find((c) => c.itemId === item.id);
-      if (!cartItem || cartItem.quantity <= 1) return;
-      decrementItem(item.id);
-      try {
-        const cartRes = await authFetch(ENDPOINTS.cart);
-        if (cartRes.ok) {
-          const serverCart = await cartRes.json();
-          const serverItem = serverCart.items?.find(
-            (i: any) => i.item_id === item.id,
-          );
-          if (serverItem) {
-            await authFetch(ENDPOINTS.cartItem(serverItem.id), {
-              method: "PUT",
-              body: JSON.stringify({ quantity: cartItem.quantity - 1 }),
-            });
-          }
-        }
-      } catch {
-        addItem({ ...cartItem, quantity: 1 });
-      }
-    },
-    [cart, decrementItem, addItem],
-  );
-
-  // Remove entirely (optimistic, then sync)
+  // Remove entirely from server cart + Zustand
   const removeFromCart = useCallback(
     async (item: TicketItem) => {
       const cartItem = cart.find((c) => c.itemId === item.id);
@@ -420,7 +346,12 @@ export default function PurchaseTicketsScreen() {
   });
 
   return (
-    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
+    <View
+      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
+      style={{
+        paddingBottom: Platform.OS === "android" ? 140 : 66,
+      }}
+    >
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -435,6 +366,18 @@ export default function PurchaseTicketsScreen() {
             ? "rgba(124,58,237,0.12)"
             : "rgba(124,58,237,0.06)",
         }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
+        start={{ x: 0, y: 0.9 }}
+        end={{ x: 0, y: 0 }}
       />
 
       <View className="px-5 pt-16 pb-3">
@@ -502,23 +445,29 @@ export default function PurchaseTicketsScreen() {
           data={filtered}
           keyExtractor={(i) => String(i.id)}
           renderItem={({ item }) => {
-            const qty = cart.find((c) => c.itemId === item.id)?.quantity ?? 0;
+            const inCart = !!cart.find((c) => c.itemId === item.id);
             return (
               <TicketCard
                 item={item}
-                qty={qty}
+                inCart={inCart}
                 adding={!!adding[item.id]}
                 isDark={isDark}
                 t={t}
                 onAdd={() => addToCart(item)}
-                onDecrement={() => decrementFromCart(item)}
                 onRemove={() => removeFromCart(item)}
               />
             );
           }}
           contentContainerStyle={{
             paddingHorizontal: 20,
-            paddingBottom: 130,
+            paddingBottom:
+              Platform.OS === "android"
+                ? cart.length > 0
+                  ? 200
+                  : 160
+                : cart.length > 0
+                  ? 130
+                  : 40,
             gap: 12,
           }}
           showsVerticalScrollIndicator={false}

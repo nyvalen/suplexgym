@@ -15,7 +15,10 @@ export default function RootLayout() {
         <ThemeProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="sign-in" />
+              <Stack.Screen
+                name="sign-in"
+                options={{ presentation: "modal" }}
+              />
               <Stack.Screen
                 name="sign-up"
                 options={{ presentation: "modal" }}

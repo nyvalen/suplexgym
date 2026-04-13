@@ -19,6 +19,7 @@ import { Language } from "../i18n";
 import { ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface UserProfile {
   name: string;
@@ -277,7 +278,12 @@ export default function ProfileScreen() {
   );
 
   return (
-    <View className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}>
+    <View
+      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
+      style={{
+        paddingBottom: Platform.OS === "android" ? 140 : 66,
+      }}
+    >
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -292,6 +298,18 @@ export default function ProfileScreen() {
             ? "rgba(124,58,237,0.12)"
             : "rgba(124,58,237,0.05)",
         }}
+      />
+      <LinearGradient
+        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
+        start={{ x: 0, y: 0.9 }}
+        end={{ x: 0, y: 0 }}
       />
 
       <KeyboardAvoidingView
@@ -330,29 +348,6 @@ export default function ProfileScreen() {
             {/* Appearance */}
             <Card>
               <SectionTitle title={t("profile.appearance")} />
-              <View
-                className="flex-row justify-between items-center rounded-xl px-3.5 py-3 mb-2.5 border"
-                style={inputStyle}
-              >
-                <Text
-                  className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                >
-                  {t("profile.animations")}
-                </Text>
-                <Switch
-                  value={animationsOn}
-                  onValueChange={setAnimationsOn}
-                  trackColor={{
-                    false: isDark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.1)",
-                    true: "rgba(124,58,237,0.5)",
-                  }}
-                  thumbColor={
-                    animationsOn ? "#7c3aed" : isDark ? "#71717a" : "#a1a1aa"
-                  }
-                />
-              </View>
 
               {/* Language */}
               <View
