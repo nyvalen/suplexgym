@@ -88,14 +88,6 @@ export default function MainScreen() {
   const today = OPENING_HOURS[todayIdx];
 
   const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-
-  const STATS = [
-    { value: "1 240", label: t("main.stats.members") },
-    { value: "34", label: t("main.stats.workouts") },
-    { value: "12", label: t("main.stats.trainers") },
-    { value: "8", label: t("main.stats.years") },
-  ];
-
   return (
     <ScrollView
       className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
@@ -144,7 +136,7 @@ export default function MainScreen() {
       />
 
       {/* ── Header ────────────────────────────────────────────── */}
-      <View className="flex-row justify-between items-start px-5 pt-16 pb-6">
+      <View className="flex-row justify-between items-start px-5 pt-8 pb-8">
         <View>
           <Text
             className={`text-xs mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
@@ -176,36 +168,6 @@ export default function MainScreen() {
             </Text>
           </View>
         )}
-      </View>
-
-      {/* ── Stats grid ────────────────────────────────────────── */}
-      <View className="flex-row flex-wrap gap-2.5 px-5 mb-7">
-        {STATS.map((s) => (
-          <View
-            key={s.label}
-            className="rounded-[20px] p-4 border"
-            style={{
-              width: "47%",
-              backgroundColor: isDark
-                ? "rgba(255,255,255,0.05)"
-                : "rgba(255,255,255,0.8)",
-              borderColor: isDark
-                ? "rgba(255,255,255,0.08)"
-                : "rgba(0,0,0,0.06)",
-            }}
-          >
-            <Text
-              className={`text-[26px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-            >
-              {s.value}
-            </Text>
-            <Text
-              className={`text-[11px] mt-0.5 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
-            >
-              {s.label}
-            </Text>
-          </View>
-        ))}
       </View>
 
       {/* ── Opening hours ─────────────────────────────────────── */}
@@ -348,7 +310,7 @@ export default function MainScreen() {
                 className="flex-1 items-center rounded-xl py-2"
                 style={{
                   backgroundColor: isToday
-                    ? "#7c3aed"
+                    ? "rgba(124,58,237,0.9)"
                     : h.isOpen
                       ? isDark
                         ? "rgba(255,255,255,0.06)"
@@ -488,7 +450,7 @@ export default function MainScreen() {
             : "rgba(124,58,237,0.07)",
           borderColor: isDark ? "rgba(124,58,237,0.3)" : "rgba(124,58,237,0.2)",
         }}
-        onPress={() => router.push("/purchase")}
+        onPress={() => router.push("/rules")}
         activeOpacity={0.8}
       >
         <View className="flex-1 ml-6">

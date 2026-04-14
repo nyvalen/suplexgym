@@ -214,7 +214,6 @@ export default function NewsListScreen() {
         <ActivityIndicator color="#7c3aed" className="flex-1" />
       ) : news.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3">
-          <Text className="text-5xl">📰</Text>
           <Text
             className={`text-lg font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >

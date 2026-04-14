@@ -127,7 +127,7 @@ export default function SignUpScreen() {
       >
         <Pressable onPress={() => router.back()} className="mb-9">
           <Text
-            className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+            className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
             ← Vissza
           </Text>
@@ -271,7 +271,7 @@ export default function SignUpScreen() {
             )}
 
             <Pressable
-              className="bg-[#7c3aed] rounded-[18px] py-[18px] items-center mt-1 active:opacity-75"
+              className="bg-[rgba(124,58,237,0.8)] rounded-[18px] py-[18px] items-center mt-1 active:opacity-75"
               onPress={handleRegister}
               disabled={loading}
               style={loading ? { opacity: 0.75 } : undefined}
@@ -288,14 +288,7 @@ export default function SignUpScreen() {
             <Pressable
               onPress={() => router.push("/sign-in")}
               className="items-center active:opacity-70"
-            >
-              <Text
-                className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
-              >
-                Már van fiókod?{" "}
-                <Text className="text-[#8b5cf6] font-bold">Bejelentkezés</Text>
-              </Text>
-            </Pressable>
+            ></Pressable>
           </View>
         )}
       </ScrollView>

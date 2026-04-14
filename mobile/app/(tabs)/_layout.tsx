@@ -2,6 +2,7 @@ import { NativeTabs, Label, Icon } from "expo-router/unstable-native-tabs";
 import React, { useState } from "react";
 import { TabBarContext } from "../context/tab-bar-context";
 import { useLanguage } from "../i18n/LanguageContext";
+import { DynamicColorIOS } from "react-native";
 
 export default function TabLayout() {
   const [isTabBarHidden, setIsTabBarHidden] = useState(false);
@@ -9,7 +10,21 @@ export default function TabLayout() {
 
   return (
     <TabBarContext value={{ setIsTabBarHidden }}>
-      <NativeTabs hidden={isTabBarHidden}>
+      <NativeTabs
+        hidden={isTabBarHidden}
+        labelStyle={{
+          // For the text color
+          color: DynamicColorIOS({
+            dark: "rgba(124,58,237,0.8)",
+            light: "rgba(124,58,237,1)",
+          }),
+        }}
+        // For the selected icon color
+        tintColor={DynamicColorIOS({
+          dark: "#rgba(124,58,237,0.8)",
+          light: "rgba(124,58,237,1)",
+        })}
+      >
         <NativeTabs.Trigger name="main">
           <Icon
             sf={{ default: "house", selected: "house.fill" }}

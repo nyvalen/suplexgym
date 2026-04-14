@@ -148,7 +148,7 @@ export default function WelcomeScreen() {
                 SUPLEX GYM
               </Text>
               <Text
-                className={`text-[10px] tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+                className={`text-[10px] tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
               >
                 Alapítva 2017
               </Text>
@@ -199,7 +199,7 @@ export default function WelcomeScreen() {
                   {s.value}
                 </Text>
                 <Text
-                  className={`text-[10px] mt-0.5 text-center ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+                  className={`text-[10px] mt-0.5 text-center ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
                 >
                   {s.label}
                 </Text>
@@ -210,7 +210,7 @@ export default function WelcomeScreen() {
           {/* CTA buttons */}
           <View className="gap-3 mb-8">
             <Pressable
-              className="rounded-[18px] py-[18px] items-center bg-[#7c3aed] border border-[rgba(124,58,237,0.5)] active:opacity-80"
+              className="rounded-[18px] py-[18px] items-center  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
               onPress={() => router.push("/sign-in")}
             >
               <Text className="text-white text-base font-bold tracking-[0.3px]">
@@ -240,7 +240,7 @@ export default function WelcomeScreen() {
 
           {/* Quote */}
           <Text
-            className={`text-xs text-center italic leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+            className={`text-xs text-center italic leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
             „Az erő következetességben gyökerezik."
           </Text>

@@ -418,12 +418,13 @@ export default function PurchaseTicketsScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="flex-grow-0 mb-3.5"
+        className="flex-grow-0 mb-2"
         contentContainerStyle={{
           paddingHorizontal: 20,
           gap: 8,
           flexDirection: "row",
           paddingRight: 20,
+          marginBottom: 16,
         }}
       >
         {(["all", "daily", "monthly", "yearly"] as Category[]).map((cat) => (
