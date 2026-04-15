@@ -116,7 +116,7 @@ export default function NewsPage() {
 
       <div className="relative min-h-screen w-full">
         {/* Hero-style header — matches main page gradient */}
-        <div className="bg-radial-[at_120%_30%] from-purple-600 to-65% px-4 pt-6 pb-8 md:px-6">
+        <div className="bg-radial-[at_300%_50%] from-purple-600 to-85% px-4 pt-6 pb-8 md:px-6">
           <div className="mb-6">
             <Link
               to="/"

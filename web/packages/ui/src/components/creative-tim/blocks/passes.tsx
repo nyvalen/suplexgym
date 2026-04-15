@@ -5,13 +5,13 @@ import { Check } from "lucide-react"
 import { Button } from "../../button"
 import { useTranslation } from "react-i18next"
 
-const PASS_KEYS = ["single", "tenPass", "monthly", "annual"] as const
-const FEATURED: (typeof PASS_KEYS)[number] = "monthly"
+const PASS_KEYS = ["daily", "monthly", "threemonths", "annual"] as const
+const FEATURED: (typeof PASS_KEYS)[number] = "threemonths"
 
 const ACCENT: Record<(typeof PASS_KEYS)[number], string> = {
-  single: "border-white/[0.08]",
-  tenPass: "border-white/[0.08]",
+  daily: "border-white/[0.08]",
   monthly: "border-white/[0.08]",
+  threemonths: "border-white/[0.08]",
   annual: "border-white/[0.08]",
 }
 

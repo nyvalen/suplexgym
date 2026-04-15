@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./reactquery";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -6,7 +6,39 @@ import { PortalHost } from "@rn-primitives/portal";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { ThemeProvider } from "./theme/ThemeContext";
 import "./global.css";
-import { View } from "react-native";
+import { useEffect } from "react";
+import {
+  checkAndRefreshSession,
+  clearTokens,
+  registerSessionRefreshListener,
+} from "./utils/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+function SessionGuard() {
+  useEffect(() => {
+    // On mount: verify the session is valid
+    const verify = async () => {
+      const hasToken = !!(await AsyncStorage.getItem("accessToken"));
+      if (!hasToken) return; // Not logged in — nothing to check
+
+      const valid = await checkAndRefreshSession();
+      if (!valid) {
+        await clearTokens();
+        router.replace("/");
+      }
+    };
+    verify();
+
+    // Register foreground listener — logs out if session expired in background
+    const unsubscribe = registerSessionRefreshListener(async () => {
+      router.replace("/");
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return null;
+}
 
 export default function RootLayout() {
   return (
@@ -14,6 +46,7 @@ export default function RootLayout() {
       <LanguageProvider>
         <ThemeProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
+            <SessionGuard />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen
                 name="sign-in"
@@ -27,6 +60,7 @@ export default function RootLayout() {
               <Stack.Screen name="purchase-finalization" />
               <Stack.Screen name="news-detail" />
               <Stack.Screen name="tickets-detail" />
+              <Stack.Screen name="rules" />
             </Stack>
             <PortalHost />
           </GestureHandlerRootView>

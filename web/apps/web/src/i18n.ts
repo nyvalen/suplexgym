@@ -14,7 +14,7 @@ const en = {
   },
   hero: {
     badge: "Suplex Gym",
-    est: "Est. 2017",
+    est: "Est. 2024",
     headline1: "Built for",
     headline2: "limitless",
     headline3: "potential.",
@@ -56,20 +56,19 @@ const en = {
     buyNow: "Buy now",
     learnMore: "Learn more",
     items: {
-      single: {
-        name: "Single entry",
-        price: "2,900",
-        unit: "/ entry",
+      daily: {
+        name: "Daily",
+        price: "2,300",
+        unit: "/ ticket",
         desc: "Drop in whenever you like. No commitment required.",
         features: [
           "Full facility access",
-          "Valid for 1 visit",
-          "No expiry date",
+          "Valid for a day",
           "Locker included",
         ],
       },
-      tenPass: {
-        name: "10-entry pass",
+      monthly: {
+        name: "Monthly",
         price: "24,900",
         unit: "/ pass",
         desc: "Perfect for those who train a few times a week.",
@@ -78,10 +77,14 @@ const en = {
           "10 entries — use anytime",
           "Valid 6 months",
           "Guest pass included",
+          "Unlimited access",
+          "All group classes included",
+          "1 personal training session",
+          "Towel service",
         ],
       },
-      monthly: {
-        name: "Monthly",
+      threemonths: {
+        name: "Seasonal",
         price: "12,900",
         unit: "/ month",
         desc: "Unlimited access, billed monthly. Cancel anytime.",
@@ -194,7 +197,8 @@ const en = {
     emailPlaceholder: "user@example.com",
     password: "Password",
     submit: "Sign In",
-    errorPermission: "Permission denied. Use admin account to access this page.",
+    errorPermission:
+      "Permission denied. Use admin account to access this page.",
     errorDefault: "Invalid email or password. Please try again.",
   },
   admin: {
@@ -221,7 +225,7 @@ const hu: typeof en = {
   },
   hero: {
     badge: "Suplex Edzőterem",
-    est: "Alapítva 2017",
+    est: "Alapítva 2024",
     headline1: "Épülve",
     headline2: "határtalan",
     headline3: "lehetőségre.",
@@ -263,7 +267,7 @@ const hu: typeof en = {
     buyNow: "Megveszem",
     learnMore: "Részletek",
     items: {
-      single: {
+      daily: {
         name: "Egyszer belépő",
         price: "2 900",
         unit: "/ alkalom",
@@ -275,7 +279,7 @@ const hu: typeof en = {
           "Öltöző beleértve",
         ],
       },
-      tenPass: {
+      monthly: {
         name: "10 alkalmas bérlet",
         price: "24 900",
         unit: "/ bérlet",
@@ -287,7 +291,7 @@ const hu: typeof en = {
           "Vendég belépő mellékelve",
         ],
       },
-      monthly: {
+      threemonths: {
         name: "Havi bérlet",
         price: "12 900",
         unit: "/ hó",

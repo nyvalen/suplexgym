@@ -36,17 +36,17 @@ export default function Hero() {
     { label: t("stats.members"), value: "1,240" },
     { label: t("stats.classes"), value: "34" },
     { label: t("stats.trainers"), value: "12" },
-    { label: t("stats.years"), value: "8" },
+    { label: t("stats.years"), value: "2" },
   ]
 
   return (
     <div
       id="hero"
-      className="flex scroll-mt-4 flex-col gap-0 bg-radial-[at_120%_30%] from-purple-600 to-65% px-4 pt-6 pb-10 md:px-6"
+      className="flex scroll-mt-4 flex-col gap-0 bg-radial-[at_70%_50%] from-purple-600 to-70% px-4 pt-6 pb-10 md:px-6"
     >
       {/* Main hero */}
       <section className="relative mb-3 grid min-h-[560px] grid-cols-1 overflow-hidden rounded-2xl lg:grid-cols-[1fr_1.1fr]">
-        <div className="to-zinc-650 bg-zinc-650 relative z-10 flex flex-col justify-end bg-radial-[at_-20%_30%] from-purple-900 to-60% p-8 md:p-12">
+        <div className="to-zinc-650 bg-zinc-650 relative z-10 flex flex-col justify-end bg-radial-[at_-10%_30%] from-purple-900 to-70% p-8 md:p-12">
           <div className="mb-6 flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10">
               <Dumbbell className="h-3.5 w-3.5 text-white" />

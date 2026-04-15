@@ -185,6 +185,48 @@ const translations = {
       networkError: "Network error.",
       wrongPassword: "Current password is incorrect.",
     },
+    rules: {
+      title: "House Rules",
+      subtitle:
+        "To keep Suplex Gym a great place for everyone, please follow these simple guidelines.",
+      footer:
+        "Repeated violations may result in membership suspension. Thank you for keeping our gym a great place.",
+      cta: "Browse Tickets →",
+      items: {
+        footwear: {
+          title: "Proper Footwear Required",
+          desc: "Closed-toe athletic shoes must be worn at all times on the gym floor.",
+        },
+        hygiene: {
+          title: "Personal Hygiene",
+          desc: "Use a towel on all equipment. Wipe down machines after use. Deodorant is appreciated.",
+        },
+        equipment: {
+          title: "Return Equipment",
+          desc: "Re-rack weights and return all equipment to its place after use.",
+        },
+        phone: {
+          title: "Phone Courtesy",
+          desc: "Keep calls brief and step away from equipment. No video recording without consent.",
+        },
+        noise: {
+          title: "Noise & Grunting",
+          desc: "Controlled effort sounds are fine — excessive screaming or dropping weights isn't.",
+        },
+        respect: {
+          title: "Respect Others",
+          desc: "No unsolicited advice. Be patient with waiting for equipment. Greet staff.",
+        },
+        substances: {
+          title: "No Alcohol or Drugs",
+          desc: "Training under the influence is strictly prohibited and grounds for immediate removal.",
+        },
+        peak: {
+          title: "Be Mindful During Peak Hours",
+          desc: "Limit cardio to 30 min and avoid occupying multiple stations simultaneously.",
+        },
+      },
+    },
   },
   hu: {
     tabs: {
@@ -368,6 +410,48 @@ const translations = {
       saveError: "Nem sikerült menteni.",
       networkError: "Hálózati hiba.",
       wrongPassword: "A jelenlegi jelszó helytelen.",
+    },
+    rules: {
+      title: "Házirend",
+      subtitle:
+        "Hogy a Suplex Gym mindenki számára kellemes hely maradjon, kérjük tartsd be ezeket az egyszerű szabályokat.",
+      footer:
+        "Ismételt szabályszegés esetén a tagság felfüggeszthető. Köszönjük, hogy segíted jó hangulatban tartani az edzőtermet.",
+      cta: "Jegyek böngészése →",
+      items: {
+        footwear: {
+          title: "Megfelelő lábbeli kötelező",
+          desc: "Az edzőteremben mindig zárt orrú sportcipőt kell viselni.",
+        },
+        hygiene: {
+          title: "Személyi higiénia",
+          desc: "Minden gépen használj törölközőt. Edzés után töröld le a gépeket. Dezodor használata elvárt.",
+        },
+        equipment: {
+          title: "Tedd vissza az eszközöket",
+          desc: "Edzés után tedd vissza a súlyokat és minden eszközt a helyére.",
+        },
+        phone: {
+          title: "Telefon-etikett",
+          desc: "Hívásokat tartsd rövidre, és lépj el a géptől. Hozzájárulás nélkül ne készíts videót másokról.",
+        },
+        noise: {
+          title: "Hangoskodás",
+          desc: "Kontrollált erőfeszítés-hangok rendben vannak – de a túlzott kiabálás és súlydobálás nem.",
+        },
+        respect: {
+          title: "Tiszteld a többieket",
+          desc: "Ne adj kéretlen tanácsokat. Légy türelmes a gépekre várakozásnál. Köszönj a személyzetnek.",
+        },
+        substances: {
+          title: "Alkohol és drogok tilosak",
+          desc: "Alkohol vagy egyéb szer hatása alatt való edzés szigorúan tilos, azonnali eltávolítást von maga után.",
+        },
+        peak: {
+          title: "Csúcsidőben légy figyelmes",
+          desc: "Csúcsidőben korlátozd a kardió edzést 30 percre, és ne foglalj le egyszerre több állomást.",
+        },
+      },
     },
   },
 };

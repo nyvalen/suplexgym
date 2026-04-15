@@ -7,6 +7,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Platform,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +17,10 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useNewsStore, NewsArticle } from "../store";
 
 import { LinearGradient } from "expo-linear-gradient";
+
+const GYM_PHOTO =
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=1200&q=80";
+
 const OPENING_HOURS = [
   { open: "06:00", close: "22:00", isOpen: true },
   { open: "06:00", close: "22:00", isOpen: true },
@@ -168,6 +173,33 @@ export default function MainScreen() {
             </Text>
           </View>
         )}
+      </View>
+
+      {/* ── Gym Photo ─────────────────────────────────────────── */}
+      <View className="mx-5 mb-7 rounded-[22px] overflow-hidden h-[180px]">
+        <Image
+          source={{ uri: GYM_PHOTO }}
+          className="w-full h-full"
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.55)"]}
+          style={{ position: "absolute", inset: 0 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        />
+        <View
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(124,58,237,0.12)" }}
+        />
+        <View className="absolute bottom-4 left-4 right-4">
+          <Text className="text-white text-[11px] font-bold tracking-[2px] uppercase opacity-70">
+            Est. 2017
+          </Text>
+          <Text className="text-white text-[15px] font-extrabold tracking-[-0.3px]">
+            {t("main.openNow") && gymOpen ? t("main.openNow") : t("main.closedNow")}
+          </Text>
+        </View>
       </View>
 
       {/* ── Opening hours ─────────────────────────────────────── */}

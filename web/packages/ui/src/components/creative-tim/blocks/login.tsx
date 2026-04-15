@@ -10,6 +10,26 @@ import { useTranslation } from "react-i18next"
 import { Language } from "../../language"
 import { Link } from "react-router-dom"
 
+/** Decode a JWT payload without verifying the signature */
+function decodeTokenPayload(token: string): Record<string, string> | null {
+  try {
+    const payload = token.split(".")[1]
+    if (!payload) return null
+    return JSON.parse(atob(payload))
+  } catch {
+    return null
+  }
+}
+
+/** Returns true if the stored access token is present and not yet expired */
+function isTokenStillValid(token: string): boolean {
+  const payload = decodeTokenPayload(token)
+  if (!payload) return false
+  const exp = Number(payload.exp ?? 0)
+  // Give a 10-second grace window
+  return Date.now() / 1000 < exp - 10
+}
+
 export default function Login({
   className,
   ...props
@@ -19,7 +39,59 @@ export default function Login({
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [error, setError] = React.useState("")
+  const [checking, setChecking] = React.useState(true)
   const { isLoggedIn, setIsLoggedIn, setUserId } = React.useContext(AuthContext)
+
+  // ── Auto-redirect if already logged in ─────────────────────────────────────
+  React.useEffect(() => {
+    const token = localStorage.getItem("accessToken")
+    if (token && token !== "") {
+      if (isTokenStillValid(token)) {
+        // Token is valid — go straight to admin
+        window.location.replace("/admin")
+        return
+      }
+
+      // Token expired — try refresh before deciding
+      const refreshToken = localStorage.getItem("refreshToken")
+      if (refreshToken) {
+        fetch("http://localhost:5103/api/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              return res.json().then((data) => {
+                localStorage.setItem("accessToken", data.accessToken)
+                if (data.refreshToken)
+                  localStorage.setItem("refreshToken", data.refreshToken)
+                const payload = decodeTokenPayload(data.accessToken)
+                if (payload?.role === "admin") {
+                  window.location.replace("/admin")
+                } else {
+                  // Not admin — clear and stay on login
+                  localStorage.removeItem("accessToken")
+                  localStorage.removeItem("refreshToken")
+                  setChecking(false)
+                }
+              })
+            } else {
+              // Refresh failed — token truly expired, show login
+              localStorage.removeItem("accessToken")
+              localStorage.removeItem("refreshToken")
+              setChecking(false)
+            }
+          })
+          .catch(() => setChecking(false))
+      } else {
+        localStorage.removeItem("accessToken")
+        setChecking(false)
+      }
+    } else {
+      setChecking(false)
+    }
+  }, [])
 
   const doLogin = async () => {
     setError("")
@@ -36,12 +108,17 @@ export default function Login({
       if (response.ok) {
         if (data.userId !== undefined && data.userId !== null) {
           setUserId(BigInt(data.userId))
-          localStorage.setItem("accessToken", data.accessToken)
+
           if (data.role !== "admin") {
             setError(t("login.errorPermission"))
-          } else {
-            setIsLoggedIn(true)
+            return
           }
+
+          localStorage.setItem("accessToken", data.accessToken)
+          if (data.refreshToken)
+            localStorage.setItem("refreshToken", data.refreshToken)
+
+          setIsLoggedIn(true)
         }
       } else {
         setError(t("login.errorDefault"))
@@ -61,6 +138,18 @@ export default function Login({
       window.location.href = "/admin"
     }
   }, [isLoggedIn])
+
+  // Show a minimal loader while checking the existing session
+  if (checking) {
+    return (
+      <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70%">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+          <p className="text-xs text-white/40 tracking-widest uppercase">Checking session…</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70% p-4">
