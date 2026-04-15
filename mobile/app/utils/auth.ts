@@ -1,8 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNetInfo } from "@react-native-community/netinfo";
 import { AppState, AppStateStatus } from "react-native";
 
+// function getIpAddress() {
+//   const ip = netInfo;
+// }
+// const netInfo = useNetInfo();
+// const ipAddress = netInfo.details?.ipAddress;
+// console.log(ipAddress);
+
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.143:5103";
+  process.env.EXPO_PUBLIC_API_URL || `http://${"192.168.0.209"}:5103`;
 
 export const ENDPOINTS = {
   login: `${API_BASE_URL}/api/auth/login`,

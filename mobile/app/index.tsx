@@ -14,6 +14,9 @@ import { TabBarContext } from "./context/tab-bar-context";
 import { useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { Component } from "react";
+import { Button, Alert, Platform } from "react-native";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -23,6 +26,8 @@ const STATS = [
 ];
 
 export default function WelcomeScreen() {
+  const netInfo = useNetInfo();
+  const ipAddress = netInfo.details?.ipAddress;
   const { isDark } = useTheme();
 
   const { setIsTabBarHidden } = use(TabBarContext);
@@ -154,7 +159,6 @@ export default function WelcomeScreen() {
               </Text>
             </View>
           </View>
-
           {/* Hero text */}
           <View className="mb-10">
             <Text
@@ -177,7 +181,6 @@ export default function WelcomeScreen() {
               csak ami számít.
             </Text>
           </View>
-
           {/* Stats grid */}
           <View className="flex-row flex-wrap gap-2 mb-10">
             {STATS.map((s) => (
@@ -206,38 +209,47 @@ export default function WelcomeScreen() {
               </View>
             ))}
           </View>
-
           {/* CTA buttons */}
-          <View className="gap-3 mb-8">
+          {netInfo.isConnected == false ? (
             <Pressable
-              className="rounded-[18px] py-[18px] items-center  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
-              onPress={() => router.push("/sign-in")}
+              className="mt-3.5 rounded-[18px] py-[18px] items-center gap-3 mb-8  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
+              onPress={() => console.log(ipAddress)}
             >
               <Text className="text-white text-base font-bold tracking-[0.3px]">
-                Bejelentkezés
+                Letöltött jegyek megjelenítése
               </Text>
             </Pressable>
-
-            <Pressable
-              className="rounded-[18px] py-[18px] items-center border active:opacity-70"
-              style={{
-                backgroundColor: isDark
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(0,0,0,0.03)",
-                borderColor: isDark
-                  ? "rgba(255,255,255,0.08)"
-                  : "rgba(0,0,0,0.06)",
-              }}
-              onPress={() => router.push("/sign-up")}
-            >
-              <Text
-                className={`text-base font-semibold ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+          ) : (
+            <View className="gap-3 mb-8">
+              <Pressable
+                className="rounded-[18px] py-[18px] items-center  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
+                onPress={() => router.push("/sign-in")}
               >
-                Fiók létrehozása
-              </Text>
-            </Pressable>
-          </View>
+                <Text className="text-white text-base font-bold tracking-[0.3px]">
+                  {/* Bejelentkezés */}
+                </Text>
+              </Pressable>
 
+              <Pressable
+                className="rounded-[18px] py-[18px] items-center border active:opacity-70"
+                style={{
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(0,0,0,0.03)",
+                  borderColor: isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.06)",
+                }}
+                onPress={() => router.push("/sign-up")}
+              >
+                <Text
+                  className={`text-base font-semibold ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+                >
+                  Fiók létrehozása
+                </Text>
+              </Pressable>
+            </View>
+          )}
           {/* Quote */}
           <Text
             className={`text-xs text-center italic leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}

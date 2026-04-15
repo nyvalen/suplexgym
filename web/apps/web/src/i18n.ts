@@ -21,7 +21,7 @@ const en = {
     sub: "A space defined by focus. Designed for progress. No excess, no distraction — only what matters.",
     join: "Join now",
     plans: "View plans",
-    quoteText: "\u201cStrength, refined through consistency.\u201d",
+    quoteText: "\u201cStrength, comes refined through consistency.\u201d",
   },
   stats: {
     members: "Active members",
@@ -74,12 +74,7 @@ const en = {
         desc: "Perfect for those who train a few times a week.",
         features: [
           "Full facility access",
-          "10 entries — use anytime",
-          "Valid 6 months",
-          "Guest pass included",
-          "Unlimited access",
           "All group classes included",
-          "1 personal training session",
           "Towel service",
         ],
       },
@@ -92,7 +87,6 @@ const en = {
           "Unlimited access",
           "All group classes included",
           "1 personal training session",
-          "Towel service",
         ],
       },
       annual: {
@@ -102,7 +96,6 @@ const en = {
         desc: "Our best value — pay yearly and save 23%.",
         features: [
           "Unlimited access",
-          "All group classes included",
           "2 personal training sessions / month",
           "Free locker rental",
           "Priority booking",
@@ -145,7 +138,7 @@ const en = {
       },
       {
         q: "What equipment do you have?",
-        a: "40+ free-weight stations, a full cable system, four squat racks, a deadlift platform, and 60+ cardio machines.",
+        a: "4 free-weight stations up to 70 kilograms, 3 full cable systems, four squat racks, 6 benches - 4 of those are adjustable, and 30+ cardio machines.",
       },
     ],
   },
@@ -153,7 +146,7 @@ const en = {
     spotlight: {
       passes: {
         label: "Passes & Tickets",
-        sublabel: "Get started",
+        sublabel: "Passes and tickets",
         description: "Flexible plans for every goal and schedule",
       },
       faq: {
@@ -226,13 +219,13 @@ const hu: typeof en = {
   hero: {
     badge: "Suplex Edzőterem",
     est: "Alapítva 2024",
-    headline1: "Épülve",
+    headline1: "A lehetőségek",
     headline2: "határtalan",
-    headline3: "lehetőségre.",
-    sub: "Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges, semmi zavaró — csak ami számít.",
+    headline3: "tárháza.",
+    sub: "Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleg, semmi zavar — csak fejlődés.",
     join: "Csatlakozz",
     plans: "Bérletek",
-    quoteText: "\u201eAz erő következetességben gyökerezik.\u201d",
+    quoteText: "\u201eAz erő a kitartás révén érlelődik.\u201d",
   },
   stats: {
     members: "Aktív tagok",
@@ -254,7 +247,7 @@ const hu: typeof en = {
     },
     personal: {
       title: "Személyi edzés",
-      desc: "Négyszemközti edzések minősített személyi edzőkkel.",
+      desc: "Igényre szabott edzések minősített személyi edzőkkel.",
       tag: "Előfoglalással",
     },
   },
@@ -336,12 +329,12 @@ const hu: typeof en = {
         a: "Hétfőtől péntekig 5:30–21:30, szombaton 7:00–20:00, vasárnap 8:00–18:00 vagyunk nyitva.",
       },
       {
-        q: "Hogyan kezdjek el új tagként?",
-        a: "Gyere be egy ingyenes körbevezetésre — bejelentkezés nélkül. Megmutatjuk a létesítményt, megbeszéljük céljaidat és segítünk a megfelelő bérlet kiválasztásában.",
+        q: "Hogyan állhatok neki új tagként?",
+        a: "Gyere be egy ingyenes körbevezetésre — bejelentkezés nélkül. Megmutatjuk a termet, megoszthatod céljaidat és segíthetünk a megfelelő bérlet kiválasztásában.",
       },
       {
         q: "Van parkoló?",
-        a: "Igen, 40 férőhelyes tagtárló parkoló található közvetlenül az épület mögött.",
+        a: "Igen, 40 férőhelyes parkoló található vendégeinknek közvetlenül az épület mögött.",
       },
       {
         q: "Felfüggeszthetem vagy lemondhatom a tagságomat?",
@@ -349,11 +342,11 @@ const hu: typeof en = {
       },
       {
         q: "Van diák- vagy kedvezményes ár?",
-        a: "Igen. Érvényes diákigazolvánnyal 20% kedvezmény jár bármely bérletre. Kedvezmény érhető el 60 év felettieknek is.",
+        a: "Igen. Érvényes diákigazolvánnyal 20% kedvezmény jár bármely bérletre. Kedvezményt ajánlunk 60 év felettieknek is.",
       },
       {
         q: "Milyen felszerelés áll rendelkezésre?",
-        a: "40+ szabad súlyos állomás, teljes kábeles rendszer, négy guggolókeret, döntőpad és 60+ kardió gép.",
+        a: "4 szabad súlyos rekesz 70 kilóig, 3 kábeles rendszer, négy guggolókeret, 6 fekpad - ezekből 4 dönthető és 30+ kardió gép.",
       },
     ],
   },
@@ -361,7 +354,7 @@ const hu: typeof en = {
     spotlight: {
       passes: {
         label: "Bérletek",
-        sublabel: "Kezdj el",
+        sublabel: "Elérhető bérletek",
         description: "Rugalmas csomagok minden célhoz",
       },
       faq: {

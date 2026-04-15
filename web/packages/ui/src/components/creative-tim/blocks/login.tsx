@@ -145,14 +145,16 @@ export default function Login({
       <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70%">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
-          <p className="text-xs text-white/40 tracking-widest uppercase">Checking session…</p>
+          <p className="text-xs tracking-widest text-white/40 uppercase">
+            Checking session…
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70% p-4">
+    <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_40%] from-purple-500 to-zinc-900 to-70% p-4">
       <div className="absolute top-4 left-4">
         <Link
           to="/"
@@ -230,6 +232,8 @@ export default function Login({
               {error}
             </p>
           )}
+
+          <div className="absolute right-0 bottom-0 h-1/4 w-3/5 place-items-center bg-radial-[at_300%_90%] from-purple-500 to-zinc-900 to-70%"></div>
         </form>
       </div>
     </div>

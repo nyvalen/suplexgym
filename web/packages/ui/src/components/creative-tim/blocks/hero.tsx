@@ -72,7 +72,7 @@ export default function Hero() {
             alt="Gym floor"
             className="h-full w-full rounded-md object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/60 via-transparent to-transparent lg:from-transparent" />
+          <div className="absolute inset-0 rounded-md bg-gradient-to-r from-zinc-950/60 via-transparent to-transparent lg:from-transparent" />
         </div>
       </section>
 

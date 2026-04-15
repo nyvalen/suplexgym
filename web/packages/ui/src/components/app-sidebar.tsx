@@ -44,20 +44,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Spotlight items link to different sections of the main page
   const spotlightItems = [
     {
-      label: t("sidebar.spotlight.passes.label"),
-      sublabel: t("sidebar.spotlight.passes.sublabel"),
-      description: t("sidebar.spotlight.passes.description"),
-      image:
-        "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&w=600&q=75",
-      sectionId: "passes",
-    },
-    {
       label: t("sidebar.spotlight.news.label"),
       sublabel: t("sidebar.spotlight.news.sublabel"),
       description: t("sidebar.spotlight.news.description"),
       image:
         "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&w=600&q=75",
       sectionId: "news",
+    },
+    {
+      label: t("sidebar.spotlight.passes.label"),
+      sublabel: t("sidebar.spotlight.passes.sublabel"),
+      description: t("sidebar.spotlight.passes.description"),
+      image:
+        "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&w=600&q=75",
+      sectionId: "passes",
     },
     {
       label: t("sidebar.spotlight.faq.label"),
@@ -112,9 +112,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {/* Spotlight items — each clicks to its respective section */}
         <SidebarGroup>
-          <p className="mb-2 px-2 font-mono text-[10px] tracking-widest text-sidebar-foreground/40 uppercase">
-            {t("nav.latest")}
-          </p>
           <div className="flex flex-col gap-0">
             {spotlightItems.map((item) => (
               <div
