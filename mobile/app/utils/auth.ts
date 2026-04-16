@@ -1,44 +1,82 @@
+// app/utils/auth.ts
+// Dynamic base URL: driven by the apiStore (Zustand).
+// On first load we read the persisted IP from AsyncStorage via the store.
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNetInfo } from "@react-native-community/netinfo";
 import { AppState, AppStateStatus } from "react-native";
+import { useApiStore } from "../store/apiStore";
 
-// function getIpAddress() {
-//   const ip = netInfo;
-// }
-// const netInfo = useNetInfo();
-// const ipAddress = netInfo.details?.ipAddress;
-// console.log(ipAddress);
+const DEFAULT_PORT = "5103";
+const FALLBACK_IP = "192.168.0.209";
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || `http://${"192.168.0.209"}:5103`;
+// Synchronously read the cached base URL from the Zustand store.
+// This works because Zustand's in-memory state is always available after
+// the store module is imported, and the store hydrates from AsyncStorage
+// on first mount via its initialise() call in the provider.
+function getBase(): string {
+  return useApiStore.getState().baseUrl;
+}
 
-export const ENDPOINTS = {
-  login: `${API_BASE_URL}/api/auth/login`,
-  register: `${API_BASE_URL}/api/auth/register`,
-  refresh: `${API_BASE_URL}/api/auth/refresh`,
-  logout: `${API_BASE_URL}/api/auth/logout`,
-  user: `${API_BASE_URL}/api/user/profile`,
-  password: `${API_BASE_URL}/api/user/change-password`,
-  billing: `${API_BASE_URL}/api/user/billing-address`,
-  settings: `${API_BASE_URL}/api/user/settings`,
-  cart: `${API_BASE_URL}/api/cart`,
-  cartAdd: `${API_BASE_URL}/api/cart/add`,
-  cartClear: `${API_BASE_URL}/api/cart/clear`,
-  cartItem: (id: number) => `${API_BASE_URL}/api/cart/item/${id}`,
-  items: `${API_BASE_URL}/api/items`,
-  itemTypes: `${API_BASE_URL}/api/items/types`,
-  orders: `${API_BASE_URL}/api/orders`,
-  checkout: `${API_BASE_URL}/api/orders/checkout`,
-  renew: (id: number) => `${API_BASE_URL}/api/orders/renew/${id}`,
-  news: `${API_BASE_URL}/api/news`,
-};
+function ep(path: string): string {
+  return `${getBase()}${path}`;
+}
+
+// ─── ENDPOINTS (Proxy — always reads latest base URL) ─────────────────────────
+
+export const ENDPOINTS = new Proxy(
+  {} as {
+    login: string;
+    register: string;
+    refresh: string;
+    logout: string;
+    user: string;
+    password: string;
+    billing: string;
+    settings: string;
+    cart: string;
+    cartAdd: string;
+    cartClear: string;
+    cartItem: (id: number) => string;
+    items: string;
+    itemTypes: string;
+    orders: string;
+    checkout: string;
+    renew: (id: number) => string;
+    news: string;
+  },
+  {
+    get(_t, prop: string) {
+      switch (prop) {
+        case "login":      return ep("/api/auth/login");
+        case "register":   return ep("/api/auth/register");
+        case "refresh":    return ep("/api/auth/refresh");
+        case "logout":     return ep("/api/auth/logout");
+        case "user":       return ep("/api/user/profile");
+        case "password":   return ep("/api/user/change-password");
+        case "billing":    return ep("/api/user/billing-address");
+        case "settings":   return ep("/api/user/settings");
+        case "cart":       return ep("/api/cart");
+        case "cartAdd":    return ep("/api/cart/add");
+        case "cartClear":  return ep("/api/cart/clear");
+        case "cartItem":   return (id: number) => ep(`/api/cart/item/${id}`);
+        case "items":      return ep("/api/items");
+        case "itemTypes":  return ep("/api/items/types");
+        case "orders":     return ep("/api/orders");
+        case "checkout":   return ep("/api/orders/checkout");
+        case "renew":      return (id: number) => ep(`/api/orders/renew/${id}`);
+        case "news":       return ep("/api/news");
+        default:           return undefined;
+      }
+    },
+  }
+);
+
+// ─── Token helpers ────────────────────────────────────────────────────────────
 
 export const AccessTokenKey = "accessToken";
 export const RefreshTokenKey = "refreshToken";
-// Store the expiry time so we can proactively refresh before the token expires
 const RefreshTokenExpiryKey = "refreshTokenExpiry";
 
-/** Save both tokens after login/register */
 export async function saveTokens(
   access: string,
   refresh: string,
@@ -53,49 +91,26 @@ export async function saveTokens(
 }
 
 export async function clearTokens() {
-  await AsyncStorage.multiRemove([
-    AccessTokenKey,
-    RefreshTokenKey,
-    RefreshTokenExpiryKey,
-  ]);
+  await AsyncStorage.multiRemove([AccessTokenKey, RefreshTokenKey, RefreshTokenExpiryKey]);
 }
 
-/** Check whether the stored refresh token is still within its validity window */
 export async function isRefreshTokenValid(): Promise<boolean> {
   const expiryStr = await AsyncStorage.getItem(RefreshTokenExpiryKey);
   if (!expiryStr) return false;
-  const expiry = Number(expiryStr);
-  // Consider expired if within 5 minutes of expiry
-  return Date.now() < expiry - 5 * 60 * 1000;
+  return Date.now() < Number(expiryStr) - 5 * 60 * 1000;
 }
 
-/**
- * Try to get a new access token using the stored refresh token.
- * Returns true on success, false if the session has fully expired.
- */
 export async function tryRefreshToken(): Promise<boolean> {
   const refreshToken = await AsyncStorage.getItem(RefreshTokenKey);
   if (!refreshToken) return false;
-
-  // Check stored expiry first to avoid unnecessary network calls
-  const valid = await isRefreshTokenValid();
-  if (!valid) {
-    await clearTokens();
-    return false;
-  }
-
+  if (!(await isRefreshTokenValid())) { await clearTokens(); return false; }
   try {
     const res = await fetch(ENDPOINTS.refresh, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
-
-    if (!res.ok) {
-      await clearTokens();
-      return false;
-    }
-
+    if (!res.ok) { await clearTokens(); return false; }
     const data = await res.json();
     await saveTokens(data.accessToken, data.refreshToken || refreshToken);
     return true;
@@ -104,16 +119,8 @@ export async function tryRefreshToken(): Promise<boolean> {
   }
 }
 
-/**
- * Authenticated fetch with automatic token refresh on 401.
- * Throws "SESSION_EXPIRED" if refresh also fails.
- */
-export async function authFetch(
-  url: string,
-  options: RequestInit = {},
-): Promise<Response> {
+export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = await AsyncStorage.getItem(AccessTokenKey);
-
   const doFetch = (t: string) =>
     fetch(url, {
       ...options,
@@ -123,89 +130,42 @@ export async function authFetch(
         Authorization: `Bearer ${t}`,
       },
     });
-
   let res = await doFetch(token ?? "");
   if (res.status !== 401) return res;
-
-  // Try refresh
   const refreshed = await tryRefreshToken();
-  if (!refreshed) {
-    throw new Error("SESSION_EXPIRED");
-  }
-
+  if (!refreshed) throw new Error("SESSION_EXPIRED");
   const newToken = await AsyncStorage.getItem(AccessTokenKey);
   return doFetch(newToken ?? "");
 }
 
-/**
- * Call this on app startup / foreground to verify the session is still valid.
- * Returns true if the user is authenticated, false if they need to log in again.
- */
 export async function checkAndRefreshSession(): Promise<boolean> {
   const accessToken = await AsyncStorage.getItem(AccessTokenKey);
   if (!accessToken) return false;
-
-  // Decode the JWT to check its expiry
   try {
     const decoded = decodeJwt(accessToken);
-    if (!decoded) {
-      // Token is malformed — try refresh
-      return tryRefreshToken();
-    }
-
+    if (!decoded) return tryRefreshToken();
     const expSec = decoded.exp ? Number(decoded.exp) : 0;
-    const nowSec = Math.floor(Date.now() / 1000);
-
-    // If access token has more than 2 minutes left, we're good
-    if (expSec - nowSec > 120) return true;
-
-    // Otherwise try to refresh proactively
+    if (expSec - Math.floor(Date.now() / 1000) > 120) return true;
     return tryRefreshToken();
   } catch {
     return tryRefreshToken();
   }
 }
 
-/** Register a listener that checks the session whenever the app comes to foreground */
-let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null =
-  null;
+let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null = null;
 
-export function registerSessionRefreshListener(
-  onExpired: () => void,
-): () => void {
-  // Remove any existing listener
-  if (appStateSubscription) {
-    appStateSubscription.remove();
-  }
-
+export function registerSessionRefreshListener(onExpired: () => void): () => void {
+  appStateSubscription?.remove();
   const handleAppStateChange = async (nextState: AppStateStatus) => {
     if (nextState === "active") {
       const stillValid = await checkAndRefreshSession();
-      if (!stillValid) {
-        await clearTokens();
-        onExpired();
-      }
+      if (!stillValid) { await clearTokens(); onExpired(); }
     }
   };
-
-  appStateSubscription = AppState.addEventListener(
-    "change",
-    handleAppStateChange,
-  );
-
-  return () => {
-    appStateSubscription?.remove();
-    appStateSubscription = null;
-  };
+  appStateSubscription = AppState.addEventListener("change", handleAppStateChange);
+  return () => { appStateSubscription?.remove(); appStateSubscription = null; };
 }
 
-export function decodeJwt(
-  token: string,
-): Record<string, string | number> | null {
-  try {
-    const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
-  } catch {
-    return null;
-  }
+export function decodeJwt(token: string): Record<string, string | number> | null {
+  try { return JSON.parse(atob(token.split(".")[1])); } catch { return null; }
 }

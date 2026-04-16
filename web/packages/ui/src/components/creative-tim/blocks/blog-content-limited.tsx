@@ -10,6 +10,8 @@ import { Calendar, ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
+const API_BASE = "http://localhost:5103"
+
 type NewsItem = {
   imagePath: string
   title: string
@@ -17,9 +19,16 @@ type NewsItem = {
   createdAt: string
 }
 
+function resolveImage(path: string): string {
+  if (!path)
+    return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+  if (path.startsWith("http")) return path
+  return `${API_BASE}${path}`
+}
+
 async function fetchNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetch("http://localhost:5103/api/news")
+    const res = await fetch(`${API_BASE}/api/news`)
     if (!res.ok) throw new Error("Failed fetch")
     return (await res.json()) as NewsItem[]
   } catch (err) {
@@ -64,10 +73,11 @@ export default function BlogContentLimited() {
               <div className="group cursor-pointer overflow-hidden rounded-xl border border-black/3 bg-black/5 transition-colors hover:bg-black/8 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.08]">
                 <div className="relative h-44 overflow-hidden">
                   <img
-                    src={imagePath}
+                    src={resolveImage(imagePath)}
                     alt={title}
                     className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 </div>
                 <div className="p-4">
@@ -106,7 +116,7 @@ export default function BlogContentLimited() {
                       <div className="relative h-[500px] lg:h-[700px]">
                         <div className="absolute inset-0 overflow-hidden rounded-2xl">
                           <img
-                            src={imagePath}
+                            src={resolveImage(imagePath)}
                             alt={title}
                             className="h-full w-full object-cover object-center"
                           />
@@ -130,7 +140,7 @@ export default function BlogContentLimited() {
         <Link to="/news">
           <Button
             variant="outline"
-            className="border-white/20text-black/80 hover:bg-white/5 hover:text-white dark:text-white/70"
+            className="border-white/20 text-black/80 hover:bg-white/5 hover:text-white dark:text-white/70"
           >
             {t("nav.allNews")}
             <ArrowRight className="ml-1.5 h-4 w-4" />

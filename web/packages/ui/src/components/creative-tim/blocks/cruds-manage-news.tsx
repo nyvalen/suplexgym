@@ -6,6 +6,9 @@ import { Input } from "../../input"
 import { Label } from "../../label"
 import { Textarea } from "../../textarea"
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react"
+import { ImageUpload } from "../../image-upload"
+
+const API_BASE = "http://localhost:5103"
 
 type NewsItem = {
   id: number
@@ -26,9 +29,7 @@ const EMPTY_FORM: NewsForm = { title: "", imagePath: "", content: "" }
 
 async function fetchNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetchWithAuth("http://localhost:5103/api/news", {
-      method: "GET",
-    })
+    const res = await fetchWithAuth(`${API_BASE}/api/news`, { method: "GET" })
     if (!res.ok) throw new Error(`Failed fetch news: ${res.status}`)
     return (await res.json()) as NewsItem[]
   } catch (err) {
@@ -47,13 +48,17 @@ export default function CrudsManageNews() {
 
   const load = async () => setNews(await fetchNews())
 
-  useEffect(() => {
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
   const flash = (msg: string) => {
     setMessage(msg)
     setTimeout(() => setMessage(""), 4000)
+  }
+
+  const resolveImagePath = (path: string) => {
+    if (!path) return ""
+    if (path.startsWith("http")) return path
+    return `${API_BASE}${path}`
   }
 
   // ── Create ──────────────────────────────────────────────────────────────────
@@ -63,7 +68,7 @@ export default function CrudsManageNews() {
       return
     }
     try {
-      const res = await fetchWithAuth("http://localhost:5103/api/news", {
+      const res = await fetchWithAuth(`${API_BASE}/api/news`, {
         method: "POST",
         body: JSON.stringify(createForm),
       })
@@ -72,7 +77,7 @@ export default function CrudsManageNews() {
       setCreateForm(EMPTY_FORM)
       setShowCreate(false)
       load()
-    } catch (err) {
+    } catch {
       flash("Failed to create article.")
     }
   }
@@ -82,7 +87,7 @@ export default function CrudsManageNews() {
     setEditingId(item.id)
     setEditForm({
       title: item.title,
-      imagePath: item.imagePath,
+      imagePath: resolveImagePath(item.imagePath),
       content: item.content,
     })
   }
@@ -93,7 +98,7 @@ export default function CrudsManageNews() {
       return
     }
     try {
-      const res = await fetchWithAuth(`http://localhost:5103/api/news/${id}`, {
+      const res = await fetchWithAuth(`${API_BASE}/api/news/${id}`, {
         method: "PUT",
         body: JSON.stringify(editForm),
       })
@@ -101,7 +106,7 @@ export default function CrudsManageNews() {
       flash("News article updated.")
       setEditingId(null)
       load()
-    } catch (err) {
+    } catch {
       flash("Failed to update article.")
     }
   }
@@ -110,13 +115,11 @@ export default function CrudsManageNews() {
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this news article?")) return
     try {
-      const res = await fetchWithAuth(`http://localhost:5103/api/news/${id}`, {
-        method: "DELETE",
-      })
+      const res = await fetchWithAuth(`${API_BASE}/api/news/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error(`${res.status}`)
       flash("Article deleted.")
       load()
-    } catch (err) {
+    } catch {
       flash("Failed to delete article.")
     }
   }
@@ -127,21 +130,15 @@ export default function CrudsManageNews() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-semibold">Manage News</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Create, edit and delete articles.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Create, edit and delete articles.</p>
           </div>
           <Button onClick={() => setShowCreate((v) => !v)} size="sm">
-            {showCreate ? (
-              <X className="size-4" />
-            ) : (
-              <Plus className="size-4" />
-            )}
+            {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
             {showCreate ? "Cancel" : "New Article"}
           </Button>
         </div>
 
-        {/* ── Create form ──────────────────────────────────────────────────── */}
+        {/* ── Create form ── */}
         {showCreate && (
           <div className="mb-6 space-y-3 rounded-lg border border-border p-4">
             <h4 className="font-medium">New Article</h4>
@@ -150,21 +147,15 @@ export default function CrudsManageNews() {
               <Input
                 id="c-title"
                 value={createForm.title}
-                onChange={(e) =>
-                  setCreateForm((f) => ({ ...f, title: e.target.value }))
-                }
+                onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
                 placeholder="Article title"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="c-img">Image URL</Label>
-              <Input
-                id="c-img"
+              <Label>Cover Image</Label>
+              <ImageUpload
                 value={createForm.imagePath}
-                onChange={(e) =>
-                  setCreateForm((f) => ({ ...f, imagePath: e.target.value }))
-                }
-                placeholder="https://..."
+                onChange={(url) => setCreateForm((f) => ({ ...f, imagePath: url }))}
               />
             </div>
             <div className="space-y-1">
@@ -172,9 +163,7 @@ export default function CrudsManageNews() {
               <Textarea
                 id="c-content"
                 value={createForm.content}
-                onChange={(e) =>
-                  setCreateForm((f) => ({ ...f, content: e.target.value }))
-                }
+                onChange={(e) => setCreateForm((f) => ({ ...f, content: e.target.value }))}
                 rows={4}
                 placeholder="Article body…"
               />
@@ -183,7 +172,7 @@ export default function CrudsManageNews() {
           </div>
         )}
 
-        {/* ── Article list ─────────────────────────────────────────────────── */}
+        {/* ── Article list ── */}
         <div className="space-y-3">
           {news.length === 0 && (
             <p className="text-sm text-muted-foreground">No articles found.</p>
@@ -191,36 +180,26 @@ export default function CrudsManageNews() {
           {news.map((item) => (
             <div key={item.id} className="rounded-lg border border-border p-4">
               {editingId === item.id ? (
-                /* ── Inline edit ───────────────────────────────────────────── */
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <Label>Title</Label>
                     <Input
                       value={editForm.title}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, title: e.target.value }))
-                      }
+                      onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label>Image URL</Label>
-                    <Input
+                    <Label>Cover Image</Label>
+                    <ImageUpload
                       value={editForm.imagePath}
-                      onChange={(e) =>
-                        setEditForm((f) => ({
-                          ...f,
-                          imagePath: e.target.value,
-                        }))
-                      }
+                      onChange={(url) => setEditForm((f) => ({ ...f, imagePath: url }))}
                     />
                   </div>
                   <div className="space-y-1">
                     <Label>Content</Label>
                     <Textarea
                       value={editForm.content}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, content: e.target.value }))
-                      }
+                      onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
                       rows={4}
                     />
                   </div>
@@ -228,40 +207,35 @@ export default function CrudsManageNews() {
                     <Button size="sm" onClick={() => handleUpdate(item.id)}>
                       <Check className="size-3.5" /> Save
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingId(null)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
                       <X className="size-3.5" /> Cancel
                     </Button>
                   </div>
                 </div>
               ) : (
-                /* ── Read-only row ─────────────────────────────────────────── */
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{item.title}</p>
-                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                      {item.content}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </p>
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {item.imagePath && (
+                      <img
+                        src={resolveImagePath(item.imagePath)}
+                        alt={item.title}
+                        className="h-14 w-20 shrink-0 rounded object-cover"
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">{item.title}</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{item.content}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <Button
-                      size="icon-sm"
-                      variant="outline"
-                      onClick={() => startEdit(item)}
-                    >
+                    <Button size="icon-sm" variant="outline" onClick={() => startEdit(item)}>
                       <Pencil className="size-3.5" />
                     </Button>
-                    <Button
-                      size="icon-sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(item.id)}
-                    >
+                    <Button size="icon-sm" variant="destructive" onClick={() => handleDelete(item.id)}>
                       <Trash2 className="size-3.5" />
                     </Button>
                   </div>
@@ -271,9 +245,7 @@ export default function CrudsManageNews() {
           ))}
         </div>
 
-        {message && (
-          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
-        )}
+        {message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}
       </Card>
     </section>
   )

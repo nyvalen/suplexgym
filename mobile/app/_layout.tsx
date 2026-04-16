@@ -1,3 +1,5 @@
+// app/_layout.tsx
+
 import { Stack, router } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./reactquery";
@@ -13,27 +15,29 @@ import {
   registerSessionRefreshListener,
 } from "./utils/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { OfflineBanner } from "./components/OfflineBanner";
+import { useApiStore } from "./store/apiStore";
 
-function SessionGuard() {
+function AppInit() {
+  const initialise = useApiStore((s) => s.initialise);
+
   useEffect(() => {
-    // On mount: verify the session is valid
+    // Hydrate the API URL store from AsyncStorage before any fetch fires
+    initialise();
+  }, []);
+
+  useEffect(() => {
     const verify = async () => {
       const hasToken = !!(await AsyncStorage.getItem("accessToken"));
-      if (!hasToken) return; // Not logged in — nothing to check
-
+      if (!hasToken) return;
       const valid = await checkAndRefreshSession();
-      if (!valid) {
-        await clearTokens();
-        router.replace("/");
-      }
+      if (!valid) { await clearTokens(); router.replace("/"); }
     };
     verify();
 
-    // Register foreground listener — logs out if session expired in background
     const unsubscribe = registerSessionRefreshListener(async () => {
       router.replace("/");
     });
-
     return unsubscribe;
   }, []);
 
@@ -46,21 +50,19 @@ export default function RootLayout() {
       <LanguageProvider>
         <ThemeProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <SessionGuard />
+            <AppInit />
+            {/* Global offline → banner. Works on every screen including tabs. */}
+            <OfflineBanner />
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen
-                name="sign-in"
-                options={{ presentation: "modal" }}
-              />
-              <Stack.Screen
-                name="sign-up"
-                options={{ presentation: "modal" }}
-              />
+              <Stack.Screen name="sign-in" options={{ presentation: "modal" }} />
+              <Stack.Screen name="sign-up" options={{ presentation: "modal" }} />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="purchase-finalization" />
               <Stack.Screen name="news-detail" />
               <Stack.Screen name="tickets-detail" />
               <Stack.Screen name="rules" />
+              <Stack.Screen name="offline-tickets" />
+              <Stack.Screen name="offline-ticket-detail" />
             </Stack>
             <PortalHost />
           </GestureHandlerRootView>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,10 +18,6 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IQrCodeService, QrCodeService>();
 
 // ─── JWT AUTHENTICATION ───────────────────────────────────────────────────────
-// FRONTEND: Every protected request must include header:
-//   Authorization: Bearer <accessToken>
-// If 401 is returned, call POST /api/auth/refresh with the refresh token.
-// If refresh also fails, redirect user to login screen.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -37,7 +33,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
         };
 
-        // Return 401 JSON responses instead of redirect
         options.Events = new JwtBearerEvents
         {
             OnChallenge = context =>
@@ -59,8 +54,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-// FRONTEND: Update the origin below to match your frontend dev server URL.
-// For production, replace with your actual frontend domain.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -84,7 +77,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Backend API for Suplex Gym ticketing and access management system."
     });
 
-    // Add JWT auth support in Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header. Enter: Bearer {your_token}",
@@ -116,12 +108,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    // FRONTEND DEVS: Swagger UI available at http://localhost:5000/swagger
-    // Use it to explore and test all available endpoints.
     app.UseSwaggerUI();
 }
 
+// Ensure wwwroot/uploads folder exists
+var uploadsDir = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "uploads");
+Directory.CreateDirectory(uploadsDir);
+
 app.UseHttpsRedirection();
+
+// Serve static files (uploaded images) from wwwroot
+app.UseStaticFiles();
+
 app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -15,6 +15,9 @@ import { Calendar, ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import Footer from "@workspace/ui/components/footer"
+import { ScrollHeader } from "@workspace/ui/components/scroll-header"
+
+const API_BASE = "http://localhost:5103"
 
 type NewsItem = {
   imagePath: string
@@ -23,9 +26,15 @@ type NewsItem = {
   createdAt: string
 }
 
+function resolveImage(path: string): string {
+  if (!path) return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+  if (path.startsWith("http")) return path
+  return `${API_BASE}${path}`
+}
+
 async function fetchNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetch("http://localhost:5103/api/news")
+    const res = await fetch(`${API_BASE}/api/news`)
     if (!res.ok) throw new Error("Failed fetch")
     return (await res.json()) as NewsItem[]
   } catch (err) {
@@ -68,7 +77,7 @@ function ArticleDrawer({
             <div className="relative h-[500px] lg:h-[700px]">
               <div className="absolute inset-0 overflow-hidden rounded-2xl">
                 <img
-                  src={post.imagePath}
+                  src={resolveImage(post.imagePath)}
                   alt={post.title}
                   className="h-full w-full object-cover object-center"
                 />
@@ -93,21 +102,19 @@ export default function NewsPage() {
 
   useEffect(() => {
     let active = true
-    fetchNews().then((items) => {
-      if (active) setPosts(items)
-    })
-    return () => {
-      active = false
-    }
+    fetchNews().then((items) => { if (active) setPosts(items) })
+    return () => { active = false }
   }, [])
 
   const [featured, ...rest] = posts
 
   return (
     <SidebarProvider
+      defaultOpen={false}
       style={{ "--sidebar-width": "19rem" } as React.CSSProperties}
     >
       <AppSidebar />
+      <ScrollHeader />
 
       {/* Sticky floating sidebar trigger */}
       <div className="fixed top-4 right-4 z-30">
@@ -115,7 +122,7 @@ export default function NewsPage() {
       </div>
 
       <div className="relative min-h-screen w-full">
-        {/* Hero-style header — matches main page gradient */}
+        {/* Hero-style header */}
         <div className="bg-radial-[at_300%_50%] from-purple-600 to-85% px-4 pt-6 pb-8 md:px-6">
           <div className="mb-6">
             <Link
@@ -126,7 +133,6 @@ export default function NewsPage() {
               {t("nav.backHome")}
             </Link>
 
-            {/* Header card matching hero style */}
             <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20 backdrop-blur-sm">
               <div className="absolute inset-0">
                 <img
@@ -159,9 +165,8 @@ export default function NewsPage() {
           </div>
         </div>
 
-        {/* Articles section — same px/bg as main page sections */}
+        {/* Articles section */}
         <div className="px-4 py-8 md:px-6">
-          {/* Featured */}
           {featured && (
             <div className="mb-6">
               <Drawer direction="bottom">
@@ -170,7 +175,7 @@ export default function NewsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr]">
                       <div className="relative h-64 overflow-hidden md:h-80">
                         <img
-                          src={featured.imagePath}
+                          src={resolveImage(featured.imagePath)}
                           alt={featured.title}
                           className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                         />
@@ -205,7 +210,6 @@ export default function NewsPage() {
             </div>
           )}
 
-          {/* Grid — same card style as blog-content-limited */}
           {rest.length > 0 && (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {rest.map((post) => (
@@ -214,7 +218,7 @@ export default function NewsPage() {
                     <div className="group cursor-pointer overflow-hidden rounded-xl border border-black/3 bg-black/5 transition-colors hover:bg-black/8 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.08]">
                       <div className="relative h-44 overflow-hidden">
                         <img
-                          src={post.imagePath}
+                          src={resolveImage(post.imagePath)}
                           alt={post.title}
                           className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         />

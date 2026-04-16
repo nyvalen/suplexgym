@@ -1,4 +1,11 @@
-import React, { useRef, useEffect, use } from "react";
+// app/index.tsx
+// ── Welcome screen
+//   - Detects device IP via NetInfo, pre-fills the subnet so the user only
+//     types the last octet of their laptop's IP.
+//   - Offline button → /offline-tickets
+//   - Gear icon → IP config sheet
+
+import React, { useRef, useEffect, use, useState } from "react";
 import {
   View,
   Text,
@@ -6,17 +13,23 @@ import {
   Animated,
   StatusBar,
   ScrollView,
+  Modal,
+  TextInput,
+  Platform,
+  Alert,
+  TouchableOpacity,
+  KeyboardAvoidingView,
 } from "react-native";
 import { router } from "expo-router";
 import { useTheme } from "./theme/ThemeContext";
-import { Dumbbell } from "lucide-react-native";
+import { Dumbbell, Settings, Wifi } from "lucide-react-native";
 import { TabBarContext } from "./context/tab-bar-context";
 import { useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { Component } from "react";
-import { Button, Alert, Platform } from "react-native";
+import { subnetPrefix } from "./utils/offline-storage";
+import { useApiStore } from "./store/apiStore";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -25,13 +38,280 @@ const STATS = [
   { value: "8", label: "Évek" },
 ];
 
+// ─── IP Config Sheet ──────────────────────────────────────────────────────────
+
+function IpConfigSheet({
+  visible,
+  onClose,
+  isDark,
+  deviceIp,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  isDark: boolean;
+  deviceIp: string | null;
+}) {
+  const { ip: storedIp, setIp } = useApiStore();
+  const [input, setInput] = useState("");
+  const [height, setHeight] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // Pre-fill: stored IP > subnet-derived suggestion > empty
+  useEffect(() => {
+    if (!visible) return;
+    if (storedIp && storedIp !== "192.168.0.209") {
+      setInput(storedIp);
+    } else if (deviceIp) {
+      const prefix = subnetPrefix(deviceIp);
+      setInput(prefix); // user just types the last octet
+    } else {
+      setInput("");
+    }
+  }, [visible, storedIp, deviceIp]);
+
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: visible ? 1 : 0,
+      tension: 65,
+      friction: 11,
+      useNativeDriver: true,
+    }).start();
+  }, [visible]);
+
+  const handleSave = async () => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      Alert.alert("Invalid IP", "Please enter a valid IP address.");
+      return;
+    }
+    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipv4.test(trimmed)) {
+      Alert.alert("Invalid IP", "Enter a full IPv4 address, e.g. 192.168.0.15");
+      return;
+    }
+    setSaving(true);
+    try {
+      await setIp(trimmed);
+      Alert.alert("Saved", `API URL → http://${trimmed}:5103`, [
+        { text: "OK", onPress: onClose },
+      ]);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <Animated.View
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.55)",
+          justifyContent: "flex-end",
+          opacity: slideAnim,
+        }}
+      >
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+
+        <Animated.View
+          style={{
+            transform: [
+              {
+                translateY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [350, 0],
+                }),
+              },
+            ],
+            backgroundColor: isDark ? "#18181b" : "#ffffff",
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+            paddingHorizontal: 24,
+            paddingTop: 16,
+            paddingBottom: Platform.OS === "ios" ? 44 : 28,
+            borderTopWidth: 1,
+            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+          }}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(0,0,0,0.12)",
+              alignSelf: "center",
+              marginBottom: 20,
+            }}
+          />
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 4,
+            }}
+          >
+            <Wifi color="#7c3aed" size={20} />
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "800",
+                color: isDark ? "#fafafa" : "#09090b",
+                letterSpacing: -0.3,
+              }}
+            >
+              API Server IP
+            </Text>
+          </View>
+
+          <Text
+            style={{
+              fontSize: 13,
+              color: isDark ? "#a1a1aa" : "#52525b",
+              marginBottom: 4,
+              lineHeight: 19,
+            }}
+          >
+            Enter your laptop's local IP (port 5103 is fixed).
+          </Text>
+
+          {deviceIp && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 16,
+              }}
+            >
+              <View
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: "#4ade80",
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: isDark ? "#71717a" : "#a1a1aa",
+                }}
+              >
+                Your device IP:{" "}
+                <Text
+                  style={{
+                    color: isDark ? "#a1a1aa" : "#52525b",
+                    fontWeight: "600",
+                  }}
+                >
+                  {deviceIp}
+                </Text>
+              </Text>
+            </View>
+          )}
+
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: "600",
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              color: isDark ? "#a1a1aa" : "#52525b",
+              marginBottom: 6,
+            }}
+          >
+            Laptop IP Address
+          </Text>
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            placeholder="192.168.0.XX"
+            placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
+            keyboardType="numeric"
+            autoCapitalize="none"
+            style={{
+              borderRadius: 14,
+              paddingHorizontal: 16,
+              paddingVertical: 13,
+              fontSize: 15,
+              marginBottom: 16,
+              color: isDark ? "#fafafa" : "#09090b",
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(0,0,0,0.03)",
+              borderWidth: 1,
+              borderColor: isDark
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.08)",
+            }}
+          />
+
+          <TouchableOpacity
+            onPress={handleSave}
+            disabled={saving}
+            activeOpacity={0.85}
+            style={{
+              backgroundColor: "#7c3aed",
+              borderRadius: 16,
+              paddingVertical: 15,
+              alignItems: "center",
+              opacity: saving ? 0.6 : 1,
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
+              {saving ? "Saving…" : "Save & Apply"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={onClose}
+            activeOpacity={0.7}
+            style={{ paddingVertical: 10, alignItems: "center" }}
+          >
+            <Text
+              style={{
+                color: isDark ? "#71717a" : "#a1a1aa",
+                fontSize: 14,
+              }}
+            >
+              Cancel
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+// ─── Welcome Screen ───────────────────────────────────────────────────────────
+
 export default function WelcomeScreen() {
   const netInfo = useNetInfo();
-  const ipAddress = netInfo.details?.ipAddress;
   const { isDark } = useTheme();
+  const [showIpConfig, setShowIpConfig] = useState(false);
+
+  // Pull the device's own IP from NetInfo details
+  const deviceIp =
+    (netInfo.details as any)?.ipAddress ??
+    (netInfo.details as any)?.ipV4Address ??
+    null;
 
   const { setIsTabBarHidden } = use(TabBarContext);
-
   useFocusEffect(() => {
     setIsTabBarHidden(true);
     return () => setIsTabBarHidden(false);
@@ -43,9 +323,7 @@ export default function WelcomeScreen() {
   useEffect(() => {
     const forwardUser = async () => {
       const token = await AsyncStorage.getItem("accessToken");
-      if (token !== null && token !== "") {
-        router.replace("/(tabs)/main");
-      }
+      if (token) router.replace("/(tabs)/main");
     };
     forwardUser();
   }, []);
@@ -74,7 +352,6 @@ export default function WelcomeScreen() {
         translucent
       />
 
-      {/* Radial gradient blobs */}
       <View
         pointerEvents="none"
         className="absolute -top-20 -left-20 w-[360px] h-[360px] rounded-full"
@@ -95,13 +372,7 @@ export default function WelcomeScreen() {
       />
       <LinearGradient
         colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: 560,
-        }}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 560 }}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 0.4, y: 0.9 }}
       />
@@ -131,35 +402,59 @@ export default function WelcomeScreen() {
           className="flex-1"
           style={{ opacity: fade, transform: [{ translateY: slide }] }}
         >
-          {/* Badge / logo */}
-          <View className="flex-row items-center gap-2.5 mb-[52px]">
-            <View
-              className="w-10 h-10 rounded-[10px] items-center justify-center border"
+          {/* Logo row + ⚙ gear */}
+          <View className="flex-row items-center justify-between mb-[52px]">
+            <View className="flex-row items-center gap-2.5">
+              <View
+                className="w-10 h-10 rounded-[10px] items-center justify-center border"
+                style={{
+                  backgroundColor: isDark
+                    ? "rgba(124,58,237,0.25)"
+                    : "rgba(124,58,237,0.1)",
+                  borderColor: isDark
+                    ? "rgba(124,58,237,0.45)"
+                    : "rgba(124,58,237,0.25)",
+                }}
+              >
+                <Dumbbell color="white" size={20} />
+              </View>
+              <View>
+                <Text
+                  className={`text-[11px] font-bold tracking-[3px] uppercase ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+                >
+                  SUPLEX GYM
+                </Text>
+                <Text
+                  className={`text-[10px] tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
+                >
+                  Alapítva 2024
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setShowIpConfig(true)}
+              activeOpacity={0.75}
               style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
                 backgroundColor: isDark
-                  ? "rgba(124,58,237,0.25)"
-                  : "rgba(124,58,237,0.1)",
+                  ? "rgba(255,255,255,0.06)"
+                  : "rgba(0,0,0,0.04)",
+                borderWidth: 1,
                 borderColor: isDark
-                  ? "rgba(124,58,237,0.45)"
-                  : "rgba(124,58,237,0.25)",
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.07)",
               }}
             >
-              <Dumbbell color="white" size={20} />
-            </View>
-            <View>
-              <Text
-                className={`text-[11px] font-bold tracking-[3px] uppercase ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-              >
-                SUPLEX GYM
-              </Text>
-              <Text
-                className={`text-[10px] tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
-              >
-                Alapítva 2017
-              </Text>
-            </View>
+              <Settings color={isDark ? "#a1a1aa" : "#646464"} size={16} />
+            </TouchableOpacity>
           </View>
-          {/* Hero text */}
+
+          {/* Hero */}
           <View className="mb-10">
             <Text
               className={`text-[17px] font-normal mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
@@ -181,7 +476,8 @@ export default function WelcomeScreen() {
               csak ami számít.
             </Text>
           </View>
-          {/* Stats grid */}
+
+          {/* Stats */}
           <View className="flex-row flex-wrap gap-2 mb-10">
             {STATS.map((s) => (
               <View
@@ -209,27 +505,45 @@ export default function WelcomeScreen() {
               </View>
             ))}
           </View>
-          {/* CTA buttons */}
-          {netInfo.isConnected == false ? (
-            <Pressable
-              className="mt-3.5 rounded-[18px] py-[18px] items-center gap-3 mb-8  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
-              onPress={() => console.log(ipAddress)}
-            >
-              <Text className="text-white text-base font-bold tracking-[0.3px]">
-                Letöltött jegyek megjelenítése
-              </Text>
-            </Pressable>
+
+          {/* CTA */}
+          {netInfo.isConnected === false ? (
+            <View className="gap-3 mb-8">
+              <View
+                className="rounded-2xl py-3 px-4 flex-row items-center gap-2.5 border"
+                style={{
+                  backgroundColor: isDark
+                    ? "rgba(248,113,113,0.1)"
+                    : "rgba(220,38,38,0.06)",
+                  borderColor: isDark
+                    ? "rgba(248,113,113,0.25)"
+                    : "rgba(220,38,38,0.15)",
+                }}
+              >
+                <View className="w-2 h-2 rounded-full bg-[#f87171]" />
+                <Text className="text-[#f87171] text-sm font-semibold">
+                  No internet connection
+                </Text>
+              </View>
+              <Pressable
+                className="rounded-[18px] py-[18px] items-center bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
+                onPress={() => router.push("/offline-tickets" as any)}
+              >
+                <Text className="text-white text-base font-bold tracking-[0.3px]">
+                  View Saved Tickets
+                </Text>
+              </Pressable>
+            </View>
           ) : (
             <View className="gap-3 mb-8">
               <Pressable
-                className="rounded-[18px] py-[18px] items-center  bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
+                className="rounded-[18px] py-[18px] items-center bg-[rgba(124,58,237,0.8)] border border-[rgba(124,58,237,0.5)] active:opacity-80"
                 onPress={() => router.push("/sign-in")}
               >
                 <Text className="text-white text-base font-bold tracking-[0.3px]">
-                  {/* Bejelentkezés */}
+                  Bejelentkezés
                 </Text>
               </Pressable>
-
               <Pressable
                 className="rounded-[18px] py-[18px] items-center border active:opacity-70"
                 style={{
@@ -250,7 +564,7 @@ export default function WelcomeScreen() {
               </Pressable>
             </View>
           )}
-          {/* Quote */}
+
           <Text
             className={`text-xs text-center italic leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
@@ -258,6 +572,13 @@ export default function WelcomeScreen() {
           </Text>
         </Animated.View>
       </ScrollView>
+
+      <IpConfigSheet
+        visible={showIpConfig}
+        onClose={() => setShowIpConfig(false)}
+        isDark={isDark}
+        deviceIp={deviceIp}
+      />
     </View>
   );
 }

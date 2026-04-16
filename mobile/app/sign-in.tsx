@@ -11,10 +11,11 @@ import {
   TextInput,
 } from "react-native";
 import { router } from "expo-router";
-import { ENDPOINTS, saveTokens } from "./utils/auth";
+import { authFetch, ENDPOINTS, saveTokens } from "./utils/auth";
 import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "./theme/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { OfflineTicket, saveTicketsOffline } from "./utils/offline-storage";
 
 export default function SignInScreen() {
   const { isDark } = useTheme();
@@ -41,6 +42,8 @@ export default function SignInScreen() {
       const data = await res.json();
       if (res.ok) {
         await saveTokens(data.accessToken, data.refreshToken || "");
+        // Persist tickets for offline use (fire-and-forget, non-blocking)
+        persistTicketsLocally();
         router.replace("/(tabs)/main");
       } else {
         setError(data.message || "Hibás email vagy jelszó.");
@@ -49,6 +52,32 @@ export default function SignInScreen() {
       setError("Hálózati hiba. Kérjük próbáld újra.");
     } finally {
       setLoading(false);
+    }
+  };
+  const persistTicketsLocally = async () => {
+    try {
+      const res = await authFetch(ENDPOINTS.orders);
+      if (!res.ok) return;
+      const orders: { id: number; items: any[] }[] = await res.json();
+
+      const offlineTickets: OfflineTicket[] = orders.flatMap((order) =>
+        order.items.map((item) => ({
+          id: item.id,
+          itemName: item.itemName,
+          qrCodeBase64: item.qrCodeBase64 ?? "",
+          activatedAt: item.activatedAt,
+          expiresAt: item.expiresAt,
+          isUsed: item.isUsed ?? false,
+          quantity: item.quantity ?? 1,
+          price: item.price ?? 0,
+          orderId: order.id,
+          savedAt: new Date().toISOString(),
+        })),
+      );
+
+      await saveTicketsOffline(offlineTickets);
+    } catch {
+      // Non-fatal — offline save is best-effort
     }
   };
 
