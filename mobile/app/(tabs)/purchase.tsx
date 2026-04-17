@@ -8,16 +8,30 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  Image,
   Dimensions,
 } from "react-native";
-import { authFetch, ENDPOINTS } from "../utils/auth";
+import { authFetch, ENDPOINTS, resolveImageUrl } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useCartStore } from "../store";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
-const { width } = Dimensions.get("window");
+const CARD_HEIGHT = 210;
+
+// Fallback gym images per type when no imagePath is set
+const FALLBACK_IMAGES: Record<number, string> = {
+  1: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=800&q=80",
+  2: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&w=800&q=80",
+  3: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&w=800&q=80",
+};
+
+const TYPE_ACCENT: Record<number, string> = {
+  1: "#f59e0b",
+  2: "#10b981",
+  3: "#7c3aed",
+};
 
 interface TicketItem {
   id: number;
@@ -27,235 +41,219 @@ interface TicketItem {
   validityDays: number;
   typeName: string;
   type_id: number;
+  imagePath?: string | null;
 }
 
 type Category = "all" | "daily" | "monthly" | "yearly";
-const TYPE_MAP: Record<number, Category> = {
-  1: "daily",
-  2: "monthly",
-  3: "yearly",
+const TYPE_MAP: Record<number, Category> = { 1: "daily", 2: "monthly", 3: "yearly" };
+const CATEGORY_ACCENT: Record<Category, string> = {
+  all: "#7c3aed",
+  daily: "#f59e0b",
+  monthly: "#10b981",
+  yearly: "#7c3aed",
+};
+const CATEGORY_EMOJI: Record<Category, string> = {
+  all: "🎫",
+  daily: "☀️",
+  monthly: "📅",
+  yearly: "⭐",
 };
 
-// Distinct visual config per pass type
-const PASS_CONFIG: Record<Category, {
-  gradient: [string, string];
-  accent: string;
-  emoji: string;
-  duration: string;
-}> = {
-  all: {
-    gradient: ["#7c3aed", "#4f46e5"],
-    accent: "#a78bfa",
-    emoji: "🎫",
-    duration: "",
-  },
-  daily: {
-    gradient: ["#d97706", "#b45309"],
-    accent: "#fbbf24",
-    emoji: "☀️",
-    duration: "1 nap",
-  },
-  monthly: {
-    gradient: ["#059669", "#047857"],
-    accent: "#34d399",
-    emoji: "📅",
-    duration: "30 nap",
-  },
-  yearly: {
-    gradient: ["#7c3aed", "#5b21b6"],
-    accent: "#c4b5fd",
-    emoji: "⭐",
-    duration: "365 nap",
-  },
-};
+// ─── Ticket Banner Card ────────────────────────────────────────────────────────
+function TicketBannerCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
+  const accent = TYPE_ACCENT[item.type_id] ?? "#7c3aed";
+  const imageUri =
+    resolveImageUrl(item.imagePath) ??
+    FALLBACK_IMAGES[item.type_id] ??
+    FALLBACK_IMAGES[1];
 
-function TicketCard({
-  item,
-  inCart,
-  onAdd,
-  onRemove,
-  adding,
-  isDark,
-  t,
-}: any) {
-  const cat: Category = TYPE_MAP[item.type_id] ?? "all";
-  const config = PASS_CONFIG[cat];
   const scale = useRef(new Animated.Value(1)).current;
-
-  const animPress = () =>
-    Animated.sequence([
-      Animated.timing(scale, { toValue: 0.97, duration: 80, useNativeDriver: true }),
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-    ]).start();
+  const pressIn = () =>
+    Animated.timing(scale, { toValue: 0.978, duration: 90, useNativeDriver: true }).start();
+  const pressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
 
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <TouchableOpacity
-        activeOpacity={0.92}
-        onPressIn={animPress}
-        style={{
-          marginBottom: 12,
+    <Animated.View
+      style={{
+        transform: [{ scale }],
+        marginBottom: 16,
+        borderRadius: 24,
+        overflow: "hidden",
+        height: CARD_HEIGHT,
+        shadowColor: accent,
+        shadowOffset: { width: 0, height: inCart ? 10 : 6 },
+        shadowOpacity: inCart ? 0.5 : 0.22,
+        shadowRadius: 22,
+        elevation: inCart ? 12 : 7,
+        // Highlight border when in cart
+        borderWidth: inCart ? 2 : 0,
+        borderColor: inCart ? accent : "transparent",
+      }}
+    >
+      {/* ── Full-bleed background image ── */}
+      <Image
+        source={{ uri: imageUri }}
+        style={{ position: "absolute", width: "100%", height: "100%" }}
+        resizeMode="cover"
+      />
+
+      {/* ── Gradient scrim (bottom-heavy so text pops) ── */}
+      <LinearGradient
+        colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.82)"]}
+        locations={[0, 0.35, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: "absolute", inset: 0 }}
+      />
+
+      {/* ── Subtle accent tint ── */}
+      <View style={{ position: "absolute", inset: 0, backgroundColor: accent, opacity: inCart ? 0.14 : 0.06 }} />
+
+      {/* ── TOP badges ── */}
+      {/* Type badge – top-left */}
+      <View style={{ position: "absolute", top: 14, left: 14 }}>
+        <View style={{
+          backgroundColor: accent + "dd",
           borderRadius: 20,
-          overflow: "hidden",
-          shadowColor: config.gradient[0],
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
-          elevation: 8,
+          paddingHorizontal: 10,
+          paddingVertical: 4,
+        }}>
+          <Text style={{ color: "#fff", fontSize: 10, fontWeight: "800", letterSpacing: 1, textTransform: "uppercase" }}>
+            {item.typeName}
+          </Text>
+        </View>
+      </View>
+
+      {/* Duration badge – top-right */}
+      <View style={{ position: "absolute", top: 14, right: 14 }}>
+        <View style={{
+          backgroundColor: "rgba(0,0,0,0.5)",
+          borderRadius: 20,
+          paddingHorizontal: 10,
+          paddingVertical: 4,
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.18)",
+        }}>
+          <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, fontWeight: "600" }}>
+            ⏱ {item.validityDays} {t("purchase.days")}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── BOTTOM glass panel ── */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          // Simulated glass: semi-transparent dark panel with blur fallback
+          backgroundColor: isDark ? "rgba(9,9,11,0.75)" : "rgba(20,20,24,0.72)",
+          // On iOS we'd use BlurView but keeping it dep-free here
+          borderTopWidth: 1,
+          borderTopColor: "rgba(255,255,255,0.1)",
+          paddingHorizontal: 18,
+          paddingVertical: 14,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        {/* Gradient header */}
-        <LinearGradient
-          colors={config.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ padding: 20, paddingBottom: 16 }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
-            <View style={{ flex: 1 }}>
-              {/* Duration badge */}
-              <View
-                style={{
-                  alignSelf: "flex-start",
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  borderRadius: 20,
-                  paddingHorizontal: 10,
-                  paddingVertical: 3,
-                  marginBottom: 8,
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.3)",
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700", letterSpacing: 1 }}>
-                  {config.emoji}  {config.duration || item.typeName?.toUpperCase()}
-                </Text>
-              </View>
-
-              <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800", letterSpacing: -0.5 }}>
-                {item.name}
-              </Text>
-              {item.description ? (
-                <Text
-                  style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4, lineHeight: 18 }}
-                  numberOfLines={2}
-                >
-                  {item.description}
-                </Text>
-              ) : null}
-            </View>
-
-            {/* Price bubble */}
-            <View
-              style={{
-                backgroundColor: "rgba(0,0,0,0.25)",
-                borderRadius: 16,
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                alignItems: "center",
-                marginLeft: 12,
-              }}
+        {/* Name + Price */}
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Text
+            style={{ color: "#fff", fontSize: 16, fontWeight: "800", letterSpacing: -0.3 }}
+            numberOfLines={1}
+          >
+            {item.name}
+          </Text>
+          {item.description ? (
+            <Text
+              style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, marginTop: 1 }}
+              numberOfLines={1}
             >
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900" }}>
-                {item.price.toLocaleString()}
-              </Text>
-              <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, fontWeight: "600" }}>Ft</Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Body */}
-        <View
-          style={{
-            backgroundColor: isDark ? "rgba(24,24,27,0.97)" : "#fff",
-            paddingHorizontal: 20,
-            paddingVertical: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Text style={{ fontSize: 12, color: isDark ? "#71717a" : "#a1a1aa" }}>⏱</Text>
-            <Text style={{ fontSize: 12, color: isDark ? "#71717a" : "#a1a1aa", fontWeight: "500" }}>
-              {item.validityDays} {t("purchase.days")}
+              {item.description}
             </Text>
+          ) : null}
+          <View style={{ flexDirection: "row", alignItems: "baseline", gap: 3, marginTop: 3 }}>
+            <Text style={{ color: accent, fontSize: 20, fontWeight: "900" }}>
+              {item.price.toLocaleString()}
+            </Text>
+            <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Ft</Text>
           </View>
-
-          {inCart ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View
-                style={{
-                  backgroundColor: "rgba(74,222,128,0.15)",
-                  borderRadius: 20,
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderWidth: 1,
-                  borderColor: "rgba(74,222,128,0.3)",
-                }}
-              >
-                <Text style={{ color: "#4ade80", fontSize: 12, fontWeight: "700" }}>✓ {t("purchase.added")}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={onRemove}
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 17,
-                  backgroundColor: "rgba(248,113,113,0.12)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: "rgba(248,113,113,0.3)",
-                }}
-              >
-                <Text style={{ color: "#f87171", fontSize: 14, fontWeight: "700" }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity
-              onPress={onAdd}
-              disabled={adding}
-              style={[
-                {
-                  borderRadius: 12,
-                  paddingHorizontal: 20,
-                  paddingVertical: 8,
-                  alignItems: "center",
-                  justifyContent: "center",
-                },
-                adding ? { opacity: 0.5 } : {},
-              ]}
-            >
-              <LinearGradient
-                colors={config.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 12,
-                  paddingHorizontal: 20,
-                  paddingVertical: 8,
-                }}
-              >
-                {adding ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
-                    {t("purchase.addToCart")}
-                  </Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
         </View>
-      </TouchableOpacity>
+
+        {/* Action button */}
+        {inCart ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View style={{
+              backgroundColor: "rgba(74,222,128,0.18)",
+              borderRadius: 14,
+              paddingHorizontal: 12,
+              paddingVertical: 7,
+              borderWidth: 1,
+              borderColor: "rgba(74,222,128,0.4)",
+            }}>
+              <Text style={{ color: "#4ade80", fontSize: 12, fontWeight: "700" }}>✓ {t("purchase.added")}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={onRemove}
+              onPressIn={pressIn}
+              onPressOut={pressOut}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                backgroundColor: "rgba(248,113,113,0.18)",
+                borderWidth: 1,
+                borderColor: "rgba(248,113,113,0.4)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              activeOpacity={0.75}
+            >
+              <Text style={{ color: "#f87171", fontSize: 14, fontWeight: "700" }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            onPress={onAdd}
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+            disabled={adding}
+            activeOpacity={0.85}
+            style={[
+              {
+                borderRadius: 14,
+                paddingHorizontal: 18,
+                paddingVertical: 10,
+                backgroundColor: accent,
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 96,
+              },
+              adding && { opacity: 0.55 },
+            ]}
+          >
+            {adding ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
+                {t("purchase.addToCart")}
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
     </Animated.View>
   );
 }
 
-function CartBar({ cart, onCheckout, isDark, t }: any) {
-  const translateY = useRef(new Animated.Value(100)).current;
+// ─── Cart Bar ─────────────────────────────────────────────────────────────────
+function CartBar({ cart, onCheckout, t }: any) {
+  const translateY = useRef(new Animated.Value(200)).current;
   const total = cart.reduce((s: number, i: any) => s + i.price, 0);
-  const count = cart.length;
 
   useEffect(() => {
     Animated.spring(translateY, {
@@ -281,7 +279,6 @@ function CartBar({ cart, onCheckout, isDark, t }: any) {
         shadowRadius: 24,
         elevation: 16,
         transform: [{ translateY }],
-        opacity: cart.length > 0 ? 1 : 0,
       }}
       pointerEvents={cart.length > 0 ? "auto" : "none"}
     >
@@ -298,15 +295,16 @@ function CartBar({ cart, onCheckout, isDark, t }: any) {
         }}
       >
         <View>
-          <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: "600", letterSpacing: 1, textTransform: "uppercase" }}>
+          <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", fontWeight: "600", letterSpacing: 1, textTransform: "uppercase" }}>
             {t("purchase.cartTotal")}
           </Text>
-          <Text style={{ fontSize: 20, fontWeight: "900", color: "#fff" }}>
+          <Text style={{ fontSize: 22, fontWeight: "900", color: "#fff" }}>
             {total.toLocaleString()} Ft
           </Text>
         </View>
         <TouchableOpacity
           onPress={onCheckout}
+          activeOpacity={0.85}
           style={{
             backgroundColor: "rgba(255,255,255,0.18)",
             borderRadius: 14,
@@ -318,19 +316,9 @@ function CartBar({ cart, onCheckout, isDark, t }: any) {
             borderWidth: 1,
             borderColor: "rgba(255,255,255,0.25)",
           }}
-          activeOpacity={0.85}
         >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              width: 22,
-              height: 22,
-              borderRadius: 11,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ color: "#7c3aed", fontSize: 11, fontWeight: "900" }}>{count}</Text>
+          <View style={{ backgroundColor: "#fff", width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ color: "#7c3aed", fontSize: 11, fontWeight: "900" }}>{cart.length}</Text>
           </View>
           <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
             {t("purchase.checkout")}
@@ -341,6 +329,7 @@ function CartBar({ cart, onCheckout, isDark, t }: any) {
   );
 }
 
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function PurchaseTicketsScreen() {
   const [items, setItems] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -349,10 +338,16 @@ export default function PurchaseTicketsScreen() {
 
   const { isDark } = useTheme();
   const { t } = useLanguage();
-
   const cart = useCartStore((s) => s.cart);
   const addItem = useCartStore((s) => s.addItem);
   const removeItem = useCartStore((s) => s.removeItem);
+
+  const CATEGORY_LABELS: Record<Category, string> = {
+    all: t("purchase.all"),
+    daily: t("purchase.daily"),
+    monthly: t("purchase.monthly"),
+    yearly: t("purchase.yearly"),
+  };
 
   useEffect(() => {
     authFetch(ENDPOINTS.items)
@@ -387,7 +382,7 @@ export default function PurchaseTicketsScreen() {
         setAdding((prev) => ({ ...prev, [item.id]: false }));
       }
     },
-    [adding, addItem, cart]
+    [adding, addItem, cart],
   );
 
   const removeFromCart = useCallback(
@@ -400,63 +395,36 @@ export default function PurchaseTicketsScreen() {
         if (cartRes.ok) {
           const serverCart = await cartRes.json();
           const serverItem = serverCart.items?.find((i: any) => i.item_id === item.id);
-          if (serverItem) {
+          if (serverItem)
             await authFetch(ENDPOINTS.cartItem(serverItem.id), { method: "DELETE" });
-          }
         }
       } catch {
         addItem(cartItem);
       }
     },
-    [cart, removeItem, addItem]
+    [cart, removeItem, addItem],
   );
 
-  const CATEGORY_LABELS: Record<Category, string> = {
-    all: t("purchase.all"),
-    daily: t("purchase.daily"),
-    monthly: t("purchase.monthly"),
-    yearly: t("purchase.yearly"),
-  };
-
-  const filtered = items.filter((item) => {
-    if (activeCategory === "all") return true;
-    return TYPE_MAP[item.type_id] === activeCategory;
-  });
+  const filtered = items.filter((item) =>
+    activeCategory === "all" ? true : TYPE_MAP[item.type_id] === activeCategory,
+  );
 
   const categories: Category[] = ["all", "daily", "monthly", "yearly"];
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: isDark ? "#09090b" : "#fafafa",
-        paddingBottom: Platform.OS === "android" ? 140 : 66,
-      }}
-    >
-      <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent
-      />
+    <View style={{ flex: 1, backgroundColor: isDark ? "#09090b" : "#fafafa", paddingBottom: Platform.OS === "android" ? 140 : 66 }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
-      {/* Background gradient */}
       <LinearGradient
-        colors={["rgba(124,58,237,0.35)", "rgba(124,58,237,0)"]}
-        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 300 }}
+        colors={["rgba(124,58,237,0.3)", "rgba(124,58,237,0)"]}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 220 }}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
       />
 
       {/* Header */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 8 }}>
-        <Text
-          style={{
-            fontSize: 30,
-            fontWeight: "800",
-            letterSpacing: -0.5,
-            color: isDark ? "#fafafa" : "#09090b",
-          }}
-        >
+      <View style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 4 }}>
+        <Text style={{ fontSize: 30, fontWeight: "800", letterSpacing: -0.5, color: isDark ? "#fafafa" : "#09090b" }}>
           {t("purchase.title")}
         </Text>
         <Text style={{ fontSize: 13, marginTop: 2, color: isDark ? "#a1a1aa" : "#52525b" }}>
@@ -464,21 +432,16 @@ export default function PurchaseTicketsScreen() {
         </Text>
       </View>
 
-      {/* Category tabs */}
+      {/* Category filter tabs */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 16,
-          paddingTop: 8,
-          gap: 8,
-          flexDirection: "row",
-        }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 12, gap: 8, flexDirection: "row" }}
       >
         {categories.map((cat) => {
           const isActive = activeCategory === cat;
-          const config = PASS_CONFIG[cat];
+          const accent = CATEGORY_ACCENT[cat];
+          const emoji = CATEGORY_EMOJI[cat];
           return (
             <TouchableOpacity
               key={cat}
@@ -487,21 +450,22 @@ export default function PurchaseTicketsScreen() {
               style={[
                 {
                   borderRadius: 24,
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
+                  paddingHorizontal: 14,
+                  paddingVertical: 7,
                   borderWidth: 1.5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
                 },
                 isActive
-                  ? {
-                      backgroundColor: config.gradient[0],
-                      borderColor: config.gradient[0],
-                    }
+                  ? { backgroundColor: accent, borderColor: accent }
                   : {
                       backgroundColor: "transparent",
                       borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)",
                     },
               ]}
             >
+              {cat !== "all" && <Text style={{ fontSize: 13 }}>{emoji}</Text>}
               <Text
                 style={{
                   fontSize: 13,
@@ -509,7 +473,6 @@ export default function PurchaseTicketsScreen() {
                   color: isActive ? "#fff" : isDark ? "#a1a1aa" : "#52525b",
                 }}
               >
-                {cat !== "all" && `${PASS_CONFIG[cat].emoji} `}
                 {CATEGORY_LABELS[cat]}
               </Text>
             </TouchableOpacity>
@@ -517,21 +480,16 @@ export default function PurchaseTicketsScreen() {
         })}
       </ScrollView>
 
-      {/* Items list */}
+      {/* Item cards */}
       {loading ? (
         <ActivityIndicator color="#7c3aed" style={{ flex: 1 }} />
       ) : (
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: 20,
-            paddingBottom:
-              Platform.OS === "android"
-                ? cart.length > 0
-                  ? 200
-                  : 160
-                : cart.length > 0
-                ? 130
-                : 40,
+            paddingBottom: cart.length > 0
+              ? Platform.OS === "android" ? 200 : 130
+              : Platform.OS === "android" ? 160 : 40,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -542,31 +500,23 @@ export default function PurchaseTicketsScreen() {
               </Text>
             </View>
           ) : (
-            filtered.map((item) => {
-              const inCart = !!cart.find((c) => c.itemId === item.id);
-              return (
-                <TicketCard
-                  key={item.id}
-                  item={item}
-                  inCart={inCart}
-                  adding={!!adding[item.id]}
-                  isDark={isDark}
-                  t={t}
-                  onAdd={() => addToCart(item)}
-                  onRemove={() => removeFromCart(item)}
-                />
-              );
-            })
+            filtered.map((item) => (
+              <TicketBannerCard
+                key={item.id}
+                item={item}
+                inCart={!!cart.find((c) => c.itemId === item.id)}
+                adding={!!adding[item.id]}
+                isDark={isDark}
+                t={t}
+                onAdd={() => addToCart(item)}
+                onRemove={() => removeFromCart(item)}
+              />
+            ))
           )}
         </ScrollView>
       )}
 
-      <CartBar
-        cart={cart}
-        isDark={isDark}
-        t={t}
-        onCheckout={() => cart.length > 0 && router.push("/purchase-finalization")}
-      />
+      <CartBar cart={cart} isDark={isDark} t={t} onCheckout={() => cart.length > 0 && router.push("/purchase-finalization")} />
     </View>
   );
 }

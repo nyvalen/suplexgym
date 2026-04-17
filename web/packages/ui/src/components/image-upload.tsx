@@ -1,8 +1,15 @@
 import { useRef, useState } from "react"
-import { Upload, X, Image as ImageIcon } from "lucide-react"
+import { Upload, X } from "lucide-react"
 import { authTokens } from "@workspace/ui/lib/auth"
 
-const API_BASE = "http://localhost:5103"
+export const API_BASE = "http://localhost:5103"
+
+/** Resolve any image path (relative /uploads/... or absolute http) to a displayable src */
+export function resolveImageSrc(path: string | null | undefined): string {
+  if (!path) return ""
+  if (path.startsWith("http://") || path.startsWith("https://")) return path
+  return `${API_BASE}${path}`
+}
 
 interface ImageUploadProps {
   value: string
@@ -10,7 +17,7 @@ interface ImageUploadProps {
   placeholder?: string
 }
 
-export function ImageUpload({ value, onChange, placeholder = "https://... or upload" }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, placeholder = "https://..." }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState("")
@@ -29,12 +36,13 @@ export function ImageUpload({ value, onChange, placeholder = "https://... or upl
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message ?? "Upload failed")
+        throw new Error((err as { message?: string }).message ?? "Upload failed")
       }
-      const data = await res.json()
+      const data = await res.json() as { url: string }
+      // Store full absolute URL so images display everywhere without extra resolution
       onChange(`${API_BASE}${data.url}`)
-    } catch (e: any) {
-      setError(e.message ?? "Upload failed")
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Upload failed")
     } finally {
       setUploading(false)
     }
@@ -46,7 +54,7 @@ export function ImageUpload({ value, onChange, placeholder = "https://... or upl
     if (file) handleFile(file)
   }
 
-  const preview = value && (value.startsWith("http") || value.startsWith("/"))
+  const displaySrc = resolveImageSrc(value)
 
   return (
     <div className="space-y-2">
@@ -99,7 +107,8 @@ export function ImageUpload({ value, onChange, placeholder = "https://... or upl
             <>
               <Upload className="size-4 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                Drop image here or <span className="text-primary underline">browse</span>
+                Drop image here or{" "}
+                <span className="text-primary underline">browse</span>
               </span>
             </>
           )}
@@ -109,13 +118,13 @@ export function ImageUpload({ value, onChange, placeholder = "https://... or upl
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       {/* Preview */}
-      {preview && (
+      {displaySrc && (
         <div className="relative w-full overflow-hidden rounded-lg border border-border">
           <img
-            src={value}
+            src={displaySrc}
             alt="Preview"
             className="h-32 w-full object-cover"
-            onError={(e) => (e.currentTarget.style.display = "none")}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
           />
           <button
             type="button"
@@ -124,13 +133,6 @@ export function ImageUpload({ value, onChange, placeholder = "https://... or upl
           >
             <X className="size-3" />
           </button>
-        </div>
-      )}
-
-      {!preview && value && (
-        <div className="flex items-center gap-1.5 rounded border border-border px-2 py-1">
-          <ImageIcon className="size-3 text-muted-foreground" />
-          <span className="truncate text-xs text-muted-foreground">{value}</span>
         </div>
       )}
     </div>

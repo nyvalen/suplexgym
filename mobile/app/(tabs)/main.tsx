@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { decodeJwt, ENDPOINTS } from "../utils/auth";
+import { decodeJwt, ENDPOINTS, resolveImageUrl } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useNewsStore, NewsArticle } from "../store";
-
 import { LinearGradient } from "expo-linear-gradient";
+import { DevIpSettings } from "../components/DevIpSettings";
 
 const GYM_PHOTO =
   "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=1200&q=80";
@@ -91,8 +91,8 @@ export default function MainScreen() {
   const todayIdx = getCurrentDayIndex();
   const gymOpen = isCurrentlyOpen();
   const today = OPENING_HOURS[todayIdx];
-
   const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
   return (
     <ScrollView
       className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
@@ -118,15 +118,6 @@ export default function MainScreen() {
             : "rgba(124,58,237,0.06)",
         }}
       />
-      <View
-        pointerEvents="none"
-        className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full"
-        style={{
-          backgroundColor: isDark
-            ? "rgba(124,58,237,0.07)"
-            : "rgba(124,58,237,0.04)",
-        }}
-      />
       <LinearGradient
         colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
         style={{
@@ -140,7 +131,7 @@ export default function MainScreen() {
         end={{ x: 0, y: 0 }}
       />
 
-      {/* ── Header ────────────────────────────────────────────── */}
+      {/* ── Header ── */}
       <View className="flex-row justify-between items-start px-5 pt-8 pb-8">
         <View>
           <Text
@@ -156,26 +147,28 @@ export default function MainScreen() {
             SUPLEX GYM
           </Text>
         </View>
-        {role === "admin" && (
-          <View
-            className="rounded-[10px] px-3 py-1.5 border"
-            style={{
-              backgroundColor: isDark
-                ? "rgba(124,58,237,0.18)"
-                : "rgba(124,58,237,0.08)",
-              borderColor: isDark
-                ? "rgba(124,58,237,0.4)"
-                : "rgba(124,58,237,0.25)",
-            }}
-          >
-            <Text className="text-[#c4b5fd] text-[11px] font-bold tracking-[1px]">
-              {t("main.adminBadge")}
-            </Text>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {role === "admin" && (
+            <View
+              className="rounded-[10px] px-3 py-1.5 border"
+              style={{
+                backgroundColor: isDark
+                  ? "rgba(124,58,237,0.18)"
+                  : "rgba(124,58,237,0.08)",
+                borderColor: isDark
+                  ? "rgba(124,58,237,0.4)"
+                  : "rgba(124,58,237,0.25)",
+              }}
+            >
+              <Text className="text-[#c4b5fd] text-[11px] font-bold tracking-[1px]">
+                {t("main.adminBadge")}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
-      {/* ── Gym Photo ─────────────────────────────────────────── */}
+      {/* ── Gym Photo ── */}
       <View className="mx-5 mb-7 rounded-[22px] overflow-hidden h-[180px]">
         <Image
           source={{ uri: GYM_PHOTO }}
@@ -197,12 +190,12 @@ export default function MainScreen() {
             Est. 2017
           </Text>
           <Text className="text-white text-[15px] font-extrabold tracking-[-0.3px]">
-            {t("main.openNow") && gymOpen ? t("main.openNow") : t("main.closedNow")}
+            {gymOpen ? t("main.openNow") : t("main.closedNow")}
           </Text>
         </View>
       </View>
 
-      {/* ── Opening hours ─────────────────────────────────────── */}
+      {/* ── Opening hours ── */}
       <Text
         className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
       >
@@ -218,7 +211,6 @@ export default function MainScreen() {
           borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
         }}
       >
-        {/* Status banner */}
         <View
           className="px-5 py-3 flex-row items-center justify-between"
           style={{
@@ -268,7 +260,6 @@ export default function MainScreen() {
           </Text>
         </View>
 
-        {/* Timeline bar */}
         {today.isOpen && today.open && today.close && (
           <View className="px-5 pt-4 pb-2">
             <View className="flex-row justify-between mb-1.5">
@@ -331,7 +322,6 @@ export default function MainScreen() {
           </View>
         )}
 
-        {/* Weekly chips */}
         <View className="flex-row px-4 pb-4 pt-2 gap-1.5 justify-between">
           {OPENING_HOURS.map((h, i) => {
             const isToday = i === todayIdx;
@@ -415,7 +405,7 @@ export default function MainScreen() {
         </View>
       </View>
 
-      {/* ── Latest news ───────────────────────────────────────── */}
+      {/* ── Latest news ── */}
       <Text
         className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
       >
@@ -441,7 +431,6 @@ export default function MainScreen() {
               onPress={() => navigateToArticle(n)}
               activeOpacity={0.75}
             >
-              <View className="absolute left-0 top-0 bottom-0 w-[50px] rounded-l-2xl" />
               <LinearGradient
                 colors={["rgba(124,58,237,0.8)", "rgba(124,58,237,0.3)"]}
                 style={{
@@ -454,6 +443,19 @@ export default function MainScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               />
+              {/* News thumbnail */}
+              {n.imagePath ? (
+                <Image
+                  source={{ uri: resolveImageUrl(n.imagePath) ?? "" }}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    marginRight: 12,
+                  }}
+                  resizeMode="cover"
+                />
+              ) : null}
               <View className="flex-1 pl-2">
                 <Text
                   className={`text-sm font-semibold leading-5 ${isDark ? "text-[#bbbbbe]" : "text-[#2e2e2e]"}`}
@@ -473,7 +475,7 @@ export default function MainScreen() {
         </View>
       )}
 
-      {/* ── CTA card ──────────────────────────────────────────── */}
+      {/* ── CTA card ── */}
       <TouchableOpacity
         className="mx-5 mt-4 rounded-[20px] p-5 flex-row items-center gap-3.5 border"
         style={{

@@ -30,6 +30,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { subnetPrefix } from "./utils/offline-storage";
 import { useApiStore } from "./store/apiStore";
+import { DevIpSettings } from "./components/DevIpSettings";
 
 const STATS = [
   { value: "1 240", label: "Aktív tagok" },
@@ -305,6 +306,8 @@ export default function WelcomeScreen() {
   const { isDark } = useTheme();
   const [showIpConfig, setShowIpConfig] = useState(false);
 
+  const [showDevSettings, setShowDevSettings] = useState(false);
+
   // Pull the device's own IP from NetInfo details
   const deviceIp =
     (netInfo.details as any)?.ipAddress ??
@@ -432,26 +435,26 @@ export default function WelcomeScreen() {
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={() => setShowIpConfig(true)}
-              activeOpacity={0.75}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: isDark
-                  ? "rgba(255,255,255,0.06)"
-                  : "rgba(0,0,0,0.04)",
-                borderWidth: 1,
-                borderColor: isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.07)",
-              }}
-            >
-              <Settings color={isDark ? "#a1a1aa" : "#646464"} size={16} />
-            </TouchableOpacity>
+            {__DEV__ && (
+              <TouchableOpacity
+                onPress={() => setShowDevSettings(true)}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 17,
+                  backgroundColor: isDark
+                    ? "rgba(251,191,36,0.12)"
+                    : "rgba(251,191,36,0.15)",
+                  borderWidth: 1,
+                  borderColor: "rgba(251,191,36,0.35)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                activeOpacity={0.75}
+              >
+                <Text style={{ fontSize: 16 }}>⚙️</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Hero */}
@@ -573,12 +576,18 @@ export default function WelcomeScreen() {
         </Animated.View>
       </ScrollView>
 
-      <IpConfigSheet
+      {/* <IpConfigSheet
         visible={showIpConfig}
         onClose={() => setShowIpConfig(false)}
         isDark={isDark}
         deviceIp={deviceIp}
-      />
+      /> */}
+      {__DEV__ && (
+        <DevIpSettings
+          visible={showDevSettings}
+          onClose={() => setShowDevSettings(false)}
+        />
+      )}
     </View>
   );
 }

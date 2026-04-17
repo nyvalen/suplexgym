@@ -99,6 +99,17 @@ const translations = {
         sun: "Sun",
       },
     },
+    devSettings: {
+      title: "Dev Server Settings",
+      subtitle:
+        "Set the local IP address of the machine running the backend server. This only appears in development builds.",
+      ipLabel: "Server IP Address",
+      portNote: "Port 5103 is used automatically.",
+      apply: "Apply & Restart",
+      saved: "Saved",
+      devBadge: "DEV ONLY",
+      devNote: "Not visible in production",
+    },
     news: {
       title: "News",
       subtitle: "Suplex Gym updates",
@@ -139,6 +150,7 @@ const translations = {
       cartTotal: "CART TOTAL",
       checkout: "Checkout →",
       added: "Added",
+      addToCart: "Add to cart",
     },
     finalization: {
       title: "Order Summary",
@@ -276,6 +288,17 @@ const translations = {
       networkError: "Hálózati hiba. Kérjük próbáld újra.",
       invalidCredentials: "Hibás email vagy jelszó.",
     },
+    devSettings: {
+      title: "Dev Szerver Beállítások",
+      subtitle:
+        "Add meg a backend szervert futtató gép helyi IP-címét. Ez csak fejlesztői buildben jelenik meg.",
+      ipLabel: "Szerver IP-cím",
+      portNote: "Az 5103-as port automatikusan kerül alkalmazásra.",
+      apply: "Alkalmaz & Újraindít",
+      saved: "Mentve",
+      devBadge: "CSAK DEV",
+      devNote: "Éles verzióban nem látható",
+    },
     signUp: {
       title: "Regisztráció",
       subtitle: "Csatlakozz a Suplex Gymhez",
@@ -365,6 +388,7 @@ const translations = {
       cartTotal: "KOSÁR ÖSSZESEN",
       checkout: "Fizetés →",
       added: "Hozzáadva",
+      addToCart: "Kosárba",
     },
     finalization: {
       title: "Rendelés összesítő",

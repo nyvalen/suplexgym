@@ -1,5 +1,3 @@
-// app/_layout.tsx
-
 import { Stack, router } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./reactquery";
@@ -13,31 +11,31 @@ import {
   checkAndRefreshSession,
   clearTokens,
   registerSessionRefreshListener,
+  refreshCachedApiBase,
 } from "./utils/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { OfflineBanner } from "./components/OfflineBanner";
-import { useApiStore } from "./store/apiStore";
 
-function AppInit() {
-  const initialise = useApiStore((s) => s.initialise);
-
+function SessionGuard() {
   useEffect(() => {
-    // Hydrate the API URL store from AsyncStorage before any fetch fires
-    initialise();
-  }, []);
+    const init = async () => {
+      // Always refresh the cached base URL first (reads stored IP in dev)
+      await refreshCachedApiBase();
 
-  useEffect(() => {
-    const verify = async () => {
       const hasToken = !!(await AsyncStorage.getItem("accessToken"));
       if (!hasToken) return;
+
       const valid = await checkAndRefreshSession();
-      if (!valid) { await clearTokens(); router.replace("/"); }
+      if (!valid) {
+        await clearTokens();
+        router.replace("/");
+      }
     };
-    verify();
+    init();
 
     const unsubscribe = registerSessionRefreshListener(async () => {
       router.replace("/");
     });
+
     return unsubscribe;
   }, []);
 
@@ -50,9 +48,7 @@ export default function RootLayout() {
       <LanguageProvider>
         <ThemeProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <AppInit />
-            {/* Global offline → banner. Works on every screen including tabs. */}
-            <OfflineBanner />
+            <SessionGuard />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="sign-in" options={{ presentation: "modal" }} />
               <Stack.Screen name="sign-up" options={{ presentation: "modal" }} />
@@ -61,8 +57,6 @@ export default function RootLayout() {
               <Stack.Screen name="news-detail" />
               <Stack.Screen name="tickets-detail" />
               <Stack.Screen name="rules" />
-              <Stack.Screen name="offline-tickets" />
-              <Stack.Screen name="offline-ticket-detail" />
             </Stack>
             <PortalHost />
           </GestureHandlerRootView>
