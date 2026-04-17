@@ -10,7 +10,8 @@ import { useTranslation } from "react-i18next"
 import { Language } from "../../language"
 import { Link } from "react-router-dom"
 
-/** Decode a JWT payload without verifying the signature */
+const PRIVILEGED_ROLES = ["admin", "staff"]
+
 function decodeTokenPayload(token: string): Record<string, string> | null {
   try {
     const payload = token.split(".")[1]
@@ -21,19 +22,14 @@ function decodeTokenPayload(token: string): Record<string, string> | null {
   }
 }
 
-/** Returns true if the stored access token is present and not yet expired */
 function isTokenStillValid(token: string): boolean {
   const payload = decodeTokenPayload(token)
   if (!payload) return false
   const exp = Number(payload.exp ?? 0)
-  // Give a 10-second grace window
   return Date.now() / 1000 < exp - 10
 }
 
-export default function Login({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export default function Login({ className, ...props }: React.ComponentProps<"div">) {
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = React.useState(false)
   const [email, setEmail] = React.useState("")
@@ -47,12 +43,16 @@ export default function Login({
     const token = localStorage.getItem("accessToken")
     if (token && token !== "") {
       if (isTokenStillValid(token)) {
-        // Token is valid — go straight to admin
-        window.location.replace("/admin")
+        const payload = decodeTokenPayload(token)
+        if (payload && PRIVILEGED_ROLES.includes(payload.role)) {
+          window.location.replace("/admin")
+          return
+        }
+        // Not a privileged role — stay on login
+        setChecking(false)
         return
       }
 
-      // Token expired — try refresh before deciding
       const refreshToken = localStorage.getItem("refreshToken")
       if (refreshToken) {
         fetch("http://localhost:5103/api/auth/refresh", {
@@ -64,20 +64,17 @@ export default function Login({
             if (res.ok) {
               return res.json().then((data) => {
                 localStorage.setItem("accessToken", data.accessToken)
-                if (data.refreshToken)
-                  localStorage.setItem("refreshToken", data.refreshToken)
+                if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken)
                 const payload = decodeTokenPayload(data.accessToken)
-                if (payload?.role === "admin") {
+                if (payload && PRIVILEGED_ROLES.includes(payload.role)) {
                   window.location.replace("/admin")
                 } else {
-                  // Not admin — clear and stay on login
                   localStorage.removeItem("accessToken")
                   localStorage.removeItem("refreshToken")
                   setChecking(false)
                 }
               })
             } else {
-              // Refresh failed — token truly expired, show login
               localStorage.removeItem("accessToken")
               localStorage.removeItem("refreshToken")
               setChecking(false)
@@ -98,9 +95,7 @@ export default function Login({
     try {
       const response = await fetch("http://localhost:5103/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       })
       const data = await response.json()
@@ -109,15 +104,13 @@ export default function Login({
         if (data.userId !== undefined && data.userId !== null) {
           setUserId(BigInt(data.userId))
 
-          if (data.role !== "admin") {
+          if (!PRIVILEGED_ROLES.includes(data.role)) {
             setError(t("login.errorPermission"))
             return
           }
 
           localStorage.setItem("accessToken", data.accessToken)
-          if (data.refreshToken)
-            localStorage.setItem("refreshToken", data.refreshToken)
-
+          if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken)
           setIsLoggedIn(true)
         }
       } else {
@@ -134,20 +127,15 @@ export default function Login({
   }
 
   React.useEffect(() => {
-    if (isLoggedIn) {
-      window.location.href = "/admin"
-    }
+    if (isLoggedIn) window.location.href = "/admin"
   }, [isLoggedIn])
 
-  // Show a minimal loader while checking the existing session
   if (checking) {
     return (
       <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_30%] from-purple-500 to-zinc-900 to-70%">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
-          <p className="text-xs tracking-widest text-white/40 uppercase">
-            Checking session…
-          </p>
+          <p className="text-xs tracking-widest text-white/40 uppercase">Checking session…</p>
         </div>
       </div>
     )
@@ -156,17 +144,12 @@ export default function Login({
   return (
     <div className="grid min-h-screen min-w-screen place-items-center bg-radial-[at_-200%_40%] from-purple-500 to-zinc-900 to-70% p-4">
       <div className="absolute top-4 left-4">
-        <Link
-          to="/"
-          className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70"
-        >
+        <Link to="/" className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70">
           <ArrowLeft className="h-3 w-3" />
           {t("nav.backHome")}
         </Link>
       </div>
-      <div className="absolute bottom-2 left-2">
-        <Language />
-      </div>
+      <div className="absolute bottom-2 left-2"><Language /></div>
 
       <div className="mx-auto w-full max-w-md p-4">
         <h2 className="mb-2 text-center text-2xl font-bold tracking-tight text-white/80">
@@ -177,64 +160,37 @@ export default function Login({
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label
-              htmlFor="email"
-              className="text-sm font-semibold text-white/80"
-            >
-              {t("login.email")}
-            </Label>
+            <Label htmlFor="email" className="text-sm font-semibold text-white/80">{t("login.email")}</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder={t("login.emailPlaceholder")}
-              className="h-11 text-white/90"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              id="email" type="email" placeholder={t("login.emailPlaceholder")}
+              className="h-11 text-white/90" value={email}
+              onChange={(e) => setEmail(e.target.value)} required
             />
           </div>
           <div className="space-y-2">
-            <Label
-              htmlFor="password"
-              className="text-sm font-semibold text-white/90"
-            >
-              {t("login.password")}
-            </Label>
+            <Label htmlFor="password" className="text-sm font-semibold text-white/90">{t("login.password")}</Label>
             <div className="relative">
               <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="h-11 pr-10 text-white/80"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                id="password" type={showPassword ? "text" : "password"}
+                className="h-11 pr-10 text-white/80" value={password}
+                onChange={(e) => setPassword(e.target.value)} required
               />
               <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+                type="button" variant="ghost" size="icon"
                 className="absolute top-1/2 right-1.5 h-7 w-7 -translate-y-1/2 text-white/80"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </Button>
             </div>
           </div>
-          <Button type="submit" size="lg" className="w-full">
-            {t("login.submit")}
-          </Button>
-          {error && (
-            <p className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">
-              {error}
-            </p>
-          )}
-
-          <div className="absolute right-0 bottom-0 h-1/4 w-3/5 place-items-center bg-radial-[at_300%_90%] from-purple-500 to-zinc-900 to-70%"></div>
+          <Button type="submit" size="lg" className="w-full">{t("login.submit")}</Button>
+          {error && <p className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">{error}</p>}
         </form>
+        {/* Hint that both admin and staff can log in */}
+        <p className="mt-8 text-center text-xs text-white/25">
+          {t("login.staffHint")}
+        </p>
       </div>
     </div>
   )

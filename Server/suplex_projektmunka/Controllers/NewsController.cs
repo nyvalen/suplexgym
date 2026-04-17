@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using suplex_projektmunka.DTOs;
@@ -18,10 +18,7 @@ namespace suplex_projektmunka.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Get all active news articles.
-        /// FRONTEND: News/blog listing page — accessible to everyone, no auth required.
-        /// </summary>
+        /// <summary>Get all active news articles. Public.</summary>
         [HttpGet]
         public async Task<IActionResult> GetNews()
         {
@@ -42,10 +39,7 @@ namespace suplex_projektmunka.Controllers
             return Ok(news);
         }
 
-        /// <summary>
-        /// Get a single news article.
-        /// FRONTEND: News detail/article page.
-        /// </summary>
+        /// <summary>Get a single news article. Public.</summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsById(int id)
         {
@@ -63,12 +57,9 @@ namespace suplex_projektmunka.Controllers
             });
         }
 
-        /// <summary>
-        /// Create a new news article. Admin only.
-        /// FRONTEND: Admin news creation form → POST body: { title, imagePath, content }
-        /// </summary>
+        /// <summary>Create a news article. Admin or staff.</summary>
         [HttpPost]
-        // [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,staff")]
         public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto)
         {
             var news = new News
@@ -88,12 +79,9 @@ namespace suplex_projektmunka.Controllers
                 new { message = "News created.", id = news.Id });
         }
 
-        /// <summary>
-        /// Update a news article. Admin only.
-        /// FRONTEND: Admin news edit form → PUT body: { title, imagePath, content }
-        /// </summary>
+        /// <summary>Update a news article. Admin or staff.</summary>
         [HttpPut("{id}")]
-        // [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,staff")]
         public async Task<IActionResult> UpdateNews(int id, [FromBody] CreateNewsDto dto)
         {
             var news = await _context.News.FindAsync(id);
@@ -108,12 +96,9 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "News updated." });
         }
 
-        /// <summary>
-        /// Soft-delete a news article. Admin only.
-        /// FRONTEND: "Delete" button in admin news list (shows confirm dialog first).
-        /// </summary>
+        /// <summary>Soft-delete a news article. Admin or staff.</summary>
         [HttpDelete("{id}")]
-        // [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,staff")]
         public async Task<IActionResult> DeleteNews(int id)
         {
             var news = await _context.News.FindAsync(id);

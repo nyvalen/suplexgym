@@ -194,9 +194,9 @@ const en = {
     emailPlaceholder: "user@example.com",
     password: "Password",
     submit: "Sign In",
-    errorPermission:
-      "Permission denied. Use admin account to access this page.",
     errorDefault: "Invalid email or password. Please try again.",
+    staffHint: "Admin and staff accounts can access the panel.",
+    errorPermission: "Access denied. Only admin or staff accounts can access this panel.",
   },
   admin: {
     title: "Admin Panel",
@@ -402,8 +402,9 @@ const hu: typeof en = {
     emailPlaceholder: "felhasznalo@example.com",
     password: "Jelszó",
     submit: "Bejelentkezés",
-    errorPermission: "Hozzáférés megtagadva. Használj admin fiókot.",
     errorDefault: "Hibás e-mail vagy jelszó. Kérjük, próbáld újra.",
+    staffHint: "Admin és személyzeti fiókok érhetik el a panelt.",
+    errorPermission: "Hozzáférés megtagadva. Csak admin vagy személyzeti fiókok léphetnek be.",
   },
   admin: {
     title: "Admin Panel",

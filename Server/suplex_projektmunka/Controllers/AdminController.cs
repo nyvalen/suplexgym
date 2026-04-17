@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using suplex_projektmunka.DTOs;
@@ -11,7 +11,7 @@ namespace suplex_projektmunka.Controllers
 {
     [ApiController]
     [Route("api/admin")]
-    [Authorize(Roles = "admin")] // All endpoints in this controller require admin role
+    [Authorize(Roles = "admin,staff")] // Both admin and staff can reach this controller
     public class AdminController : ControllerBase
     {
         private readonly GymContext _context;
@@ -23,13 +23,13 @@ namespace suplex_projektmunka.Controllers
             _qrCodeService = qrCodeService;
         }
 
-        // ─── USER MANAGEMENT ─────────────────────────────────────────────────────
+        // ── Helpers ──────────────────────────────────────────────────────────
+        private bool IsAdmin() => User.IsInRole("admin");
 
-        /// <summary>
-        /// List all users.
-        /// FRONTEND: Admin user management table with search/filter.
-        /// </summary>
+        // ── USER MANAGEMENT (admin only) ──────────────────────────────────────
+
         [HttpGet("users")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetUsers()
         {
             var users = await _context.Users
@@ -49,11 +49,8 @@ namespace suplex_projektmunka.Controllers
             return Ok(users);
         }
 
-        /// <summary>
-        /// Get a single user's details.
-        /// FRONTEND: Admin user detail/edit page.
-        /// </summary>
         [HttpGet("users/{userId}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetUser(int userId)
         {
             var user = await _context.Users
@@ -74,11 +71,8 @@ namespace suplex_projektmunka.Controllers
             });
         }
 
-        /// <summary>
-        /// Update a user's role or active status.
-        /// FRONTEND: Admin user edit — role dropdown + "Ban/Unban" toggle button.
-        /// </summary>
         [HttpPut("users/{userId}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] AdminUpdateUserDto dto)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -93,11 +87,8 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "User updated." });
         }
 
-        /// <summary>
-        /// Get all available roles for user role management.
-        /// FRONTEND: Admin user management form role dropdown.
-        /// </summary>
         [HttpGet("roles")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetRoles()
         {
             var roles = await _context.Roles
@@ -108,11 +99,8 @@ namespace suplex_projektmunka.Controllers
             return Ok(roles);
         }
 
-        /// <summary>
-        /// View all tickets for a specific user, including expiry and remaining days.
-        /// FRONTEND: Admin "view user tickets" panel — show expiry countdown and renewal history.
-        /// </summary>
         [HttpGet("users/{userId}/tickets")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetUserTickets(int userId)
         {
             var tickets = await _context.PurchaseItems
@@ -131,12 +119,8 @@ namespace suplex_projektmunka.Controllers
             }));
         }
 
-        /// <summary>
-        /// Manually add a ticket to a user's account (no cart/payment needed).
-        /// FRONTEND: Admin "Add ticket" form in user detail page.
-        /// POST body: { userId, itemId, quantity }
-        /// </summary>
         [HttpPost("users/{userId}/tickets")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddTicketToUser(int userId, [FromBody] AdminAddTicketDto dto)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -177,13 +161,10 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "Ticket added to user.", ticketId = ticket.Id });
         }
 
-        // ─── ITEM / TICKET MANAGEMENT ─────────────────────────────────────────────
+        // ── ITEM MANAGEMENT (admin only) ──────────────────────────────────────
 
-        /// <summary>
-        /// Create a new item/pass available for purchase.
-        /// FRONTEND: Admin item creation form → POST body with all item fields.
-        /// </summary>
         [HttpPost("items")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateItem([FromBody] CreateItemDto dto)
         {
             var item = new Item
@@ -205,11 +186,8 @@ namespace suplex_projektmunka.Controllers
                 new { message = "Item created.", id = item.Id });
         }
 
-        /// <summary>
-        /// Update an existing item/pass.
-        /// FRONTEND: Admin item edit form → PUT body with updated fields.
-        /// </summary>
         [HttpPut("items/{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateItem(int id, [FromBody] CreateItemDto dto)
         {
             var item = await _context.Items.FindAsync(id);
@@ -227,11 +205,8 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "Item updated." });
         }
 
-        /// <summary>
-        /// Soft-delete an item (set IsActive = false).
-        /// FRONTEND: "Deactivate" button in admin items table.
-        /// </summary>
         [HttpDelete("items/{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteItem(int id)
         {
             var item = await _context.Items.FindAsync(id);
@@ -244,12 +219,8 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "Item deactivated." });
         }
 
-        // ─── EQUIPMENT MANAGEMENT ─────────────────────────────────────────────────
+        // ── EQUIPMENT MANAGEMENT (admin + staff) ──────────────────────────────
 
-        /// <summary>
-        /// Get all gym equipment. Admin only (not visible to regular users).
-        /// FRONTEND: Admin "Equipment" tab — shows table of machines with status badges.
-        /// </summary>
         [HttpGet("equipment")]
         public async Task<IActionResult> GetEquipment()
         {
@@ -269,10 +240,6 @@ namespace suplex_projektmunka.Controllers
             return Ok(equipment);
         }
 
-        /// <summary>
-        /// Add new equipment to the system.
-        /// FRONTEND: Admin "Add equipment" form.
-        /// </summary>
         [HttpPost("equipment")]
         public async Task<IActionResult> CreateEquipment([FromBody] CreateEquipmentDto dto)
         {
@@ -293,11 +260,6 @@ namespace suplex_projektmunka.Controllers
                 new { message = "Equipment added.", id = equipment.Id });
         }
 
-        /// <summary>
-        /// Update equipment status (operational / maintenance / out_of_order).
-        /// FRONTEND: Status dropdown per equipment row in admin panel.
-        /// Allowed values: "operational", "maintenance", "out_of_order"
-        /// </summary>
         [HttpPut("equipment/{id}/status")]
         public async Task<IActionResult> UpdateEquipmentStatus(int id, [FromBody] UpdateEquipmentStatusDto dto)
         {
@@ -315,10 +277,6 @@ namespace suplex_projektmunka.Controllers
             return Ok(new { message = "Equipment status updated." });
         }
 
-        /// <summary>
-        /// Soft-delete equipment.
-        /// FRONTEND: "Remove" button in admin equipment list.
-        /// </summary>
         [HttpDelete("equipment/{id}")]
         public async Task<IActionResult> DeleteEquipment(int id)
         {

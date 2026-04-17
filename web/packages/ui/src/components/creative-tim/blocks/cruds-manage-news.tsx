@@ -6,7 +6,7 @@ import { Input } from "../../input"
 import { Label } from "../../label"
 import { Textarea } from "../../textarea"
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react"
-import { ImageUpload } from "../../image-upload"
+import { ImageUpload } from "../../image-crop-upload"
 
 const API_BASE = "http://localhost:5103"
 
@@ -57,6 +57,10 @@ export default function CrudsManageNews() {
 
   const resolveImagePath = (path: string) => {
     if (!path) return ""
+    // Remove localhost:5103 URL prefix if present, keeping only the path
+    if (path.startsWith("http://localhost:5103")) {
+      path = path.replace("http://localhost:5103", "")
+    }
     if (path.startsWith("http")) return path
     return `${API_BASE}${path}`
   }

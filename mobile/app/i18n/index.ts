@@ -75,6 +75,7 @@ const translations = {
       welcome: "Welcome",
       welcomeUser: "Welcome",
       adminBadge: "Admin",
+      staffBadge: "Staff",
       openingHours: "Opening Hours",
       openNow: "Open now",
       closedNow: "Closed now",
@@ -150,6 +151,7 @@ const translations = {
       cartTotal: "CART TOTAL",
       checkout: "Checkout →",
       added: "Added",
+      seasonal: "Seasonal",
       addToCart: "Add to cart",
     },
     finalization: {
@@ -324,6 +326,7 @@ const translations = {
       welcome: "Üdvözlünk",
       welcomeUser: "Üdvözlünk",
       adminBadge: "Admin",
+      staffBadge: "Személyzet",
       openingHours: "Nyitvatartás",
       openNow: "Most nyitva",
       closedNow: "Most zárva",
@@ -389,6 +392,7 @@ const translations = {
       checkout: "Fizetés →",
       added: "Hozzáadva",
       addToCart: "Kosárba",
+      seasonal: "Szezonális",
     },
     finalization: {
       title: "Rendelés összesítő",

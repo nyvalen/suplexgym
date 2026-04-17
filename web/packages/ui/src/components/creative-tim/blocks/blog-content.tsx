@@ -23,6 +23,16 @@ type NewsItem = {
   createdAt: string
 }
 
+function resolveImage(path: string): string {
+  if (!path) return ""
+  // Remove localhost:5103 URL prefix if present, keeping only the path
+  if (path.startsWith("http://localhost:5103")) {
+    path = path.replace("http://localhost:5103", "")
+  }
+  if (path.startsWith("http")) return path
+  return `http://localhost:5103${path}`
+}
+
 async function fetchNews(): Promise<NewsItem[]> {
   try {
     const res = await fetch("http://localhost:5103/api/news")
@@ -58,7 +68,7 @@ export default function BlogContent() {
                 <CardHeader className="p-4 pb-0">
                   <div className="relative h-60 w-full overflow-hidden rounded-lg">
                     <img
-                      src={imagePath}
+                      src={resolveImage(imagePath)}
                       alt={title}
                       className="h-full w-full object-cover object-center"
                     />
@@ -113,7 +123,7 @@ export default function BlogContent() {
                       <div className="relative h-[500px] lg:h-[700px]">
                         <div className="absolute inset-0 overflow-hidden rounded-2xl">
                           <img
-                            src={imagePath}
+                            src={resolveImage(imagePath)}
                             alt="Modern architecture"
                             className="h-full w-full object-cover object-center"
                           />

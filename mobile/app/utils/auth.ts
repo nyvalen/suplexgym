@@ -6,7 +6,7 @@ import { AppState, AppStateStatus } from "react-native";
 // In development, falls back to stored IP or the hardcoded default.
 const IS_DEV = __DEV__;
 
-const DEFAULT_DEV_IP = "192.168.0.209";
+const DEFAULT_DEV_IP = "192.168.0.216";
 const DEFAULT_PORT = "5103";
 
 export const IP_STORAGE_KEY = "dev_server_ip";
@@ -64,11 +64,15 @@ export const ENDPOINTS = {
 };
 
 /** Resolve an image path from the server (handles both absolute URLs and /uploads/... paths) */
-export function resolveImageUrl(path: string | null | undefined): string | null {
-  if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  // Relative server path like /uploads/abc.jpg
-  return `${getCachedApiBase()}${path}`;
+export function resolveImageUrl(path: string): string {
+  if (!path)
+    return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+  // Remove localhost:5103 URL prefix if present, keeping only the path
+  if (path.startsWith("http://localhost:5103")) {
+    path = path.replace("http://localhost:5103", "");
+  }
+  if (path.startsWith("http")) return path
+  return `${getCachedApiBase()}${path}`
 }
 
 // ─── Token storage ────────────────────────────────────────────────────────────

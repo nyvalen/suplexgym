@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using suplex_projektmunka.Models.FrontendExtraData;
 using suplex_projektmunka.Models.ItemPurchases;
 using suplex_projektmunka.Models.UserData;
@@ -87,31 +87,76 @@ namespace suplex_projektmunka.Models.Context
                 .WithOne()
                 .HasForeignKey<User>(u => u.Settings_id);
 
-            // Seed: alapértelmezett szerepkörök
+            // ── Seed: roles ──────────────────────────────────────────────────
             modelBuilder.Entity<Roles>().HasData(
-                new Roles
+                new Roles { Id = 1, Role = "admin", IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1) },
+                new Roles { Id = 2, Role = "user",  IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1) },
+                new Roles { Id = 3, Role = "staff", IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1) }
+            );
+
+            // ── Seed: ticket types ───────────────────────────────────────────
+            // 1=daily, 2=monthly, 3=yearly, 4=seasonal (3 months)
+            modelBuilder.Entity<Types>().HasData(
+                new Types { Id = 1, Type = "daily" },
+                new Types { Id = 2, Type = "monthly" },
+                new Types { Id = 3, Type = "annual" },
+                new Types { Id = 4, Type = "seasonal" }
+            );
+
+            // ── Seed: default items ──────────────────────────────────────────
+            modelBuilder.Entity<Item>().HasData(
+                new Item
                 {
                     Id = 1,
-                    Role = "admin",
+                    Name = "Daily Pass",
+                    Description = "Full facility access for one day. No commitment required.",
+                    ImagePath = null,
+                    Price = 2900,
+                    Type_id = 1,
+                    ValidityDays = 1,
                     IsActive = true,
                     CreatedAt = new DateTime(2026, 1, 1),
                     ModifiedAt = new DateTime(2026, 1, 1)
                 },
-                new Roles
+                new Item
                 {
                     Id = 2,
-                    Role = "user",
+                    Name = "Monthly Pass",
+                    Description = "Unlimited access for 30 days. Includes all group classes.",
+                    ImagePath = null,
+                    Price = 12900,
+                    Type_id = 2,
+                    ValidityDays = 30,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1),
+                    ModifiedAt = new DateTime(2026, 1, 1)
+                },
+                new Item
+                {
+                    Id = 3,
+                    Name = "Seasonal Pass",
+                    Description = "90 days of unlimited access. Great value for committed trainers.",
+                    ImagePath = null,
+                    Price = 32900,
+                    Type_id = 4,
+                    ValidityDays = 90,
+                    IsActive = true,
+                    CreatedAt = new DateTime(2026, 1, 1),
+                    ModifiedAt = new DateTime(2026, 1, 1)
+                },
+                new Item
+                {
+                    Id = 4,
+                    Name = "Annual Pass",
+                    Description = "Best value — full access for 365 days. Priority booking included.",
+                    ImagePath = null,
+                    Price = 99900,
+                    Type_id = 3,
+                    ValidityDays = 365,
                     IsActive = true,
                     CreatedAt = new DateTime(2026, 1, 1),
                     ModifiedAt = new DateTime(2026, 1, 1)
                 }
-            );
-
-            // Seed: jegy típusok
-            modelBuilder.Entity<Types>().HasData(
-                new Types { Id = 1, Type = "daily" },
-                new Types { Id = 2, Type = "monthly" },
-                new Types { Id = 3, Type = "yearly" }
             );
         }
     }

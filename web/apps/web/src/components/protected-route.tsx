@@ -1,49 +1,38 @@
 import { Navigate } from "react-router-dom"
 
-const ProtectedRoute = ({ allowedRoles, children }) => {
-  //   function getUserRole() {
-  //     return fetch("http://localhost:5103/api/user/profile", {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //       },
-  //     })
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         console.log("User Role:", data.role)
-  //         console.log("Allowed Roles:", allowedRoles)
-  //         console.log(data)
-
-  //         if (allowedRoles !== data.role) {
-  //           return <Navigate to="/" replace />
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error fetching user role:", error)
-  //         return null
-  //       })
-  //   }
-  //   getUserRole()
-  function decodeToken(token) {
+function decodeToken(token: string) {
+  try {
     const payload = token.split(".")[1]
-
-    const decoded = atob(payload)
-
-    return JSON.parse(decoded)
+    return JSON.parse(atob(payload))
+  } catch {
+    return null
   }
+}
 
+// Roles that are allowed to access the admin panel
+const PRIVILEGED_ROLES = ["admin", "staff"]
+
+const ProtectedRoute = ({
+  allowedRoles,
+  children,
+}: {
+  allowedRoles: string | string[]
+  children: React.ReactNode
+}) => {
   const token = localStorage.getItem("accessToken")
+  if (!token) return <Navigate to="/login" replace />
 
-  const data = token !== undefined && token !== "" ? decodeToken(token) : ""
+  const data = decodeToken(token)
+  if (!data) return <Navigate to="/login" replace />
 
-  console.log(data)
-  console.log("User Role:", data.role)
-  console.log("Allowed Roles:", allowedRoles)
-  if (allowedRoles !== data.role) {
+  const userRole: string = data.role ?? ""
+  const allowed = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
+
+  if (!allowed.includes(userRole)) {
     return <Navigate to="/" replace />
   }
-  return children
+
+  return <>{children}</>
 }
 
 export default ProtectedRoute

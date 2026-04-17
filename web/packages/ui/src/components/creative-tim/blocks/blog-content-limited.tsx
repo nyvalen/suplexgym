@@ -22,6 +22,10 @@ type NewsItem = {
 function resolveImage(path: string): string {
   if (!path)
     return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+  // Remove localhost:5103 URL prefix if present, keeping only the path
+  if (path.startsWith("http://localhost:5103")) {
+    path = path.replace("http://localhost:5103", "")
+  }
   if (path.startsWith("http")) return path
   return `${API_BASE}${path}`
 }

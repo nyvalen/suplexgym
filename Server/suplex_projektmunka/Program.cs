@@ -104,6 +104,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
 // ─── MIDDLEWARE PIPELINE ──────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {

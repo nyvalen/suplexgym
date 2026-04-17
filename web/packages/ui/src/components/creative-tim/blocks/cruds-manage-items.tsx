@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
 } from "../../select"
 import { Pencil, X, Check, Plus, PackageX } from "lucide-react"
-import { ImageUpload } from "../../image-upload"
+import { ImageUpload } from "../../image-crop-upload"
 
 const API_BASE = "http://localhost:5103"
 
@@ -79,6 +79,10 @@ export default function CrudsManageItems() {
 
   const resolveImagePath = (path: string | null) => {
     if (!path) return ""
+    // Remove localhost:5103 URL prefix if present, keeping only the path
+    if (path.startsWith("http://localhost:5103")) {
+      path = path.replace("http://localhost:5103", "")
+    }
     if (path.startsWith("http")) return path
     return `${API_BASE}${path}`
   }

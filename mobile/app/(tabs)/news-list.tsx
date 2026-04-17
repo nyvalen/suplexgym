@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import { ENDPOINTS } from "@/app/utils/auth";
+import { DEFAULT_DEV_IP, ENDPOINTS, resolveImageUrl } from "@/app/utils/auth";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useNewsStore, NewsArticle } from "../store";
@@ -46,7 +46,7 @@ function FeaturedCard({ item, onPress, isDark, t }: any) {
         }}
       >
         <Image
-          source={{ uri: item.imagePath || FALLBACK }}
+          source={{ uri: resolveImageUrl(item.imagePath) || FALLBACK }}
           className="absolute w-full h-full"
           resizeMode="cover"
         />
@@ -107,7 +107,7 @@ function NewsCard({ item, onPress, isDark, t }: any) {
         }}
       >
         <Image
-          source={{ uri: item.imagePath || FALLBACK }}
+          source={{ uri: resolveImageUrl(item.imagePath) }}
           style={{ width: 110, height: "100%" }}
           resizeMode="cover"
         />
@@ -121,6 +121,7 @@ function NewsCard({ item, onPress, isDark, t }: any) {
             numberOfLines={2}
           >
             {item.title}
+            
           </Text>
           <View>
             <Text
