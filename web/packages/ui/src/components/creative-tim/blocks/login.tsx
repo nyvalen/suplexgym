@@ -9,6 +9,7 @@ import { AuthContext } from "../../../../../../apps/web/src/context/auth-context
 import { useTranslation } from "react-i18next"
 import { Language } from "../../language"
 import { Link } from "react-router-dom"
+import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 
 const PRIVILEGED_ROLES = ["admin", "staff"]
 
@@ -29,7 +30,7 @@ function isTokenStillValid(token: string): boolean {
   return Date.now() / 1000 < exp - 10
 }
 
-export default function Login({ className, ...props }: React.ComponentProps<"div">) {
+export default function Login() {
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = React.useState(false)
   const [email, setEmail] = React.useState("")
@@ -38,7 +39,6 @@ export default function Login({ className, ...props }: React.ComponentProps<"div
   const [checking, setChecking] = React.useState(true)
   const { isLoggedIn, setIsLoggedIn, setUserId } = React.useContext(AuthContext)
 
-  // ── Auto-redirect if already logged in ─────────────────────────────────────
   React.useEffect(() => {
     const token = localStorage.getItem("accessToken")
     if (token && token !== "") {
@@ -48,14 +48,13 @@ export default function Login({ className, ...props }: React.ComponentProps<"div
           window.location.replace("/admin")
           return
         }
-        // Not a privileged role — stay on login
         setChecking(false)
         return
       }
 
       const refreshToken = localStorage.getItem("refreshToken")
       if (refreshToken) {
-        fetch("http://localhost:5103/api/auth/refresh", {
+        fetch(API_ENDPOINTS.refresh, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refreshToken }),
@@ -93,7 +92,7 @@ export default function Login({ className, ...props }: React.ComponentProps<"div
   const doLogin = async () => {
     setError("")
     try {
-      const response = await fetch("http://localhost:5103/api/auth/login", {
+      const response = await fetch(API_ENDPOINTS.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -161,25 +160,19 @@ export default function Login({ className, ...props }: React.ComponentProps<"div
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-semibold text-white/80">{t("login.email")}</Label>
-            <Input
-              id="email" type="email" placeholder={t("login.emailPlaceholder")}
+            <Input id="email" type="email" placeholder={t("login.emailPlaceholder")}
               className="h-11 text-white/90" value={email}
-              onChange={(e) => setEmail(e.target.value)} required
-            />
+              onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-semibold text-white/90">{t("login.password")}</Label>
             <div className="relative">
-              <Input
-                id="password" type={showPassword ? "text" : "password"}
+              <Input id="password" type={showPassword ? "text" : "password"}
                 className="h-11 pr-10 text-white/80" value={password}
-                onChange={(e) => setPassword(e.target.value)} required
-              />
-              <Button
-                type="button" variant="ghost" size="icon"
+                onChange={(e) => setPassword(e.target.value)} required />
+              <Button type="button" variant="ghost" size="icon"
                 className="absolute top-1/2 right-1.5 h-7 w-7 -translate-y-1/2 text-white/80"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+                onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </Button>
             </div>
@@ -187,7 +180,6 @@ export default function Login({ className, ...props }: React.ComponentProps<"div
           <Button type="submit" size="lg" className="w-full">{t("login.submit")}</Button>
           {error && <p className="text-sm text-red-500 text-shadow-2xs text-shadow-red-700">{error}</p>}
         </form>
-        {/* Hint that both admin and staff can log in */}
         <p className="mt-8 text-center text-xs text-white/25">
           {t("login.staffHint")}
         </p>

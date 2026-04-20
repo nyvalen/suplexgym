@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
+import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
+import { resolveImageUrl } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
 import { Card } from "../../card"
 import { Input } from "../../input"
@@ -7,8 +9,6 @@ import { Label } from "../../label"
 import { Textarea } from "../../textarea"
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react"
 import { ImageUpload } from "../../image-crop-upload"
-
-const API_BASE = "http://localhost:5103"
 
 type NewsItem = {
   id: number
@@ -29,7 +29,7 @@ const EMPTY_FORM: NewsForm = { title: "", imagePath: "", content: "" }
 
 async function fetchNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetchWithAuth(`${API_BASE}/api/news`, { method: "GET" })
+    const res = await fetchWithAuth(API_ENDPOINTS.news, { method: "GET" })
     if (!res.ok) throw new Error(`Failed fetch news: ${res.status}`)
     return (await res.json()) as NewsItem[]
   } catch (err) {
@@ -55,24 +55,13 @@ export default function CrudsManageNews() {
     setTimeout(() => setMessage(""), 4000)
   }
 
-  const resolveImagePath = (path: string) => {
-    if (!path) return ""
-    // Remove localhost:5103 URL prefix if present, keeping only the path
-    if (path.startsWith("http://localhost:5103")) {
-      path = path.replace("http://localhost:5103", "")
-    }
-    if (path.startsWith("http")) return path
-    return `${API_BASE}${path}`
-  }
-
-  // ── Create ──────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
     if (!createForm.title.trim() || !createForm.content.trim()) {
       flash("Title and content are required.")
       return
     }
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/news`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.news}`, {
         method: "POST",
         body: JSON.stringify(createForm),
       })
@@ -86,12 +75,11 @@ export default function CrudsManageNews() {
     }
   }
 
-  // ── Edit ────────────────────────────────────────────────────────────────────
   const startEdit = (item: NewsItem) => {
     setEditingId(item.id)
     setEditForm({
       title: item.title,
-      imagePath: resolveImagePath(item.imagePath),
+      imagePath: resolveImageUrl(item.imagePath),
       content: item.content,
     })
   }
@@ -102,7 +90,7 @@ export default function CrudsManageNews() {
       return
     }
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/news/${id}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.news}/${id}`, {
         method: "PUT",
         body: JSON.stringify(editForm),
       })
@@ -115,11 +103,10 @@ export default function CrudsManageNews() {
     }
   }
 
-  // ── Delete (soft) ────────────────────────────────────────────────────────────
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this news article?")) return
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/news/${id}`, { method: "DELETE" })
+      const res = await fetchWithAuth(`${API_ENDPOINTS.news}/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error(`${res.status}`)
       flash("Article deleted.")
       load()
@@ -142,41 +129,30 @@ export default function CrudsManageNews() {
           </Button>
         </div>
 
-        {/* ── Create form ── */}
         {showCreate && (
           <div className="mb-6 space-y-3 rounded-lg border border-border p-4">
             <h4 className="font-medium">New Article</h4>
             <div className="space-y-1">
               <Label htmlFor="c-title">Title</Label>
-              <Input
-                id="c-title"
-                value={createForm.title}
+              <Input id="c-title" value={createForm.title}
                 onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
-                placeholder="Article title"
-              />
+                placeholder="Article title" />
             </div>
             <div className="space-y-1">
               <Label>Cover Image</Label>
-              <ImageUpload
-                value={createForm.imagePath}
-                onChange={(url) => setCreateForm((f) => ({ ...f, imagePath: url }))}
-              />
+              <ImageUpload value={createForm.imagePath}
+                onChange={(url) => setCreateForm((f) => ({ ...f, imagePath: url }))} />
             </div>
             <div className="space-y-1">
               <Label htmlFor="c-content">Content</Label>
-              <Textarea
-                id="c-content"
-                value={createForm.content}
+              <Textarea id="c-content" value={createForm.content}
                 onChange={(e) => setCreateForm((f) => ({ ...f, content: e.target.value }))}
-                rows={4}
-                placeholder="Article body…"
-              />
+                rows={4} placeholder="Article body…" />
             </div>
             <Button onClick={handleCreate}>Publish</Button>
           </div>
         )}
 
-        {/* ── Article list ── */}
         <div className="space-y-3">
           {news.length === 0 && (
             <p className="text-sm text-muted-foreground">No articles found.</p>
@@ -187,25 +163,19 @@ export default function CrudsManageNews() {
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <Label>Title</Label>
-                    <Input
-                      value={editForm.title}
-                      onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                    />
+                    <Input value={editForm.title}
+                      onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))} />
                   </div>
                   <div className="space-y-1">
                     <Label>Cover Image</Label>
-                    <ImageUpload
-                      value={editForm.imagePath}
-                      onChange={(url) => setEditForm((f) => ({ ...f, imagePath: url }))}
-                    />
+                    <ImageUpload value={editForm.imagePath}
+                      onChange={(url) => setEditForm((f) => ({ ...f, imagePath: url }))} />
                   </div>
                   <div className="space-y-1">
                     <Label>Content</Label>
-                    <Textarea
-                      value={editForm.content}
+                    <Textarea value={editForm.content}
                       onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
-                      rows={4}
-                    />
+                      rows={4} />
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleUpdate(item.id)}>
@@ -220,12 +190,9 @@ export default function CrudsManageNews() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     {item.imagePath && (
-                      <img
-                        src={resolveImagePath(item.imagePath)}
-                        alt={item.title}
+                      <img src={resolveImageUrl(item.imagePath)} alt={item.title}
                         className="h-14 w-20 shrink-0 rounded object-cover"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
+                        onError={(e) => (e.currentTarget.style.display = "none")} />
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold">{item.title}</p>

@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../card"
-import { Badge } from "../../badge"
 import { useEffect, useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import {

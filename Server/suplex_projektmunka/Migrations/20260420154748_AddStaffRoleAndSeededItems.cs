@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,26 +11,21 @@ namespace suplex_projektmunka.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // ── Add staff role ───────────────────────────────────────────────
-            migrationBuilder.InsertData(
-                table: "Roles",
-                columns: new[] { "Id", "CreatedAt", "IsActive", "ModifiedAt", "Role" },
-                values: new object[]
-                {
-                    3,
-                    new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                    true,
-                    new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                    "staff"
-                });
+            // ── Add staff role (only if it doesn't exist) ──────────────────────
+            migrationBuilder.Sql(@"
+                INSERT INTO Roles (Id, Role, CreatedAt, ModifiedAt, IsActive)
+                SELECT 3, 'staff', '2026-01-01', '2026-01-01', 1
+                WHERE NOT EXISTS (SELECT 1 FROM Roles WHERE Id = 3 OR Role = 'staff' LIMIT 1);
+            ");
 
             // ── Add seasonal ticket type (type 4) ────────────────────────────
             // Types 1=daily, 2=monthly, 3=yearly already exist.
             // We add seasonal as type 4 (3 months).
-            migrationBuilder.InsertData(
-                table: "Types",
-                columns: new[] { "Id", "Type" },
-                values: new object[] { 4, "seasonal" });
+            migrationBuilder.Sql(@"
+                INSERT INTO Types (Id, Type)
+                SELECT 4, 'seasonal'
+                WHERE NOT EXISTS (SELECT 1 FROM Types WHERE Id = 4 LIMIT 1);
+            ");
 
             // ── Seed default items (daily, monthly, seasonal, annual) ─────────
             // Only insert if they do not already exist (guard: check count via raw SQL)
@@ -56,12 +51,13 @@ namespace suplex_projektmunka.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Only delete the items we added
             migrationBuilder.Sql(@"
                 DELETE FROM Items WHERE Name IN ('Daily Pass','Monthly Pass','Seasonal Pass','Annual Pass');
             ");
 
-            migrationBuilder.DeleteData(table: "Types", keyColumn: "Id", keyValue: 4);
-            migrationBuilder.DeleteData(table: "Roles", keyColumn: "Id", keyValue: 3);
+            // Note: Staff role and seasonal type are now part of the initial migration,
+            // so we don't delete them here to maintain consistency
         }
     }
 }

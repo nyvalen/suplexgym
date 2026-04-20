@@ -1,7 +1,7 @@
 import { UserRoundKey } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 
-function decodeToken(token) {
+function decodeToken(token: string) {
   const payload = token.split(".")[1]
 
   const decoded = atob(payload)

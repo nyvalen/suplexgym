@@ -1,29 +1,33 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\",
+  "WorkspaceRootPath": "C:\\suplexgym\\Server\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\migrations\\20260420154748_addstaffroleandseededitems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\migrations\\20260420154748_addstaffroleandseededitems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\users\\tothl\\onedrive\\asztali g\u00E9p\\projektmunka\\suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -34,86 +38,99 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "GymContext.cs",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Models\\Context\\GymContext.cs",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "RelativeToolTip": "suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-04T12:16:15.217Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "suplex_projektmunka\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAADEBAAAAAAAAAADwvz8BAAABAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "20260420154748_AddStaffRoleAndSeededItems.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Migrations\\20260420154748_AddStaffRoleAndSeededItems.cs",
+              "RelativeDocumentMoniker": "suplex_projektmunka\\Migrations\\20260420154748_AddStaffRoleAndSeededItems.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Migrations\\20260420154748_AddStaffRoleAndSeededItems.cs",
+              "RelativeToolTip": "suplex_projektmunka\\Migrations\\20260420154748_AddStaffRoleAndSeededItems.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T20:54:37.786Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "UserController.cs",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Controllers\\UserController.cs",
-              "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\UserController.cs",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Controllers\\UserController.cs",
-              "RelativeToolTip": "suplex_projektmunka\\Controllers\\UserController.cs",
-              "ViewState": "AgIAAKIAAAAAAAAAAAAmwBMAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T20:03:46.543Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "JwtService.cs",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Services\\JwtService.cs",
-              "RelativeDocumentMoniker": "suplex_projektmunka\\Services\\JwtService.cs",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Services\\JwtService.cs",
-              "RelativeToolTip": "suplex_projektmunka\\Services\\JwtService.cs",
-              "ViewState": "AgIAAE0AAAAAAAAAAAAAwCAAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T20:02:54.766Z",
+              "WhenOpened": "2026-04-20T15:47:48.832Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "suplex_projektmunka\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAACUBAAAAAAAAAAAAACUBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T20:54:37.786Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\UserController.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\UserController.cs",
+              "RelativeToolTip": "suplex_projektmunka\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAmwBMAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T20:03:46.543Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "JwtService.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Services\\JwtService.cs",
+              "RelativeDocumentMoniker": "suplex_projektmunka\\Services\\JwtService.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Services\\JwtService.cs",
+              "RelativeToolTip": "suplex_projektmunka\\Services\\JwtService.cs",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAAwCAAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T20:02:54.766Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\appsettings.json",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\appsettings.json",
               "RelativeDocumentMoniker": "suplex_projektmunka\\appsettings.json",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\appsettings.json",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\appsettings.json",
               "RelativeToolTip": "suplex_projektmunka\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-03-06T20:02:10.433Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Program.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Program.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Program.cs",
-              "ToolTip": "C:\\Users\\tothl\\OneDrive\\Asztali g\u00E9p\\Projektmunka\\Suplex_gym_server\\suplex_projektmunka\\suplex_projektmunka\\Program.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Program.cs",
               "RelativeToolTip": "suplex_projektmunka\\Program.cs",
-              "ViewState": "AgIAAHgAAAAAAAAAAAAAABQAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-06T20:00:39.689Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }

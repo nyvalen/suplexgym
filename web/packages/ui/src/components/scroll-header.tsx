@@ -31,12 +31,6 @@ export function ScrollHeader() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const navLinks = [
-    { label: t("nav.news"), id: "news" },
-    { label: t("nav.passes"), id: "passes" },
-    { label: t("nav.faq"), id: "faq" },
-  ]
-
   return (
     <header
       className={cn(

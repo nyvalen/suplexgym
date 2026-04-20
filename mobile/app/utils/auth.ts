@@ -2,30 +2,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState, AppStateStatus } from "react-native";
 
 // ─── Base URL ─────────────────────────────────────────────────────────────────
-// In production (EAS build / app store), EXPO_PUBLIC_API_URL must be set.
-// In development, falls back to stored IP or the hardcoded default.
 const IS_DEV = __DEV__;
 
-const DEFAULT_DEV_IP = "192.168.0.216";
+export const DEFAULT_DEV_IP = "192.168.0.216";
 const DEFAULT_PORT = "5103";
 
 export const IP_STORAGE_KEY = "dev_server_ip";
 
-/** Get the current API base URL. In prod, always uses EXPO_PUBLIC_API_URL. */
+/** Get the current API base URL. */
 export async function getApiBaseUrl(): Promise<string> {
   if (!IS_DEV) {
-    // Production: must be set at build time
     const prodUrl = process.env.EXPO_PUBLIC_API_URL;
     if (!prodUrl) throw new Error("EXPO_PUBLIC_API_URL is not set for production");
     return prodUrl;
   }
-  // Development: use stored IP or default
   const stored = await AsyncStorage.getItem(IP_STORAGE_KEY);
   const ip = stored?.trim() || DEFAULT_DEV_IP;
   return `http://${ip}:${DEFAULT_PORT}`;
 }
 
-/** Synchronous version using a cached value — updated on app start */
+/** Synchronous version using a cached value */
 let _cachedBase = `http://${DEFAULT_DEV_IP}:${DEFAULT_PORT}`;
 
 export function getCachedApiBase(): string {
@@ -41,7 +37,6 @@ export async function refreshCachedApiBase(): Promise<string> {
 }
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
-// Use getCachedApiBase() — call refreshCachedApiBase() on app start.
 export const ENDPOINTS = {
   get login() { return `${getCachedApiBase()}/api/auth/login` },
   get register() { return `${getCachedApiBase()}/api/auth/register` },
@@ -61,18 +56,41 @@ export const ENDPOINTS = {
   get checkout() { return `${getCachedApiBase()}/api/orders/checkout` },
   renew: (id: number) => `${getCachedApiBase()}/api/orders/renew/${id}`,
   get news() { return `${getCachedApiBase()}/api/news` },
+  get deals() { return `${getCachedApiBase()}/api/deals` },
 };
 
-/** Resolve an image path from the server (handles both absolute URLs and /uploads/... paths) */
-export function resolveImageUrl(path: string): string {
-  if (!path)
-    return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-  // Remove localhost:5103 URL prefix if present, keeping only the path
-  if (path.startsWith("http://localhost:5103")) {
-    path = path.replace("http://localhost:5103", "");
+/**
+ * Resolve an image path from the server.
+ * Handles: null/empty, absolute URLs, /uploads/... paths.
+ * FIXED: Never returns null or empty string that could cause URI parsing errors.
+ */
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=800&q=80";
+
+export function resolveImageUrl(path: string | null | undefined): string {
+  if (!path || path.trim() === "") return FALLBACK_IMAGE;
+  
+  const trimmed = path.trim();
+  
+  // Strip hardcoded localhost prefix
+  const cleaned = trimmed.startsWith("http://localhost:5103")
+    ? trimmed.replace("http://localhost:5103", "")
+    : trimmed;
+
+  // Already a full URL
+  if (cleaned.startsWith("http://") || cleaned.startsWith("https://")) {
+    // Validate it's a proper URL - if not, return fallback
+    try {
+      new URL(cleaned);
+      return cleaned;
+    } catch {
+      return FALLBACK_IMAGE;
+    }
   }
-  if (path.startsWith("http")) return path
-  return `${getCachedApiBase()}${path}`
+
+  // Relative path - combine with API base
+  const base = getCachedApiBase();
+  const separator = cleaned.startsWith("/") ? "" : "/";
+  return `${base}${separator}${cleaned}`;
 }
 
 // ─── Token storage ────────────────────────────────────────────────────────────
@@ -142,6 +160,11 @@ export async function authFetch(
   url: string,
   options: RequestInit = {},
 ): Promise<Response> {
+  // Guard: never fetch an invalid URL
+  if (!url || url.trim() === "" || url.includes("undefined") || url.includes("null")) {
+    throw new Error(`Invalid URL: "${url}"`);
+  }
+
   const token = await AsyncStorage.getItem(AccessTokenKey);
 
   const doFetch = (t: string) =>
@@ -206,7 +229,10 @@ export function registerSessionRefreshListener(onExpired: () => void): () => voi
 
 export function decodeJwt(token: string): Record<string, string | number> | null {
   try {
-    const payload = token.split(".")[1];
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    if (!payload) return null;
     return JSON.parse(atob(payload));
   } catch {
     return null;

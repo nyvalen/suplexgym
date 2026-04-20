@@ -6,18 +6,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { useTheme } from "../../../../apps/web/src/components/theme-provider"
 import { Button } from "@workspace/ui/components/button"
 import { AuthContext } from "../../../../apps/web/src/context/auth-context"
-import { useContext, useEffect, useState } from "react"
+import { useContext } from "react"
 import { fetchWithAuth } from "../lib/auth"
 
 export function Logout() {
-  const [error, setError] = useState("")
-
-  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext)
+  const { setIsLoggedIn } = useContext(AuthContext)
   const Logout = async () => {
-    setError("")
     try {
       const response = await fetchWithAuth(
         "http://localhost:5103/api/auth/logout",
@@ -29,19 +25,15 @@ export function Logout() {
           },
         }
       )
-      const data = await response.json()
 
       if (response.ok) {
-        console.log("Logout successful:", data)
+        console.log("Logout successful")
         setIsLoggedIn(false)
         localStorage.setItem("accessToken", "")
         window.location.href = "/"
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Login failed")
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      console.error("Logout error:", err)
     }
   }
   const handleClick = async () => {

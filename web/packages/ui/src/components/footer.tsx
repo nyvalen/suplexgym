@@ -9,7 +9,6 @@ import {
   MapPin,
   Clock,
 } from "lucide-react"
-import { Link } from "react-router-dom"
 
 export default function Footer() {
   const { t } = useTranslation()

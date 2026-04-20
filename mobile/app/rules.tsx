@@ -7,242 +7,287 @@ import {
   StatusBar,
   Animated,
   Platform,
-  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { useTheme } from "./theme/ThemeContext";
 import { useLanguage } from "./i18n/LanguageContext";
 import { LinearGradient } from "expo-linear-gradient";
 
-const GYM_IMAGE =
-  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=1200&q=80";
+const RULES = [
+  { icon: "👟", key: "footwear", color: "#f59e0b" },
+  { icon: "🧴", key: "hygiene", color: "#10b981" },
+  { icon: "🏋️", key: "equipment", color: "#6366f1" },
+  { icon: "📵", key: "phone", color: "#ec4899" },
+  { icon: "🎧", key: "noise", color: "#8b5cf6" },
+  { icon: "🤝", key: "respect", color: "#7c3aed" },
+  { icon: "🚫", key: "substances", color: "#ef4444" },
+  { icon: "⏱️", key: "peak", color: "#f97316" },
+];
+
+function RuleCard({ icon, ruleKey, color, index, isDark, t, fadeAnim, slideY }: any) {
+  return (
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ translateY: slideY }],
+        marginBottom: 10,
+      }}
+    >
+      <View
+        style={{
+          borderRadius: 20,
+          overflow: "hidden",
+          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.95)",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+        }}
+      >
+        {/* Thin color accent top border */}
+        <View style={{ height: 2, backgroundColor: color, opacity: 0.7 }} />
+
+        <View style={{ flexDirection: "row", alignItems: "flex-start", padding: 16, gap: 14 }}>
+          {/* Icon with colored background */}
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 14,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: `${color}18`,
+              borderWidth: 1,
+              borderColor: `${color}30`,
+              flexShrink: 0,
+            }}
+          >
+            <Text style={{ fontSize: 22 }}>{icon}</Text>
+          </View>
+
+          {/* Text content */}
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "700",
+                  color: isDark ? "#fafafa" : "#09090b",
+                  letterSpacing: -0.2,
+                  flex: 1,
+                }}
+              >
+                {t(`rules.items.${ruleKey}.title`)}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: "800",
+                  color: `${color}99`,
+                  fontVariant: ["tabular-nums"],
+                  marginLeft: 8,
+                }}
+              >
+                {String(index + 1).padStart(2, "0")}
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 12,
+                lineHeight: 18,
+                color: isDark ? "#71717a" : "#6b7280",
+              }}
+            >
+              {t(`rules.items.${ruleKey}.desc`)}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </Animated.View>
+  );
+}
 
 export default function RulesScreen() {
   const { isDark } = useTheme();
   const { t } = useLanguage();
 
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(30)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideUp = useRef(new Animated.Value(24)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeIn, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideUp, {
-        toValue: 0,
-        tension: 55,
-        friction: 11,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.spring(slideUp, { toValue: 0, tension: 60, friction: 12, useNativeDriver: true }),
     ]).start();
   }, []);
 
-  const rules: { icon: string; key: string }[] = [
-    { icon: "👟", key: "footwear" },
-    { icon: "🧴", key: "hygiene" },
-    { icon: "🏋️", key: "equipment" },
-    { icon: "📵", key: "phone" },
-    { icon: "🎧", key: "noise" },
-    { icon: "🤝", key: "respect" },
-    { icon: "🚫", key: "substances" },
-    { icon: "⏱️", key: "peak" },
-  ];
-
   return (
-    <View
-      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
-    >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
+    <View style={{ flex: 1, backgroundColor: isDark ? "#09090b" : "#fafafa" }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+
+      {/* Background gradient */}
+      <LinearGradient
+        colors={["rgba(124,58,237,0.35)", "rgba(124,58,237,0)"]}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 400 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: -60,
+          right: -60,
+          width: 220,
+          height: 220,
+          borderRadius: 110,
+          backgroundColor: isDark ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.06)",
+        }}
       />
 
-      {/* Hero image */}
-      <View className="h-[280px] relative">
-        <Image
-          source={{ uri: GYM_IMAGE }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
-        <View className="absolute inset-0 bg-black/50" />
-        <LinearGradient
-          colors={["rgba(124,58,237,0.35)", "rgba(0,0,0,0)"]}
-          style={{ position: "absolute", inset: 0 }}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-        />
-
-        {/* Back button */}
+      {/* Header */}
+      <View style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 }}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute top-14 left-5 w-10 h-10 rounded-full items-center justify-center border bg-black/40"
-          style={{ borderColor: "rgba(255,255,255,0.2)" }}
-          activeOpacity={0.8}
+          style={{ marginBottom: 20 }}
+          activeOpacity={0.7}
         >
-          <Text className="text-white text-base font-semibold">←</Text>
+          <Text style={{ color: "#7c3aed", fontSize: 15, fontWeight: "600" }}>
+            {t("common.back")}
+          </Text>
         </TouchableOpacity>
 
-        {/* Hero text */}
-        <View className="absolute bottom-6 left-5 right-5">
-          <Text
-            className="text-[11px] font-bold tracking-[3px] text-white/50 uppercase mb-1"
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideUp }] }}>
+          {/* Badge */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 10,
+              alignSelf: "flex-start",
+            }}
           >
-            SUPLEX GYM
-          </Text>
-          <Text className="text-[28px] font-extrabold text-white tracking-[-0.5px]">
+            <View
+              style={{
+                backgroundColor: "rgba(124,58,237,0.15)",
+                borderRadius: 8,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderWidth: 1,
+                borderColor: "rgba(124,58,237,0.3)",
+              }}
+            >
+              <Text style={{ color: "#c4b5fd", fontSize: 10, fontWeight: "700", letterSpacing: 1.5, textTransform: "uppercase" }}>
+                Suplex Gym
+              </Text>
+            </View>
+          </View>
+
+          <Text
+            style={{
+              fontSize: 32,
+              fontWeight: "800",
+              letterSpacing: -0.5,
+              color: isDark ? "#fafafa" : "#09090b",
+              marginBottom: 8,
+            }}
+          >
             {t("rules.title")}
           </Text>
-        </View>
-      </View>
-
-      {/* Content card slides up over image */}
-      <Animated.View
-        className="-mt-6 flex-1 rounded-tl-[28px] rounded-tr-[28px] overflow-hidden"
-        style={{
-          backgroundColor: isDark ? "#09090b" : "#fafafa",
-          opacity: fadeIn,
-          transform: [{ translateY: slideUp }],
-        }}
-      >
-        {/* Purple accent bar */}
-        <View className="h-[3px] bg-[#7c3aed] mx-6 rounded-sm mt-[18px] mb-2" />
-
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 12,
-            paddingBottom: Platform.OS === "android" ? 160 : 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Subtitle */}
           <Text
-            className={`text-sm leading-6 mb-6 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+            style={{
+              fontSize: 14,
+              lineHeight: 22,
+              color: isDark ? "#a1a1aa" : "#6b7280",
+              maxWidth: 300,
+            }}
           >
             {t("rules.subtitle")}
           </Text>
+        </Animated.View>
+      </View>
 
-          {/* Rules list */}
-          <View className="gap-3">
-            {rules.map(({ icon, key }, index) => (
-              <Animated.View
-                key={key}
-                style={{
-                  opacity: fadeIn,
-                  transform: [{ translateY: slideUp }],
-                }}
-              >
-                <View
-                  className="flex-row items-start gap-4 rounded-[18px] p-4 border"
-                  style={{
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.04)"
-                      : "rgba(255,255,255,0.9)",
-                    borderColor: isDark
-                      ? "rgba(255,255,255,0.07)"
-                      : "rgba(0,0,0,0.06)",
-                  }}
-                >
-                  {/* Icon bubble */}
-                  <View
-                    className="w-11 h-11 rounded-[12px] items-center justify-center shrink-0"
-                    style={{
-                      backgroundColor: isDark
-                        ? "rgba(124,58,237,0.15)"
-                        : "rgba(124,58,237,0.08)",
-                    }}
-                  >
-                    <Text className="text-[20px]">{icon}</Text>
-                  </View>
+      {/* Rules list */}
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: Platform.OS === "android" ? 160 : 120,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {RULES.map(({ icon, key, color }, index) => (
+          <RuleCard
+            key={key}
+            icon={icon}
+            ruleKey={key}
+            color={color}
+            index={index}
+            isDark={isDark}
+            t={t}
+            fadeAnim={fadeAnim}
+            slideY={slideUp}
+          />
+        ))}
 
-                  {/* Text */}
-                  <View className="flex-1">
-                    <Text
-                      className={`text-[14px] font-bold mb-0.5 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                    >
-                      {t(`rules.items.${key}.title`)}
-                    </Text>
-                    <Text
-                      className={`text-[12px] leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
-                    >
-                      {t(`rules.items.${key}.desc`)}
-                    </Text>
-                  </View>
-
-                  {/* Index number */}
-                  <Text
-                    className="text-[11px] font-bold self-start mt-1"
-                    style={{ color: "rgba(124,58,237,0.5)" }}
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </Text>
-                </View>
-              </Animated.View>
-            ))}
-          </View>
-
-          {/* Footer note */}
+        {/* Footer note */}
+        <Animated.View style={{ opacity: fadeAnim, marginTop: 8 }}>
           <View
-            className="mt-6 rounded-[16px] p-4 border"
             style={{
-              backgroundColor: isDark
-                ? "rgba(124,58,237,0.08)"
-                : "rgba(124,58,237,0.05)",
-              borderColor: isDark
-                ? "rgba(124,58,237,0.2)"
-                : "rgba(124,58,237,0.15)",
+              borderRadius: 18,
+              padding: 16,
+              backgroundColor: isDark ? "rgba(124,58,237,0.08)" : "rgba(124,58,237,0.05)",
+              borderWidth: 1,
+              borderColor: isDark ? "rgba(124,58,237,0.2)" : "rgba(124,58,237,0.15)",
             }}
           >
             <Text
-              className="text-[12px] leading-[18px] text-center"
-              style={{ color: isDark ? "#c4b5fd" : "#6d28d9" }}
+              style={{
+                fontSize: 12,
+                lineHeight: 18,
+                textAlign: "center",
+                color: isDark ? "#c4b5fd" : "#6d28d9",
+              }}
             >
               {t("rules.footer")}
             </Text>
           </View>
-        </ScrollView>
+        </Animated.View>
+      </ScrollView>
 
-        {/* CTA */}
-        <View
-          className="absolute bottom-0 left-0 right-0 px-5"
-          style={{ paddingBottom: Platform.OS === "android" ? 100 : 40 }}
+      {/* CTA — Buy Tickets */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          paddingHorizontal: 20,
+          paddingBottom: Platform.OS === "android" ? 100 : 44,
+        }}
+      >
+        <LinearGradient
+          colors={isDark ? ["rgba(9,9,11,0)", "rgba(9,9,11,1)"] : ["rgba(250,250,250,0)", "rgba(250,250,250,1)"]}
+          style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 120 }}
+        />
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/purchase")}
+          activeOpacity={0.85}
+          style={{
+            backgroundColor: "#7c3aed",
+            borderRadius: 20,
+            paddingVertical: 18,
+            alignItems: "center",
+            shadowColor: "#7c3aed",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.4,
+            shadowRadius: 16,
+            elevation: 10,
+          }}
         >
-          <LinearGradient
-            colors={
-              isDark
-                ? ["rgba(9,9,11,0)", "rgba(9,9,11,1)"]
-                : ["rgba(250,250,250,0)", "rgba(250,250,250,1)"]
-            }
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 100,
-            }}
-          />
-          <TouchableOpacity
-            className="bg-[#7c3aed] rounded-[20px] py-[18px] items-center"
-            style={{
-              shadowColor: "#7c3aed",
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.4,
-              shadowRadius: 16,
-              elevation: 10,
-            }}
-            onPress={() => router.push("/purchase")}
-            activeOpacity={0.85}
-          >
-            <Text className="text-white text-[15px] font-bold tracking-[0.3px]">
-              {t("rules.cta")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
+          <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700", letterSpacing: 0.3 }}>
+            {t("rules.cta")}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

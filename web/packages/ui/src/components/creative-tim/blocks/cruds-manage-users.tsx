@@ -4,6 +4,7 @@ import {
   getFoundingAdminId,
   isProtectedAction,
 } from "@workspace/ui/lib/auth"
+import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
 import { Card } from "../../card"
 import {
@@ -36,11 +37,16 @@ type RoleItem = {
   role: string
 }
 
+// Role badge colors
+const ROLE_COLORS: Record<string, string> = {
+  admin: "bg-purple-500/20 text-purple-400",
+  staff: "bg-amber-500/20 text-amber-500",
+  user: "bg-blue-500/20 text-blue-400",
+}
+
 async function fetchUsers(): Promise<UsersItem[]> {
   try {
-    const res = await fetchWithAuth("http://localhost:5103/api/admin/users", {
-      method: "GET",
-    })
+    const res = await fetchWithAuth(API_ENDPOINTS.adminUsers, { method: "GET" })
     if (!res.ok) throw new Error(`Failed fetch users: ${res.status}`)
     return (await res.json()) as UsersItem[]
   } catch (err) {
@@ -51,10 +57,8 @@ async function fetchUsers(): Promise<UsersItem[]> {
 
 async function fetchRoles(): Promise<RoleItem[]> {
   try {
-    const res = await fetchWithAuth("http://localhost:5103/api/admin/roles", {
-      method: "GET",
-    })
-    if (res.status == 401) {
+    const res = await fetchWithAuth(API_ENDPOINTS.adminRoles, { method: "GET" })
+    if (res.status === 401) {
       window.location.href = "/"
     }
     if (!res.ok) throw new Error(`Failed fetch roles: ${res.status}`)
@@ -69,11 +73,10 @@ export default function CrudsManageUsers() {
   const [data, setData] = useState<UsersItem[]>([])
   const [roles, setRoles] = useState<RoleItem[]>([])
   const [openItemIds, setOpenItemIds] = useState<number[]>([])
-  const [selectedRoleIds, setSelectedRoleIds] = useState<
-    Record<number, number>
-  >({})
+  const [selectedRoleIds, setSelectedRoleIds] = useState<Record<number, number>>({})
   const [message, setMessage] = useState("")
   const [foundingAdminId, setFoundingAdminId] = useState<number | null>(null)
+
   const flash = (msg: string) => {
     setMessage(msg)
     setTimeout(() => setMessage(""), 4000)
@@ -81,10 +84,7 @@ export default function CrudsManageUsers() {
 
   const loadUsers = async () => {
     try {
-      const [users, fetchedRoles] = await Promise.all([
-        fetchUsers(),
-        fetchRoles(),
-      ])
+      const [users, fetchedRoles] = await Promise.all([fetchUsers(), fetchRoles()])
       setData(users)
       setRoles(fetchedRoles)
       setFoundingAdminId(getFoundingAdminId(users))
@@ -102,9 +102,7 @@ export default function CrudsManageUsers() {
     }
   }
 
-  useEffect(() => {
-    loadUsers()
-  }, [])
+  useEffect(() => { loadUsers() }, [])
 
   const updateUserRole = async (id: number) => {
     if (isProtectedAction(id, foundingAdminId, "role-change")) {
@@ -115,32 +113,21 @@ export default function CrudsManageUsers() {
     const user = data.find((u) => u.id === id)
     if (!user) return
 
-    const selectedRoleId =
-      selectedRoleIds[id] || roles.find((r) => r.role === user.role)?.id
+    const selectedRoleId = selectedRoleIds[id] || roles.find((r) => r.role === user.role)?.id
     if (!selectedRoleId) {
       flash("Could not determine role id to update.")
       return
     }
 
-    const selectedRoleName =
-      roles.find((r) => r.id === selectedRoleId)?.role ?? user.role
+    const selectedRoleName = roles.find((r) => r.id === selectedRoleId)?.role ?? user.role
 
     try {
-      const response = await fetchWithAuth(
-        `http://localhost:5103/api/admin/users/${id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            RoleId: selectedRoleId,
-            IsActive: user.isActive,
-          }),
-        }
-      )
-      if (!response.ok)
-        throw new Error(`Failed to update user: ${response.status}`)
-      setData((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, role: selectedRoleName } : u))
-      )
+      const response = await fetchWithAuth(`${API_ENDPOINTS.adminUsers}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ RoleId: selectedRoleId, IsActive: user.isActive }),
+      })
+      if (!response.ok) throw new Error(`Failed to update user: ${response.status}`)
+      setData((prev) => prev.map((u) => (u.id === id ? { ...u, role: selectedRoleName } : u)))
       flash("User role updated successfully.")
     } catch (error) {
       console.error("Update failed", error)
@@ -158,21 +145,13 @@ export default function CrudsManageUsers() {
     if (!user) return
 
     try {
-      const response = await fetchWithAuth(
-        `http://localhost:5103/api/admin/users/${id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({ IsActive: !user.isActive }),
-        }
-      )
-      if (!response.ok)
-        throw new Error(`Failed to toggle active: ${response.status}`)
-      setData((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u))
-      )
-      flash(
-        `User ${!user.isActive ? "activated" : "deactivated"} successfully.`
-      )
+      const response = await fetchWithAuth(`${API_ENDPOINTS.adminUsers}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ IsActive: !user.isActive }),
+      })
+      if (!response.ok) throw new Error(`Failed to toggle active: ${response.status}`)
+      setData((prev) => prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u)))
+      flash(`User ${!user.isActive ? "activated" : "deactivated"} successfully.`)
     } catch (error) {
       console.error("Toggle active failed", error)
       flash("Toggle active failed. Check console.")
@@ -197,130 +176,120 @@ export default function CrudsManageUsers() {
           )}
         </div>
 
+        {/* Role legend */}
+        <div className="mb-4 flex gap-2 flex-wrap">
+          {Object.entries(ROLE_COLORS).map(([role, cls]) => (
+            <span key={role} className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cls}`}>
+              {role}
+            </span>
+          ))}
+        </div>
+
         <div className="space-y-2">
           <div className="container mx-auto flex-row items-start gap-6">
-            {data.map(
-              ({ id, name, username, email, role, isActive, createdAt }) => {
-                const isFounder = id === foundingAdminId
-                return (
-                  <Collapsible
-                    key={id}
-                    open={openItemIds.includes(id)}
-                    onOpenChange={(isOpen) => {
-                      setOpenItemIds((prev) =>
-                        isOpen
-                          ? [...new Set([...prev, id])]
-                          : prev.filter((i) => i !== id)
-                      )
-                    }}
-                  >
-                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded p-2">
-                      <span className="font-semibold">{username}</span>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {isFounder && (
-                          <span className="flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-600 dark:text-amber-400">
-                            <ShieldAlert className="size-3" /> Founding Admin
-                          </span>
-                        )}
-                        <span
-                          className={`rounded px-1.5 py-0.5 ${isActive ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-red-500/20 text-red-500"}`}
-                        >
-                          {isActive ? "Active" : "Inactive"}
-                        </span>
-                        <span className="capitalize">{role}</span>
-                      </div>
-                    </CollapsibleTrigger>
-
-                    <CollapsibleContent className="mt-2 overflow-hidden rounded-lg border border-border p-4 shadow-sm">
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Name</p>
-                          <p className="font-medium">{name}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Email</p>
-                          <p className="truncate font-medium">{email}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            Status
-                          </p>
-                          <p className="font-medium">
-                            {isActive ? "Active" : "Inactive"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            Created
-                          </p>
-                          <p className="font-medium">
-                            {new Date(createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-
+            {data.map(({ id, name, username, email, role, isActive, createdAt }) => {
+              const isFounder = id === foundingAdminId
+              const roleBadgeCls = ROLE_COLORS[role] ?? "bg-zinc-500/20 text-zinc-400"
+              return (
+                <Collapsible
+                  key={id}
+                  open={openItemIds.includes(id)}
+                  onOpenChange={(isOpen) => {
+                    setOpenItemIds((prev) =>
+                      isOpen ? [...new Set([...prev, id])] : prev.filter((i) => i !== id)
+                    )
+                  }}
+                >
+                  <CollapsibleTrigger className="flex w-full items-center justify-between rounded p-2 hover:bg-muted/50 transition-colors">
+                    <span className="font-semibold">{username}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       {isFounder && (
-                        <p className="mt-3 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-                          <ShieldAlert className="size-3.5" />
-                          This is the founding admin — role changes and
-                          deactivation are blocked.
-                        </p>
+                        <span className="flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-600 dark:text-amber-400">
+                          <ShieldAlert className="size-3" /> Founding Admin
+                        </span>
                       )}
+                      <span className={`rounded-full px-2 py-0.5 font-semibold capitalize ${isActive ? "bg-green-500/20 text-green-600 dark:text-green-400" : "bg-red-500/20 text-red-500"}`}>
+                        {isActive ? "Active" : "Inactive"}
+                      </span>
+                      <span className={`rounded-full px-2 py-0.5 font-semibold capitalize ${roleBadgeCls}`}>
+                        {role}
+                      </span>
+                    </div>
+                  </CollapsibleTrigger>
 
-                      <div className="mt-4 flex flex-wrap items-center gap-3">
-                        <Select
-                          disabled={isFounder}
-                          onValueChange={(value) =>
-                            setSelectedRoleIds((prev) => ({
-                              ...prev,
-                              [id]: Number(value),
-                            }))
-                          }
-                        >
-                          <SelectTrigger className="w-36">
-                            <SelectValue
-                              placeholder={
-                                roles.find((r) => r.id === selectedRoleIds[id])
-                                  ?.role ?? role
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="w-36">
-                            <SelectGroup>
-                              {roles.map((roleOption) => (
-                                <SelectItem
-                                  key={roleOption.id}
-                                  value={`${roleOption.id}`}
-                                >
-                                  {roleOption.role}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-
-                        <Button
-                          type="button"
-                          disabled={isFounder}
-                          onClick={() => updateUserRole(id)}
-                        >
-                          Save Role
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant={isActive ? "destructive" : "outline"}
-                          disabled={isFounder}
-                          onClick={() => toggleActive(id)}
-                        >
-                          {isActive ? "Deactivate" : "Activate"}
-                        </Button>
+                  <CollapsibleContent className="mt-2 overflow-hidden rounded-lg border border-border p-4 shadow-sm">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Name</p>
+                        <p className="font-medium">{name}</p>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )
-              }
-            )}
+                      <div>
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="truncate font-medium">{email}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Status</p>
+                        <p className="font-medium">{isActive ? "Active" : "Inactive"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Created</p>
+                        <p className="font-medium">{new Date(createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    {isFounder && (
+                      <p className="mt-3 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                        <ShieldAlert className="size-3.5" />
+                        This is the founding admin — role changes and deactivation are blocked.
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <Select
+                        disabled={isFounder}
+                        onValueChange={(value) =>
+                          setSelectedRoleIds((prev) => ({ ...prev, [id]: Number(value) }))
+                        }
+                      >
+                        <SelectTrigger className="w-36">
+                          <SelectValue
+                            placeholder={
+                              roles.find((r) => r.id === selectedRoleIds[id])?.role ?? role
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="w-36">
+                          <SelectGroup>
+                            {roles.map((roleOption) => (
+                              <SelectItem key={roleOption.id} value={`${roleOption.id}`}>
+                                <span className={`mr-2 inline-block w-2 h-2 rounded-full ${
+                                  roleOption.role === "admin" ? "bg-purple-400" :
+                                  roleOption.role === "staff" ? "bg-amber-400" : "bg-blue-400"
+                                }`} />
+                                {roleOption.role}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+
+                      <Button type="button" disabled={isFounder} onClick={() => updateUserRole(id)}>
+                        Save Role
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant={isActive ? "destructive" : "outline"}
+                        disabled={isFounder}
+                        onClick={() => toggleActive(id)}
+                      >
+                        {isActive ? "Deactivate" : "Activate"}
+                      </Button>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )
+            })}
           </div>
 
           {message && (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
+import { API_ENDPOINTS, resolveImageUrl } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
 import { Card } from "../../card"
 import { Input } from "../../input"
@@ -10,8 +11,6 @@ import {
 } from "../../select"
 import { Pencil, X, Check, Plus, PackageX } from "lucide-react"
 import { ImageUpload } from "../../image-crop-upload"
-
-const API_BASE = "http://localhost:5103"
 
 type ItemType = { id: number; type: string | null }
 
@@ -41,7 +40,7 @@ const EMPTY_FORM: ItemForm = {
 
 async function fetchItems(): Promise<Item[]> {
   try {
-    const res = await fetchWithAuth(`${API_BASE}/api/items`, { method: "GET" })
+    const res = await fetchWithAuth(API_ENDPOINTS.items, { method: "GET" })
     if (!res.ok) throw new Error(`${res.status}`)
     return (await res.json()) as Item[]
   } catch { return [] }
@@ -49,7 +48,7 @@ async function fetchItems(): Promise<Item[]> {
 
 async function fetchTypes(): Promise<ItemType[]> {
   try {
-    const res = await fetchWithAuth(`${API_BASE}/api/items/types`, { method: "GET" })
+    const res = await fetchWithAuth(API_ENDPOINTS.itemTypes, { method: "GET" })
     if (!res.ok) throw new Error(`${res.status}`)
     return (await res.json()) as ItemType[]
   } catch { return [] }
@@ -77,16 +76,6 @@ export default function CrudsManageItems() {
     setTimeout(() => setMessage(""), 4000)
   }
 
-  const resolveImagePath = (path: string | null) => {
-    if (!path) return ""
-    // Remove localhost:5103 URL prefix if present, keeping only the path
-    if (path.startsWith("http://localhost:5103")) {
-      path = path.replace("http://localhost:5103", "")
-    }
-    if (path.startsWith("http")) return path
-    return `${API_BASE}${path}`
-  }
-
   const formToPayload = (f: ItemForm) => ({
     Name: f.name.trim(),
     Description: f.description.trim(),
@@ -108,7 +97,7 @@ export default function CrudsManageItems() {
     const err = validate(createForm)
     if (err) { flash(err); return }
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/admin/items`, {
+      const res = await fetchWithAuth(API_ENDPOINTS.adminItems, {
         method: "POST",
         body: JSON.stringify(formToPayload(createForm)),
       })
@@ -125,7 +114,7 @@ export default function CrudsManageItems() {
     setEditForm({
       name: item.name ?? "",
       description: item.description ?? "",
-      imagePath: resolveImagePath(item.imagePath),
+      imagePath: resolveImageUrl(item.imagePath),
       price: String(item.price),
       type_id: String(item.type_id),
       validityDays: String(item.validityDays),
@@ -136,7 +125,7 @@ export default function CrudsManageItems() {
     const err = validate(editForm)
     if (err) { flash(err); return }
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/admin/items/${id}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.adminItems}/${id}`, {
         method: "PUT",
         body: JSON.stringify(formToPayload(editForm)),
       })
@@ -150,7 +139,7 @@ export default function CrudsManageItems() {
   const handleDeactivate = async (id: number) => {
     if (!confirm("Deactivate this item?")) return
     try {
-      const res = await fetchWithAuth(`${API_BASE}/api/admin/items/${id}`, { method: "DELETE" })
+      const res = await fetchWithAuth(`${API_ENDPOINTS.adminItems}/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error(`${res.status}`)
       flash("Item deactivated.")
       load()
@@ -171,10 +160,7 @@ export default function CrudsManageItems() {
       </div>
       <div className="space-y-1 sm:col-span-2">
         <Label>Cover Image</Label>
-        <ImageUpload
-          value={form.imagePath}
-          onChange={(url) => setForm((f) => ({ ...f, imagePath: url }))}
-        />
+        <ImageUpload value={form.imagePath} onChange={(url) => setForm((f) => ({ ...f, imagePath: url }))} />
       </div>
       <div className="space-y-1">
         <Label>Price (HUF)</Label>
@@ -238,12 +224,9 @@ export default function CrudsManageItems() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     {item.imagePath && (
-                      <img
-                        src={resolveImagePath(item.imagePath)}
-                        alt={item.name ?? ""}
+                      <img src={resolveImageUrl(item.imagePath)} alt={item.name ?? ""}
                         className="h-14 w-20 shrink-0 rounded object-cover"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
+                        onError={(e) => (e.currentTarget.style.display = "none")} />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

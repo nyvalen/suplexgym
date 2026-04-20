@@ -8,8 +8,9 @@ import CrudsManageUsers from "@workspace/ui/components/creative-tim/blocks/cruds
 import CrudsManageNews from "@workspace/ui/components/creative-tim/blocks/cruds-manage-news"
 import CrudsManageItems from "@workspace/ui/components/creative-tim/blocks/cruds-manage-items"
 import CrudsManageEquipment from "@workspace/ui/components/creative-tim/blocks/cruds-manage-equipment"
+import CrudsManageDeals from "@workspace/ui/components/creative-tim/blocks/cruds-manage-deals"
 
-type Section = "users" | "news" | "items" | "equipment"
+type Section = "users" | "news" | "items" | "equipment" | "deals"
 
 function getUserRole(): string {
   try {
@@ -53,6 +54,7 @@ export default function AdminPage() {
         {section === "news" && <CrudsManageNews />}
         {section === "items" && isAdmin && <CrudsManageItems />}
         {section === "equipment" && <CrudsManageEquipment />}
+        {section === "deals" && <CrudsManageDeals />}
       </div>
     </SidebarProvider>
   )

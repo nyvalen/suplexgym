@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "./api-config"
+
 export interface AuthTokens {
   accessToken: string
   refreshToken: string
@@ -10,8 +12,6 @@ export interface RefreshResponse {
   userId: number
   username: string
 }
-
-const API_BASE_URL = "http://localhost:5103"
 
 export const authTokens = {
   getAccessToken: () => localStorage.getItem("accessToken"),
@@ -34,7 +34,7 @@ export const refreshAccessToken = async (): Promise<boolean> => {
       return false
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch(API_ENDPOINTS.refresh, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -73,8 +73,6 @@ export async function fetchWithAuth(
 }
 
 // ─── First-admin failsafe ─────────────────────────────────────────────────────
-// The "first admin" is determined by the lowest user ID among all admin-role
-// users. This is a pure frontend guard. The backend should also enforce this.
 
 export interface AdminUserSnapshot {
   id: number
@@ -82,21 +80,12 @@ export interface AdminUserSnapshot {
   isActive: boolean
 }
 
-/**
- * Given the full user list (already fetched), returns the id of the
- * "founding admin" — the admin account with the lowest id.
- */
 export function getFoundingAdminId(users: AdminUserSnapshot[]): number | null {
   const admins = users.filter((u) => u.role === "admin")
   if (admins.length === 0) return null
   return admins.reduce((min, u) => (u.id < min ? u.id : min), admins[0].id)
 }
 
-/**
- * Returns true when the proposed action would be blocked for the founding admin:
- * - Changing their role away from "admin"
- * - Deactivating their account
- */
 export function isProtectedAction(
   userId: number,
   foundingAdminId: number | null,

@@ -9,9 +9,6 @@ function decodeToken(token: string) {
   }
 }
 
-// Roles that are allowed to access the admin panel
-const PRIVILEGED_ROLES = ["admin", "staff"]
-
 const ProtectedRoute = ({
   allowedRoles,
   children,

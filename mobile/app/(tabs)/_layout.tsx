@@ -12,6 +12,7 @@ export default function TabLayout() {
     <TabBarContext value={{ setIsTabBarHidden }}>
       <NativeTabs
         hidden={isTabBarHidden}
+        
         labelStyle={{
           // For the text color
           color: DynamicColorIOS({

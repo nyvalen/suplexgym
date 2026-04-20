@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using suplex_projektmunka.Models.Context;
@@ -117,10 +118,16 @@ if (app.Environment.IsDevelopment())
 var uploadsDir = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "uploads");
 Directory.CreateDirectory(uploadsDir);
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection(); // Disabled for local development
 
 // Serve static files (uploaded images) from wwwroot
-app.UseStaticFiles();
+app.UseDefaultFiles();
+string currentDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(currentDir),
+    RequestPath = ""
+});
 
 app.UseCors("FrontendPolicy");
 app.UseAuthentication();

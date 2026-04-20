@@ -183,6 +183,56 @@ namespace suplex_projektmunka.Migrations
                     b.HasIndex("Type_id");
 
                     b.ToTable("Items");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Full facility access for one day. No commitment required.",
+                            IsActive = true,
+                            ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Daily Pass",
+                            Price = 2900,
+                            Type_id = 1,
+                            ValidityDays = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Unlimited access for 30 days. Includes all group classes.",
+                            IsActive = true,
+                            ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Monthly Pass",
+                            Price = 12900,
+                            Type_id = 2,
+                            ValidityDays = 30
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "90 days of unlimited access. Great value for committed trainers.",
+                            IsActive = true,
+                            ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Seasonal Pass",
+                            Price = 32900,
+                            Type_id = 4,
+                            ValidityDays = 90
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Best value — full access for 365 days. Priority booking included.",
+                            IsActive = true,
+                            ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Annual Pass",
+                            Price = 99900,
+                            Type_id = 3,
+                            ValidityDays = 365
+                        });
                 });
 
             modelBuilder.Entity("suplex_projektmunka.Models.ItemPurchases.PurchaseDetail", b =>
@@ -280,7 +330,12 @@ namespace suplex_projektmunka.Migrations
                         new
                         {
                             Id = 3,
-                            Type = "yearly"
+                            Type = "annual"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Type = "seasonal"
                         });
                 });
 
@@ -365,6 +420,14 @@ namespace suplex_projektmunka.Migrations
                             IsActive = true,
                             ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Role = "user"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = "staff"
                         });
                 });
 
