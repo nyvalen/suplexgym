@@ -28,6 +28,8 @@ const en = {
     classes: "Weekly classes",
     trainers: "Certified trainers",
     years: "Years open",
+    equipment: "Machines",
+    satisfaction: "Satisfaction",
   },
   services: {
     heading: "What we offer",
@@ -196,7 +198,8 @@ const en = {
     submit: "Sign In",
     errorDefault: "Invalid email or password. Please try again.",
     staffHint: "Admin and staff accounts can access the panel.",
-    errorPermission: "Access denied. Only admin or staff accounts can access this panel.",
+    errorPermission:
+      "Access denied. Only admin or staff accounts can access this panel.",
   },
   admin: {
     title: "Admin Panel",
@@ -234,8 +237,10 @@ const hu: typeof en = {
   stats: {
     members: "Aktív tagok",
     classes: "Heti edzések",
-    trainers: "Minősített edzők",
-    years: "Évek óta nyitva",
+    trainers: "Személyi edző",
+    years: "Éve nyitva",
+    equipment: "Gép",
+    satisfaction: "Elégedettség",
   },
   services: {
     heading: "Amit kínálunk",
@@ -404,7 +409,8 @@ const hu: typeof en = {
     submit: "Bejelentkezés",
     errorDefault: "Hibás e-mail vagy jelszó. Kérjük, próbáld újra.",
     staffHint: "Admin és személyzeti fiókok érhetik el a panelt.",
-    errorPermission: "Hozzáférés megtagadva. Csak admin vagy személyzeti fiókok léphetnek be.",
+    errorPermission:
+      "Hozzáférés megtagadva. Csak admin vagy személyzeti fiókok léphetnek be.",
   },
   admin: {
     title: "Admin Panel",

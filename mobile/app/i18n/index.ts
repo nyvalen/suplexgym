@@ -224,11 +224,11 @@ const translations = {
       noResults: "Nincs találat",
     },
     welcome: {
-      tagline: "Épülve",
+      tagline: "A lehetőségek",
       headline: "határtalan",
-      subheadline: "lehetőségre.",
+      subheadline: "tárháza.",
       description:
-        "Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges — csak ami számít.",
+        "Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges — fejlődés.",
       signIn: "Bejelentkezés",
       createAccount: "Fiók létrehozása",
       quote: '„Az erő következetességben gyökerezik."',

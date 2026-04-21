@@ -31,10 +31,10 @@ export default function Hero() {
   ]
 
   const stats = [
-    { label: t("stats.members"), value: "1,240" },
-    { label: t("stats.classes"), value: "34" },
-    { label: t("stats.trainers"), value: "12" },
-    { label: t("stats.years"), value: "2" },
+    { value: "7", label: t("stats.trainers") },
+    { value: "2", label: t("stats.years") },
+    { value: "20+", label: t("stats.equipment") },
+    { value: "100%", label: t("stats.satisfaction") },
   ]
 
   return (
@@ -146,30 +146,6 @@ export default function Hero() {
             {t("hero.quoteText")}
           </p>
         </div>
-      </div>
-
-      {/* Logos */}
-      <div className="flex flex-wrap items-center gap-8 px-2 py-4 opacity-30">
-        <img
-          src="https://v3.material-tailwind.com/logo/spotify.svg"
-          alt="Spotify"
-          className="h-6 brightness-0 invert"
-        />
-        <img
-          src="https://v3.material-tailwind.com/logo/coinbase.svg"
-          alt="Coinbase"
-          className="h-6 brightness-0 invert"
-        />
-        <img
-          src="https://v3.material-tailwind.com/logo/netflix.svg"
-          alt="Netflix"
-          className="h-6 brightness-0 invert"
-        />
-        <img
-          src="https://v3.material-tailwind.com/logo/pinterest.svg"
-          alt="Pinterest"
-          className="h-6 brightness-0 invert"
-        />
       </div>
     </div>
   )

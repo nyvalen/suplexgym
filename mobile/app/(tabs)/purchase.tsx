@@ -120,7 +120,7 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
               textTransform: "uppercase",
             }}
           >
-            {item.typeName ?? cfg.label}
+            {cfg.label}
           </Text>
         </View>
         <View
@@ -181,7 +181,7 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
                 fontSize: 11,
                 marginTop: 1,
               }}
-              numberOfLines={1}
+              numberOfLines={3}
             >
               {item.description}
             </Text>
@@ -489,10 +489,10 @@ export default function PurchaseTicketsScreen() {
               cart.length > 0
                 ? Platform.OS === "android"
                   ? 200
-                  : 130
+                  : 90
                 : Platform.OS === "android"
                   ? 160
-                  : 40,
+                  : 10,
           }}
           showsVerticalScrollIndicator={false}
         >

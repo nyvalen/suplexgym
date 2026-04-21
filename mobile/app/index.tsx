@@ -33,10 +33,10 @@ import { useApiStore } from "./store/apiStore";
 import { DevIpSettings } from "./components/DevIpSettings";
 
 const STATS = [
-  { value: "1 240", label: "Aktív tagok" },
-  { value: "34", label: "Heti edzés" },
-  { value: "12", label: "Edzők" },
-  { value: "8", label: "Évek" },
+  { value: "7", label: "Személyi edző" },
+  { value: "2", label: "Éve nyitva" },
+  { value: "20+", label: "Gép" },
+  { value: "100%", label: "elégedettség" },
 ];
 
 // ─── IP Config Sheet ──────────────────────────────────────────────────────────
@@ -460,20 +460,20 @@ export default function WelcomeScreen() {
           {/* Hero */}
           <View className="mb-10">
             <Text
-              className={`text-[17px] font-normal mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+              className={`text-[28px] font-normal mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#09090b]"}`}
             >
-              Épülve
+              A lehetőségek
             </Text>
-            <Text className="text-[46px] font-extrabold italic text-[#7c3aed] tracking-[-1px] leading-[50px]">
+            <Text className="text-[46px] font-bold italic text-[#7c3aed] tracking-[-1px] leading-[50px]">
               határtalan
             </Text>
             <Text
-              className={`text-[36px] font-bold tracking-[-0.5px] leading-[42px] opacity-85 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+              className={`text-[36px] font-normal tracking-[-0.5px] leading-[42px] opacity-85 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
             >
-              lehetőségre.
+              tárháza.
             </Text>
             <Text
-              className={`text-sm leading-[22px] mt-3.5 max-w-[280px] ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+              className={`text-sm leading-[22px] mt-3.5 max-w-[280px] ${isDark ? "text-[#646464]" : "text-[#646464]"}`}
             >
               Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges —
               csak ami számít.
