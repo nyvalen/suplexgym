@@ -323,22 +323,22 @@ namespace suplex_projektmunka.Migrations
                         new
                         {
                             Id = 1,
-                            Type = "daily"
+                            Type = "napi"
                         },
                         new
                         {
                             Id = 2,
-                            Type = "monthly"
+                            Type = "havi"
                         },
                         new
                         {
                             Id = 3,
-                            Type = "annual"
+                            Type = "éves"
                         },
                         new
                         {
                             Id = 4,
-                            Type = "seasonal"
+                            Type = "szezonális"
                         });
                 });
 

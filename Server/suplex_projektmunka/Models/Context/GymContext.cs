@@ -99,39 +99,43 @@ namespace suplex_projektmunka.Models.Context
             // ── Seed: ticket types ───────────────────────────────────────────
             // 1=daily  2=monthly  3=annual  4=seasonal (90 days)
             modelBuilder.Entity<Types>().HasData(
-                new Types { Id = 1, Type = "daily" },
-                new Types { Id = 2, Type = "monthly" },
-                new Types { Id = 3, Type = "annual" },
-                new Types { Id = 4, Type = "seasonal" }
+                new Types { Id = 1, Type = "napi" },
+                new Types { Id = 2, Type = "havi" },
+                new Types { Id = 3, Type = "éves" },
+                new Types { Id = 4, Type = "szezonális" }
             );
 
             // ── Seed: items/passes ───────────────────────────────────────────
             modelBuilder.Entity<Item>().HasData(
                 new Item
                 {
-                    Id = 1, Name = "Daily Pass",
-                    Description = "Full facility access for one day. No commitment required.",
+                    Id = 1,
+                    Name = "Napijegy",
+                    Description = "Teljes hozzáférés egy napra. Nincs kötelezettség.",
                     ImagePath = null, Price = 2900, Type_id = 1, ValidityDays = 1,
                     IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1)
                 },
                 new Item
                 {
-                    Id = 2, Name = "Monthly Pass",
-                    Description = "Unlimited access for 30 days. Includes all group classes.",
+                    Id = 2,
+                    Name = "Havi bérlet",
+                    Description = "Korlátlan hozzáférés 30 napra. Részt vehetsz az összes csoportos edzésen.",
                     ImagePath = null, Price = 12900, Type_id = 2, ValidityDays = 30,
                     IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1)
                 },
                 new Item
                 {
-                    Id = 3, Name = "Seasonal Pass",
-                    Description = "90 days of unlimited access. Great value for committed trainers.",
+                    Id = 3,
+                    Name = "Szezonális bérlet",
+                    Description = "90 nap korlátlan hozzáférés. Kiváló választás elkötelezett edzeni vágyóknak.",
                     ImagePath = null, Price = 32900, Type_id = 4, ValidityDays = 90,
                     IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1)
                 },
                 new Item
                 {
-                    Id = 4, Name = "Annual Pass",
-                    Description = "Best value — full access for 365 days. Priority booking included.",
+                    Id = 4,
+                    Name = "Éves bérlet",
+                    Description = "Legjobb ár-érték arány – teljes hozzáférés 365 napra.",
                     ImagePath = null, Price = 99900, Type_id = 3, ValidityDays = 365,
                     IsActive = true, CreatedAt = new DateTime(2026, 1, 1), ModifiedAt = new DateTime(2026, 1, 1)
                 }

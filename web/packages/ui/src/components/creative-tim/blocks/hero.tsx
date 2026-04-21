@@ -31,10 +31,10 @@ export default function Hero() {
   ]
 
   const stats = [
-    { value: "7", label: t("stats.trainers") },
-    { value: "2", label: t("stats.years") },
-    { value: "20+", label: t("stats.equipment") },
-    { value: "100%", label: t("stats.satisfaction") },
+    { label: t("stats.trainers"), value: "7" },
+    { label: t("stats.machines"), value: "20+" },
+    { label: t("stats."), value: "12" },
+    { label: t("stats.years"), value: "2" },
   ]
 
   return (
@@ -147,6 +147,8 @@ export default function Hero() {
           </p>
         </div>
       </div>
+
+      
     </div>
   )
 }

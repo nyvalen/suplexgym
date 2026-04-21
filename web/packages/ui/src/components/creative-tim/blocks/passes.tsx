@@ -11,8 +11,8 @@ import {
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
-const PASS_KEYS = ["daily", "monthly", "seasonal", "annual"] as const
-const FEATURED: (typeof PASS_KEYS)[number] = "seasonal"
+const PASS_KEYS = ["napi", "havi", "szezonális", "éves"] as const
+const FEATURED: (typeof PASS_KEYS)[number] = "szezonális"
 
 type TargetGroup = "all" | "student" | "senior" | "member"
 
@@ -108,7 +108,7 @@ export default function Passes() {
 
   const passes = [
     {
-      key: "daily",
+      key: "napi",
       name: t("passes.items.daily.name"),
       price: t("passes.items.daily.price"),
       unit: t("passes.items.daily.unit"),
@@ -120,7 +120,7 @@ export default function Passes() {
       label: "1 day",
     },
     {
-      key: "monthly",
+      key: "havi",
       name: t("passes.items.monthly.name"),
       price: t("passes.items.monthly.price"),
       unit: t("passes.items.monthly.unit"),
@@ -132,7 +132,7 @@ export default function Passes() {
       label: "30 days",
     },
     {
-      key: "seasonal",
+      key: "szezonális",
       name: t("passes.items.threemonths.name"),
       price: t("passes.items.threemonths.price"),
       unit: t("passes.items.threemonths.unit"),
@@ -144,7 +144,7 @@ export default function Passes() {
       label: "90 days",
     },
     {
-      key: "annual",
+      key: "éves",
       name: t("passes.items.annual.name"),
       price: t("passes.items.annual.price"),
       unit: t("passes.items.annual.unit"),
@@ -266,110 +266,6 @@ export default function Passes() {
           {t("passes.mobileNote")}
         </p>
       </div>
-
-      {/* Deals & Discounts section */}
-      {activeDeals.length > 0 && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-baseline justify-between">
-            <h3 className="text-base font-medium text-black/70 dark:text-white/80">
-              Special Offers & Discounts
-            </h3>
-            <span className="font-mono text-[11px] tracking-widest text-black/40 uppercase dark:text-white/30">
-              {activeDeals.length} active
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {activeDeals.map((deal) => {
-              const colors = TARGET_COLORS[deal.targetGroup]
-              return (
-                <div
-                  key={deal.id}
-                  className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border p-5"
-                  style={{
-                    backgroundColor: colors.bg,
-                    borderColor: colors.border,
-                  }}
-                >
-                  {/* Big discount number as background */}
-                  <div
-                    className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[80px] leading-none font-black opacity-[0.07] select-none"
-                    style={{ color: colors.text }}
-                  >
-                    {deal.discountPercent}%
-                  </div>
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border"
-                        style={{
-                          backgroundColor: colors.bg,
-                          borderColor: colors.border,
-                          color: colors.text,
-                        }}
-                      >
-                        {TARGET_ICONS[deal.targetGroup]}
-                      </div>
-                      <div>
-                        <p
-                          className="text-sm font-semibold"
-                          style={{ color: colors.text }}
-                        >
-                          {TARGET_LABELS[deal.targetGroup]}
-                        </p>
-                        <p className="font-mono text-[10px] tracking-wider text-black/40 uppercase dark:text-white/30">
-                          {deal.discountPercent}% off
-                        </p>
-                      </div>
-                    </div>
-
-                    <div
-                      className="flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold"
-                      style={{
-                        backgroundColor: `${colors.bg}`,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <Percent className="size-3" />
-                      {deal.discountPercent}%
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="mb-0.5 text-sm font-bold text-black/80 dark:text-white">
-                      {deal.title}
-                    </p>
-                    <p className="text-xs leading-relaxed text-black/50 dark:text-white/50">
-                      {deal.description}
-                    </p>
-                  </div>
-
-                  {deal.code && (
-                    <div className="flex items-center gap-2">
-                      <Tag className="size-3 text-black/30 dark:text-white/30" />
-                      <span className="font-mono text-xs text-black/50 dark:text-white/40">
-                        Code:{" "}
-                        <span className="font-bold text-black/70 dark:text-white/70">
-                          {deal.code}
-                        </span>
-                      </span>
-                    </div>
-                  )}
-
-                  {deal.validUntil && (
-                    <p className="text-[10px] text-black/30 dark:text-white/25">
-                      Valid until{" "}
-                      {new Date(deal.validUntil).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </section>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
 import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
@@ -49,6 +50,7 @@ async function fetchEquipment(): Promise<Equipment[]> {
 }
 
 export default function CrudsManageEquipment() {
+  const { t } = useTranslation()
   const [equipment, setEquipment] = useState<Equipment[]>([])
   const [message, setMessage] = useState("")
   const [showCreate, setShowCreate] = useState(false)
@@ -124,12 +126,12 @@ export default function CrudsManageEquipment() {
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-semibold">Manage Equipment</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Add, update status, and remove gym equipment.</p>
+            <h3 className="text-2xl font-semibold">{t("cruds.equipment.title")}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t("cruds.equipment.description")}</p>
           </div>
           <Button onClick={() => setShowCreate((v) => !v)} size="sm">
             {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
-            {showCreate ? "Cancel" : "Add Equipment"}
+            {showCreate ? t("cruds.equipment.cancel") : t("cruds.equipment.addEquipment")}
           </Button>
         </div>
 

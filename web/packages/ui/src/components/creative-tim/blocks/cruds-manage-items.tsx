@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
 import { API_ENDPOINTS, resolveImageUrl } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
@@ -55,6 +56,7 @@ async function fetchTypes(): Promise<ItemType[]> {
 }
 
 export default function CrudsManageItems() {
+  const { t } = useTranslation()
   const [items, setItems] = useState<Item[]>([])
   const [types, setTypes] = useState<ItemType[]>([])
   const [message, setMessage] = useState("")
@@ -191,12 +193,12 @@ export default function CrudsManageItems() {
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-semibold">Manage Items</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Create, edit and deactivate ticket passes.</p>
+            <h3 className="text-2xl font-semibold">{t("cruds.items.title")}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t("cruds.items.description")}</p>
           </div>
           <Button onClick={() => setShowCreate((v) => !v)} size="sm">
             {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
-            {showCreate ? "Cancel" : "New Item"}
+            {showCreate ? t("cruds.items.cancel") : t("cruds.items.newItem")}
           </Button>
         </div>
 

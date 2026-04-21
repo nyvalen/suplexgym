@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
 import { getCachedApiBase } from "@workspace/ui/lib/api-config"
 import { Button } from "../../button"
@@ -105,6 +106,7 @@ async function fetchDeals(): Promise<Deal[]> {
 }
 
 export default function CrudsManageDeals() {
+  const { t } = useTranslation()
   const [deals, setDeals] = useState<Deal[]>([])
   const [message, setMessage] = useState("")
   const [showCreate, setShowCreate] = useState(false)
@@ -297,14 +299,14 @@ export default function CrudsManageDeals() {
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-semibold">Manage Deals & Discounts</h3>
+            <h3 className="text-2xl font-semibold">{t("cruds.deals.title")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Student discounts, senior rates, promotions, and special offers.
+              {t("cruds.deals.description")}
             </p>
           </div>
           <Button onClick={() => setShowCreate((v) => !v)} size="sm">
             {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
-            {showCreate ? "Cancel" : "New Deal"}
+            {showCreate ? t("cruds.deals.cancel") : t("cruds.deals.newDeal")}
           </Button>
         </div>
 

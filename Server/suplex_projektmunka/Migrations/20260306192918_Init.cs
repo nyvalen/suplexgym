@@ -300,9 +300,9 @@ namespace suplex_projektmunka.Migrations
                 columns: new[] { "Id", "Type" },
                 values: new object[,]
                 {
-                    { 1, "daily" },
-                    { 2, "monthly" },
-                    { 3, "yearly" }
+                    { 1, "napi" },
+                    { 2, "havi" },
+                    { 3, "éves" }
                 });
 
             migrationBuilder.CreateIndex(

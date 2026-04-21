@@ -273,17 +273,17 @@ namespace suplex_projektmunka.Migrations
                         new
                         {
                             Id = 1,
-                            Type = "daily"
+                            Type = "napi"
                         },
                         new
                         {
                             Id = 2,
-                            Type = "monthly"
+                            Type = "havi"
                         },
                         new
                         {
                             Id = 3,
-                            Type = "yearly"
+                            Type = "éves"
                         });
                 });
 

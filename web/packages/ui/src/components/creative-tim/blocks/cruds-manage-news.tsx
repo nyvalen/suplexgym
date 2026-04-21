@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { fetchWithAuth } from "@workspace/ui/lib/auth"
 import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 import { resolveImageUrl } from "@workspace/ui/lib/api-config"
@@ -39,6 +40,7 @@ async function fetchNews(): Promise<NewsItem[]> {
 }
 
 export default function CrudsManageNews() {
+  const { t } = useTranslation()
   const [news, setNews] = useState<NewsItem[]>([])
   const [message, setMessage] = useState("")
   const [showCreate, setShowCreate] = useState(false)
@@ -57,7 +59,7 @@ export default function CrudsManageNews() {
 
   const handleCreate = async () => {
     if (!createForm.title.trim() || !createForm.content.trim()) {
-      flash("Title and content are required.")
+      flash(t("cruds.news.titleContentRequired"))
       return
     }
     try {
@@ -66,12 +68,12 @@ export default function CrudsManageNews() {
         body: JSON.stringify(createForm),
       })
       if (!res.ok) throw new Error(`${res.status}`)
-      flash("News article created.")
+      flash(t("cruds.news.created"))
       setCreateForm(EMPTY_FORM)
       setShowCreate(false)
       load()
     } catch {
-      flash("Failed to create article.")
+      flash(t("cruds.news.createFailed"))
     }
   }
 
@@ -120,12 +122,12 @@ export default function CrudsManageNews() {
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-semibold">Manage News</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Create, edit and delete articles.</p>
+            <h3 className="text-2xl font-semibold">{t("cruds.news.title")}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t("cruds.news.description")}</p>
           </div>
           <Button onClick={() => setShowCreate((v) => !v)} size="sm">
             {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
-            {showCreate ? "Cancel" : "New Article"}
+            {showCreate ? t("cruds.news.cancel") : t("cruds.news.newArticle")}
           </Button>
         </div>
 

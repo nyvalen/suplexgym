@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   fetchWithAuth,
   getFoundingAdminId,
@@ -70,6 +71,7 @@ async function fetchRoles(): Promise<RoleItem[]> {
 }
 
 export default function CrudsManageUsers() {
+  const { t } = useTranslation()
   const [data, setData] = useState<UsersItem[]>([])
   const [roles, setRoles] = useState<RoleItem[]>([])
   const [openItemIds, setOpenItemIds] = useState<number[]>([])
@@ -98,7 +100,7 @@ export default function CrudsManageUsers() {
       )
     } catch (error) {
       console.error("Failed to load users", error)
-      flash("Unable to load users.")
+      flash(t("cruds.users.unableToLoad"))
     }
   }
 
@@ -106,7 +108,7 @@ export default function CrudsManageUsers() {
 
   const updateUserRole = async (id: number) => {
     if (isProtectedAction(id, foundingAdminId, "role-change")) {
-      flash("The founding admin's role cannot be changed.")
+      flash(t("cruds.users.roleChangeBlocked"))
       return
     }
 
@@ -163,9 +165,9 @@ export default function CrudsManageUsers() {
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h3 className="text-2xl font-semibold">Manage Users</h3>
+            <h3 className="text-2xl font-semibold">{t("cruds.users.title")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              View and update user roles and active status.
+              {t("cruds.users.description")}
             </p>
           </div>
           {foundingAdminId !== null && (

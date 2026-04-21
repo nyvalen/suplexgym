@@ -33,7 +33,6 @@ export function AdminSidebar({
     { title: t("admin.sections.news"), section: "news", icon: <Newspaper className="size-4" /> },
     { title: t("admin.sections.items"), section: "items", icon: <Package className="size-4" />, adminOnly: true },
     { title: t("admin.sections.equipment"), section: "equipment", icon: <GymIcon className="size-4" /> },
-    { title: "Deals & Discounts", section: "deals", icon: <Tag className="size-4" />, adminOnly: true },
   ]
 
   const navItems = isAdmin ? allNavItems : allNavItems.filter((i) => !i.adminOnly)
@@ -45,13 +44,13 @@ export function AdminSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" variant="outline" asChild>
               <a onClick={() => (window.location.href = "/")}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-purple-600/60 text-sidebar-primary-foreground dark:bg-sidebar-ring">
-                  <Dumbbell className="size-4" />
-                </div>
-                <div className="flex w-full gap-0.5 leading-none">
-                  <span className="font-mono size-6 tracking-widest text-sidebar-accent-foreground uppercase">
-                    Suplex Gym
-                  </span>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/70">
+                            <Dumbbell className="h-3.5 w-3.5 text-white" />
+                          </div>
+                <div className="flex w-7/12 gap-0.5 leading-none">
+                  <span className="text-[11px] leading-none font-semibold tracking-[0.2em] text-white/90 uppercase">
+              Suplex Gym
+            </span>
                 </div>
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-xs text-muted-foreground">{t("admin.title")}</span>

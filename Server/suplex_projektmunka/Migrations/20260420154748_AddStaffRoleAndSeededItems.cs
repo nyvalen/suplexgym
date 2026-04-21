@@ -23,7 +23,7 @@ namespace suplex_projektmunka.Migrations
             // We add seasonal as type 4 (3 months).
             migrationBuilder.Sql(@"
                 INSERT INTO Types (Id, Type)
-                SELECT 4, 'seasonal'
+                SELECT 4, 'szezonális'
                 WHERE NOT EXISTS (SELECT 1 FROM Types WHERE Id = 4 LIMIT 1);
             ");
 
