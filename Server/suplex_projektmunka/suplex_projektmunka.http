@@ -1,4 +1,4 @@
-@suplex_projektmunka_HostAddress = http://localhost:5103
+@suplex_projektmunka_HostAddress = http://localhost:5001
 
 GET {{suplex_projektmunka_HostAddress}}/weatherforecast/
 Accept: application/json

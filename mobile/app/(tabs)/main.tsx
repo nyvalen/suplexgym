@@ -120,7 +120,13 @@ export default function MainScreen() {
       />
       <LinearGradient
         colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
-        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 1200 }}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 1200,
+        }}
         start={{ x: 0, y: 0.9 }}
         end={{ x: 0, y: 0 }}
       />
@@ -128,10 +134,16 @@ export default function MainScreen() {
       {/* ── Header ── */}
       <View className="flex-row justify-between items-start px-5 pt-8 pb-8">
         <View>
-          <Text className={`text-xs mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
-            {username ? `${t("main.welcomeUser")}, ${username}` : t("main.welcome")}
+          <Text
+            className={`text-xs mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+          >
+            {username
+              ? `${t("main.welcomeUser")}, ${username}`
+              : t("main.welcome")}
           </Text>
-          <Text className={`text-[22px] font-extrabold tracking-[3px] uppercase ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}>
+          <Text
+            className={`text-[22px] font-extrabold tracking-[3px] uppercase ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+          >
             SUPLEX GYM
           </Text>
         </View>
@@ -140,8 +152,12 @@ export default function MainScreen() {
             <View
               className="rounded-[10px] px-3 py-1.5 border"
               style={{
-                backgroundColor: isDark ? "rgba(124,58,237,0.18)" : "rgba(124,58,237,0.08)",
-                borderColor: isDark ? "rgba(124,58,237,0.4)" : "rgba(124,58,237,0.25)",
+                backgroundColor: isDark
+                  ? "rgba(124,58,237,0.18)"
+                  : "rgba(124,58,237,0.08)",
+                borderColor: isDark
+                  ? "rgba(124,58,237,0.4)"
+                  : "rgba(124,58,237,0.25)",
               }}
             >
               <Text className="text-[#c4b5fd] text-[11px] font-bold tracking-[1px]">
@@ -154,16 +170,25 @@ export default function MainScreen() {
 
       {/* ── Gym Photo ── */}
       <View className="mx-5 mb-7 rounded-[22px] overflow-hidden h-[180px]">
-        <Image source={{ uri: GYM_PHOTO }} className="w-full h-full" resizeMode="cover" />
+        <Image
+          source={{ uri: GYM_PHOTO }}
+          className="w-full h-full"
+          resizeMode="cover"
+        />
         <LinearGradient
           colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.55)"]}
           style={{ position: "absolute", inset: 0 }}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         />
-        <View className="absolute inset-0" style={{ backgroundColor: "rgba(124,58,237,0.12)" }} />
+        <View
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(124,58,237,0.12)" }}
+        />
         <View className="absolute bottom-4 left-4 right-4">
-          <Text className="text-white text-[11px] font-bold tracking-[2px] uppercase opacity-70">Est. 2017</Text>
+          <Text className="text-white text-[11px] font-bold tracking-[2px] uppercase opacity-70">
+            Est. 2017
+          </Text>
           <Text className="text-white text-[15px] font-extrabold tracking-[-0.3px]">
             {gymOpen ? t("main.openNow") : t("main.closedNow")}
           </Text>
@@ -171,14 +196,18 @@ export default function MainScreen() {
       </View>
 
       {/* ── Opening hours ── */}
-      <Text className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
+      <Text
+        className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+      >
         {t("main.openingHours")}
       </Text>
 
       <View
         className="mx-5 rounded-[22px] border overflow-hidden mb-7"
         style={{
-          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.9)",
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.04)"
+            : "rgba(255,255,255,0.9)",
           borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
         }}
       >
@@ -186,36 +215,72 @@ export default function MainScreen() {
           className="px-5 py-3 flex-row items-center justify-between"
           style={{
             backgroundColor: gymOpen
-              ? isDark ? "rgba(74,222,128,0.1)" : "rgba(22,163,74,0.07)"
-              : isDark ? "rgba(248,113,113,0.1)" : "rgba(220,38,38,0.06)",
+              ? isDark
+                ? "rgba(74,222,128,0.1)"
+                : "rgba(22,163,74,0.07)"
+              : isDark
+                ? "rgba(248,113,113,0.1)"
+                : "rgba(220,38,38,0.06)",
           }}
         >
           <View className="flex-row items-center gap-2">
             <View
               className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: gymOpen ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#f87171" : "#dc2626") }}
+              style={{
+                backgroundColor: gymOpen
+                  ? isDark
+                    ? "#4ade80"
+                    : "#16a34a"
+                  : isDark
+                    ? "#f87171"
+                    : "#dc2626",
+              }}
             />
             <Text
               className="text-[13px] font-bold"
-              style={{ color: gymOpen ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#f87171" : "#dc2626") }}
+              style={{
+                color: gymOpen
+                  ? isDark
+                    ? "#4ade80"
+                    : "#16a34a"
+                  : isDark
+                    ? "#f87171"
+                    : "#dc2626",
+              }}
             >
               {gymOpen ? t("main.openNow") : t("main.closedNow")}
             </Text>
           </View>
-          <Text className={`text-[11px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}>
-            {today.isOpen && today.open && today.close ? `${today.open} – ${today.close}` : t("main.closed")}
+          <Text
+            className={`text-[11px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+          >
+            {today.isOpen && today.open && today.close
+              ? `${today.open} – ${today.close}`
+              : t("main.closed")}
           </Text>
         </View>
 
         {today.isOpen && today.open && today.close && (
           <View className="px-5 pt-4 pb-2">
             <View className="flex-row justify-between mb-1.5">
-              <Text className={`text-[10px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}>06:00</Text>
-              <Text className={`text-[10px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}>22:00</Text>
+              <Text
+                className={`text-[10px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+              >
+                06:00
+              </Text>
+              <Text
+                className={`text-[10px] font-semibold ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+              >
+                22:00
+              </Text>
             </View>
             <View
               className="w-full h-3 rounded-full overflow-hidden"
-              style={{ backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}
+              style={{
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.06)",
+              }}
             >
               <View
                 className="absolute h-full rounded-full"
@@ -223,23 +288,35 @@ export default function MainScreen() {
                   left: `${timeFrac(today.open!) * 100}%`,
                   right: `${(1 - timeFrac(today.close!)) * 100}%`,
                   backgroundColor: gymOpen
-                    ? isDark ? "rgba(74,222,128,0.7)" : "rgba(22,163,74,0.6)"
-                    : isDark ? "rgba(124,58,237,0.5)" : "rgba(124,58,237,0.4)",
+                    ? isDark
+                      ? "rgba(74,222,128,0.7)"
+                      : "rgba(22,163,74,0.6)"
+                    : isDark
+                      ? "rgba(124,58,237,0.5)"
+                      : "rgba(124,58,237,0.4)",
                 }}
               />
               {(() => {
                 const now = new Date();
                 const nowMins = now.getHours() * 60 + now.getMinutes();
-                const frac = Math.max(0, Math.min(1, (nowMins - 360) / (22 * 60 - 360)));
+                const frac = Math.max(
+                  0,
+                  Math.min(1, (nowMins - 360) / (22 * 60 - 360)),
+                );
                 return (
                   <View
                     className="absolute top-0 bottom-0 w-0.5 rounded-full bg-white"
-                    style={{ left: `${frac * 100}%`, opacity: gymOpen ? 1 : 0.4 }}
+                    style={{
+                      left: `${frac * 100}%`,
+                      opacity: gymOpen ? 1 : 0.4,
+                    }}
                   />
                 );
               })()}
             </View>
-            <Text className={`text-[10px] mt-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}>
+            <Text
+              className={`text-[10px] mt-1 ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+            >
               {t("main.todayHours")}: {today.open} – {today.close}
             </Text>
           </View>
@@ -257,12 +334,20 @@ export default function MainScreen() {
                   backgroundColor: isToday
                     ? "rgba(124,58,237,0.9)"
                     : h.isOpen
-                    ? isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"
-                    : isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                      ? isDark
+                        ? "rgba(255,255,255,0.06)"
+                        : "rgba(0,0,0,0.04)"
+                      : isDark
+                        ? "rgba(255,255,255,0.02)"
+                        : "rgba(0,0,0,0.02)",
                 }}
               >
-                <Text className="text-[10px] font-bold mb-1"
-                  style={{ color: isToday ? "#fff" : isDark ? "#a1a1aa" : "#52525b" }}>
+                <Text
+                  className="text-[10px] font-bold mb-1"
+                  style={{
+                    color: isToday ? "#fff" : isDark ? "#a1a1aa" : "#52525b",
+                  }}
+                >
                   {t(`main.days.${dayKey}`)}
                 </Text>
                 <View
@@ -270,23 +355,47 @@ export default function MainScreen() {
                   style={{
                     backgroundColor: isToday
                       ? "rgba(255,255,255,0.8)"
-                      : h.isOpen ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#f87171" : "#dc2626"),
+                      : h.isOpen
+                        ? isDark
+                          ? "#4ade80"
+                          : "#16a34a"
+                        : isDark
+                          ? "#f87171"
+                          : "#dc2626",
                   }}
                 />
                 {h.isOpen && h.open && h.close ? (
                   <>
-                    <Text className="text-[8px] mt-1 font-semibold"
-                      style={{ color: isToday ? "rgba(255,255,255,0.7)" : isDark ? "#71717a" : "#a1a1aa" }}>
+                    <Text
+                      className="text-[8px] mt-1 font-semibold"
+                      style={{
+                        color: isToday
+                          ? "rgba(255,255,255,0.7)"
+                          : isDark
+                            ? "#71717a"
+                            : "#a1a1aa",
+                      }}
+                    >
                       {h.open}
                     </Text>
-                    <Text className="text-[8px] font-semibold"
-                      style={{ color: isToday ? "rgba(255,255,255,0.7)" : isDark ? "#71717a" : "#a1a1aa" }}>
+                    <Text
+                      className="text-[8px] font-semibold"
+                      style={{
+                        color: isToday
+                          ? "rgba(255,255,255,0.7)"
+                          : isDark
+                            ? "#71717a"
+                            : "#a1a1aa",
+                      }}
+                    >
                       {h.close}
                     </Text>
                   </>
                 ) : (
-                  <Text className="text-[8px] mt-1 font-semibold"
-                    style={{ color: isDark ? "#f87171" : "#dc2626" }}>
+                  <Text
+                    className="text-[8px] mt-1 font-semibold"
+                    style={{ color: isDark ? "#f87171" : "#dc2626" }}
+                  >
                     {t("main.closed")}
                   </Text>
                 )}
@@ -297,7 +406,9 @@ export default function MainScreen() {
       </View>
 
       {/* ── Latest news ── */}
-      <Text className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
+      <Text
+        className={`text-[11px] font-bold tracking-[2px] uppercase px-5 mb-3 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+      >
         {t("main.latestNews")}
       </Text>
 
@@ -310,22 +421,37 @@ export default function MainScreen() {
               key={n.id}
               className="rounded-[18px] p-3.5 flex-row items-center border overflow-hidden"
               style={{
-                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.3)",
-                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(255,255,255,0.3)",
+                borderColor: isDark
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.06)",
               }}
               onPress={() => navigateToArticle(n)}
               activeOpacity={0.75}
             >
               <LinearGradient
                 colors={["rgba(124,58,237,0.8)", "rgba(124,58,237,0.3)"]}
-                style={{ position: "absolute", left: 0, right: 0, top: 0, height: 70 }}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  height: 500,
+                }}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               />
               {n.imagePath ? (
                 <Image
                   source={{ uri: resolveImageUrl(n.imagePath) }}
-                  style={{ width: 44, height: 44, borderRadius: 10, marginRight: 12 }}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    marginRight: 12,
+                  }}
                   resizeMode="cover"
                 />
               ) : null}
@@ -336,7 +462,9 @@ export default function MainScreen() {
                 >
                   {n.title}
                 </Text>
-                <Text className={`text-[11px] mt-1 ${isDark ? "text-[#9d9dab]" : "text-[#e6e6ff]"}`}>
+                <Text
+                  className={`text-[11px] mt-1 ${isDark ? "text-[#9d9dab]" : "text-[#e6e6ff]"}`}
+                >
                   {new Date(n.createdAt).toLocaleDateString()}
                 </Text>
               </View>
@@ -352,8 +480,12 @@ export default function MainScreen() {
         <TouchableOpacity
           className="rounded-[20px] p-5 flex-row items-center gap-3.5 border"
           style={{
-            backgroundColor: isDark ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.07)",
-            borderColor: isDark ? "rgba(124,58,237,0.3)" : "rgba(124,58,237,0.2)",
+            backgroundColor: isDark
+              ? "rgba(124,58,237,0.12)"
+              : "rgba(124,58,237,0.07)",
+            borderColor: isDark
+              ? "rgba(124,58,237,0.3)"
+              : "rgba(124,58,237,0.2)",
           }}
           onPress={() => router.push("/(tabs)/purchase")}
           activeOpacity={0.8}
@@ -373,10 +505,14 @@ export default function MainScreen() {
             <Text style={{ fontSize: 20 }}>🎟️</Text>
           </View>
           <View className="flex-1">
-            <Text className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}>
+            <Text
+              className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+            >
               {t("main.buyTicket")}
             </Text>
-            <Text className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
+            <Text
+              className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+            >
               {t("main.buyTicketSub")}
             </Text>
           </View>
@@ -387,7 +523,9 @@ export default function MainScreen() {
         <TouchableOpacity
           className="rounded-[20px] p-5 flex-row items-center gap-3.5 border"
           style={{
-            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.8)",
+            backgroundColor: isDark
+              ? "rgba(255,255,255,0.04)"
+              : "rgba(255,255,255,0.8)",
             borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
           }}
           onPress={() => router.push("/rules")}
@@ -398,9 +536,13 @@ export default function MainScreen() {
               width: 42,
               height: 42,
               borderRadius: 12,
-              backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(0,0,0,0.04)",
               borderWidth: 1,
-              borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)",
+              borderColor: isDark
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.06)",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -408,14 +550,22 @@ export default function MainScreen() {
             <Text style={{ fontSize: 20 }}>📋</Text>
           </View>
           <View className="flex-1">
-            <Text className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}>
+            <Text
+              className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+            >
               {t("main.houseRules")}
             </Text>
-            <Text className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
+            <Text
+              className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
+            >
               {t("main.houseRulesSub")}
             </Text>
           </View>
-          <Text className={`text-base ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}>→</Text>
+          <Text
+            className={`text-base ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
+          >
+            →
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

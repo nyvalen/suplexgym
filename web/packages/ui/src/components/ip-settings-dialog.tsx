@@ -2,7 +2,12 @@
 
 import * as React from "react"
 import { Server, X, Check, Wifi } from "lucide-react"
-import { getCachedApiBase, setApiIp, getStoredApiIp, DEFAULT_PORT } from "../lib/api-config"
+import {
+  getCachedApiBase,
+  setApiIp,
+  getStoredApiIp,
+  DEFAULT_PORT,
+} from "../lib/api-config"
 
 interface IpSettingsDialogProps {
   open: boolean
@@ -40,70 +45,76 @@ export function IpSettingsDialog({ open, onClose }: IpSettingsDialogProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+        <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-              <Wifi className="w-4 h-4 text-purple-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-600/20">
+              <Wifi className="h-4 w-4 text-purple-400" />
             </div>
             <div>
               <p className="text-sm font-semibold text-white">API Server</p>
-              <p className="text-[10px] text-white/40 font-mono">Port {DEFAULT_PORT}</p>
+              <p className="font-mono text-[10px] text-white/40">
+                Port {DEFAULT_PORT}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-md flex items-center justify-center text-white/40 hover:text-white hover:bg-white/8 transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition-colors hover:bg-white/8 hover:text-white"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
-          <p className="text-sm text-white/50 leading-relaxed">
-            Enter the IP address of the machine running the backend. This allows the app to be accessed from any device on the same network.
+        <div className="space-y-4 p-5">
+          <p className="text-sm leading-relaxed text-white/50">
+            Enter the IP address of the machine running the backend. This allows
+            the app to be accessed from any device on the same network.
           </p>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold tracking-[1px] uppercase text-white/40">
+            <label className="text-[11px] font-semibold tracking-[1px] text-white/40 uppercase">
               Server IP Address
             </label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={ip}
-                onChange={(e) => { setIp(e.target.value); setError("") }}
+                onChange={(e) => {
+                  setIp(e.target.value)
+                  setError("")
+                }}
                 placeholder="192.168.1.100"
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white font-mono placeholder:text-white/20 outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all"
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-sm text-white transition-all outline-none placeholder:text-white/20 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30"
               />
-              <span className="text-xs text-white/25 font-mono shrink-0">:{DEFAULT_PORT}</span>
+              <span className="shrink-0 font-mono text-xs text-white/25">
+                :{DEFAULT_PORT}
+              </span>
             </div>
             {error && <p className="text-xs text-red-400">{error}</p>}
           </div>
 
-          <div
-            className="rounded-lg bg-white/3 border border-white/5 px-3 py-2 flex items-center gap-2"
-          >
-            <Server className="w-3.5 h-3.5 text-white/30 shrink-0" />
-            <p className="text-[11px] text-white/30 font-mono truncate">
+          <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/3 px-3 py-2">
+            <Server className="h-3.5 w-3.5 shrink-0 text-white/30" />
+            <p className="truncate font-mono text-[11px] text-white/30">
               {getCachedApiBase()}
             </p>
           </div>
 
           <button
             onClick={handleSave}
-            className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            className={`w-full rounded-xl py-2.5 text-sm font-semibold transition-all ${
               saved
-                ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                : "bg-purple-600/80 hover:bg-purple-600 text-white"
+                ? "border border-green-500/30 bg-green-500/20 text-green-400"
+                : "bg-purple-600/80 text-white hover:bg-purple-600"
             }`}
           >
             {saved ? (
               <span className="flex items-center justify-center gap-2">
-                <Check className="w-4 h-4" /> Saved — reloading…
+                <Check className="h-4 w-4" /> Saved — reloading…
               </span>
             ) : (
               "Save & Apply"

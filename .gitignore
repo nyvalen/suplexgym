@@ -177,6 +177,11 @@ typings/
 # dotenv environment variables file
 .env
 
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
 
 
 .travis/README.md

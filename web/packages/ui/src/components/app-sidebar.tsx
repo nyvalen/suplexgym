@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Dumbbell, Home, Newspaper, Settings } from "lucide-react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -13,8 +13,8 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "./sidebar"
-import { HoverExpand } from "./unlumen-ui/hover-expand"
 import { Admin } from "./admin"
+import { HoverExpand } from "./unlumen-ui/hover-expand"
 import { IpSettingsDialog } from "./ip-settings-dialog"
 
 function scrollTo(id: string) {
@@ -25,6 +25,7 @@ function scrollTo(id: string) {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const isHome = location.pathname === "/"
   const [showIpSettings, setShowIpSettings] = React.useState(false)
 
@@ -73,22 +74,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader className="pb-4">
         <button
-                type="button"
-                className="flex items-center gap-2.5 rounded-md px-3 py-3 transition-opacity hover:opacity-70"
-                onClick={() => scrollTo("hero")}
-              >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/70">
-                  <Dumbbell className="h-3.5 w-3.5 text-white" />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-[11px] leading-none font-semibold tracking-[0.2em] text-white/90 uppercase">
-                    Suplex Gym
-                  </span>
-                  <span className="text-[9px] tracking-[0.1em] text-white/35">
-                    {t("hero.est")}
-                  </span>
-                </div>
-              </button>
+          type="button"
+          className="flex items-center gap-2.5 rounded-md px-3 py-3 transition-opacity hover:opacity-70"
+          onClick={() => scrollTo("hero")}
+        >
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/70">
+            <Dumbbell className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[11px] leading-none font-semibold tracking-[0.2em] text-white/90 uppercase">
+              Suplex Gym
+            </span>
+            <span className="text-[9px] tracking-[0.1em] text-white/35">
+              {t("hero.est")}
+            </span>
+          </div>
+        </button>
       </SidebarHeader>
 
       <SidebarContent>
@@ -97,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {navItems.map(({ label, icon: Icon, sectionId }) => (
               <SidebarMenuItem key={label}>
                 <SidebarMenuButton
-                  onClick={() => (window.location.href = sectionId)}
+                  onClick={() => navigate(sectionId)}
                   className="flex cursor-pointer items-center gap-2.5"
                 >
                   <Icon className="h-4 w-4 shrink-0 opacity-70" />
@@ -143,7 +144,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Admin />
         </div>
       </SidebarFooter>
-      <IpSettingsDialog open={showIpSettings} onClose={() => setShowIpSettings(false)} />
+      <IpSettingsDialog
+        open={showIpSettings}
+        onClose={() => setShowIpSettings(false)}
+      />
     </Sidebar>
   )
 }

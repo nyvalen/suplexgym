@@ -85,7 +85,7 @@ const translations = {
       buyTicket: "Buy a Ticket",
       houseRules: "House Rules",
       houseRulesSub: "Gym etiquette & guidelines",
-    
+
       buyTicketSub: "Daily, monthly and yearly passes",
       stats: {
         members: "Active members",
@@ -111,7 +111,7 @@ const translations = {
       subtitle:
         "Set the local IP address of the machine running the backend server. This only appears in development builds.",
       ipLabel: "Server IP Address",
-      portNote: "Port 5103 is used automatically.",
+      portNote: "Port 5001 is used automatically.",
       apply: "Apply & Restart",
       saved: "Saved",
       devBadge: "DEV ONLY",
@@ -259,7 +259,7 @@ const translations = {
       subtitle:
         "Add meg a backend szervert futtató gép helyi IP-címét. Ez csak fejlesztői buildben jelenik meg.",
       ipLabel: "Szerver IP-cím",
-      portNote: "Az 5103-as port automatikusan kerül alkalmazásra.",
+      portNote: "Az 5001-as port automatikusan kerül alkalmazásra.",
       apply: "Alkalmaz & Újraindít",
       saved: "Mentve",
       devBadge: "CSAK DEV",
@@ -298,7 +298,7 @@ const translations = {
       todayHours: "Mai nyitvatartás",
       latestNews: "Legfrissebb hírek",
       buyTicket: "Jegy vásárlása",
-       houseRules: "Házirendünk",
+      houseRules: "Házirendünk",
       houseRulesSub: "Edzőtermi etikett és szabályok",
       buyTicketSub: "Napi, havi és éves bérletek",
       stats: {

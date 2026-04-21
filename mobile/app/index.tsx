@@ -94,7 +94,7 @@ function IpConfigSheet({
     setSaving(true);
     try {
       await setIp(trimmed);
-      Alert.alert("Saved", `API URL → http://${trimmed}:5103`, [
+      Alert.alert("Saved", `API URL → http://${trimmed}:5001`, [
         { text: "OK", onPress: onClose },
       ]);
     } finally {
@@ -186,7 +186,7 @@ function IpConfigSheet({
               lineHeight: 19,
             }}
           >
-            Enter your laptop's local IP (port 5103 is fixed).
+            Enter your laptop's local IP (port 5001 is fixed).
           </Text>
 
           {deviceIp && (

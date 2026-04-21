@@ -1,7 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Check, Smartphone, GraduationCap, Users, Tag, Percent } from "lucide-react"
+import {
+  Check,
+  Smartphone,
+  GraduationCap,
+  Users,
+  Tag,
+  Percent,
+} from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 const PASS_KEYS = ["daily", "monthly", "seasonal", "annual"] as const
@@ -56,11 +63,30 @@ const TARGET_ICONS: Record<TargetGroup, React.ReactNode> = {
   member: <Tag className="size-3.5" />,
 }
 
-const TARGET_COLORS: Record<TargetGroup, { bg: string; text: string; border: string }> = {
-  all: { bg: "rgba(124,58,237,0.1)", text: "#a78bfa", border: "rgba(124,58,237,0.25)" },
-  student: { bg: "rgba(59,130,246,0.1)", text: "#60a5fa", border: "rgba(59,130,246,0.25)" },
-  senior: { bg: "rgba(245,158,11,0.1)", text: "#fbbf24", border: "rgba(245,158,11,0.25)" },
-  member: { bg: "rgba(16,185,129,0.1)", text: "#34d399", border: "rgba(16,185,129,0.25)" },
+const TARGET_COLORS: Record<
+  TargetGroup,
+  { bg: string; text: string; border: string }
+> = {
+  all: {
+    bg: "rgba(124,58,237,0.1)",
+    text: "#a78bfa",
+    border: "rgba(124,58,237,0.25)",
+  },
+  student: {
+    bg: "rgba(59,130,246,0.1)",
+    text: "#60a5fa",
+    border: "rgba(59,130,246,0.25)",
+  },
+  senior: {
+    bg: "rgba(245,158,11,0.1)",
+    text: "#fbbf24",
+    border: "rgba(245,158,11,0.25)",
+  },
+  member: {
+    bg: "rgba(16,185,129,0.1)",
+    text: "#34d399",
+    border: "rgba(16,185,129,0.25)",
+  },
 }
 
 export default function Passes() {
@@ -69,10 +95,12 @@ export default function Passes() {
 
   React.useEffect(() => {
     // Try to fetch real deals from backend
-    const base = `http://${window.location.hostname}:5103`
+    const base = `http://${window.location.hostname}:5001`
     fetch(`${base}/api/deals`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data && Array.isArray(data) && data.length > 0) setDeals(data) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data) && data.length > 0) setDeals(data)
+      })
       .catch(() => {}) // silently keep demo deals
   }, [])
 
@@ -85,7 +113,9 @@ export default function Passes() {
       price: t("passes.items.daily.price"),
       unit: t("passes.items.daily.unit"),
       desc: t("passes.items.daily.desc"),
-      features: t("passes.items.daily.features", { returnObjects: true }) as string[],
+      features: t("passes.items.daily.features", {
+        returnObjects: true,
+      }) as string[],
       accentColor: "#f59e0b",
       label: "1 day",
     },
@@ -95,7 +125,9 @@ export default function Passes() {
       price: t("passes.items.monthly.price"),
       unit: t("passes.items.monthly.unit"),
       desc: t("passes.items.monthly.desc"),
-      features: t("passes.items.monthly.features", { returnObjects: true }) as string[],
+      features: t("passes.items.monthly.features", {
+        returnObjects: true,
+      }) as string[],
       accentColor: "#10b981",
       label: "30 days",
     },
@@ -105,7 +137,9 @@ export default function Passes() {
       price: t("passes.items.threemonths.price"),
       unit: t("passes.items.threemonths.unit"),
       desc: t("passes.items.threemonths.desc"),
-      features: t("passes.items.threemonths.features", { returnObjects: true }) as string[],
+      features: t("passes.items.threemonths.features", {
+        returnObjects: true,
+      }) as string[],
       accentColor: "#7c3aed",
       label: "90 days",
     },
@@ -115,7 +149,9 @@ export default function Passes() {
       price: t("passes.items.annual.price"),
       unit: t("passes.items.annual.unit"),
       desc: t("passes.items.annual.desc"),
-      features: t("passes.items.annual.features", { returnObjects: true }) as string[],
+      features: t("passes.items.annual.features", {
+        returnObjects: true,
+      }) as string[],
       accentColor: "#6366f1",
       label: "365 days",
     },
@@ -142,11 +178,15 @@ export default function Passes() {
           return (
             <div
               key={pass.key}
-              className="relative flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-black/3 p-6 transition-colors hover:bg-black/6 dark:bg-white/[0.04] dark:hover:bg-white/[0.05] dark:border-white/[0.08]"
+              className="relative flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-black/3 p-6 transition-colors hover:bg-black/6 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.05]"
             >
               <div
                 className="absolute top-0 right-0 left-0 h-[2.5px]"
-                style={{ backgroundColor: isFeatured ? pass.accentColor : `${pass.accentColor}55` }}
+                style={{
+                  backgroundColor: isFeatured
+                    ? pass.accentColor
+                    : `${pass.accentColor}55`,
+                }}
               />
 
               {isFeatured && (
@@ -188,7 +228,10 @@ export default function Passes() {
 
               <ul className="mb-6 flex flex-col gap-2">
                 {pass.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-black/30 dark:text-white/70">
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-sm text-black/30 dark:text-white/70"
+                  >
                     <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black/60 dark:text-white/40" />
                     {f}
                   </li>
@@ -206,7 +249,9 @@ export default function Passes() {
                   }}
                 >
                   <Smartphone className="h-3.5 w-3.5 shrink-0" />
-                  <span className="text-xs font-semibold">{t("passes.mobileOnly")}</span>
+                  <span className="text-xs font-semibold">
+                    {t("passes.mobileOnly")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -229,7 +274,7 @@ export default function Passes() {
             <h3 className="text-base font-medium text-black/70 dark:text-white/80">
               Special Offers & Discounts
             </h3>
-            <span className="font-mono text-[11px] tracking-widest text-black/40 dark:text-white/30 uppercase">
+            <span className="font-mono text-[11px] tracking-widest text-black/40 uppercase dark:text-white/30">
               {activeDeals.length} active
             </span>
           </div>
@@ -240,7 +285,7 @@ export default function Passes() {
               return (
                 <div
                   key={deal.id}
-                  className="relative flex flex-col gap-3 rounded-2xl border p-5 overflow-hidden"
+                  className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border p-5"
                   style={{
                     backgroundColor: colors.bg,
                     borderColor: colors.border,
@@ -248,7 +293,7 @@ export default function Passes() {
                 >
                   {/* Big discount number as background */}
                   <div
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[80px] font-black opacity-[0.07] leading-none select-none pointer-events-none"
+                    className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[80px] leading-none font-black opacity-[0.07] select-none"
                     style={{ color: colors.text }}
                   >
                     {deal.discountPercent}%
@@ -258,23 +303,34 @@ export default function Passes() {
                     <div className="flex items-center gap-2">
                       <div
                         className="flex h-8 w-8 items-center justify-center rounded-lg border"
-                        style={{ backgroundColor: colors.bg, borderColor: colors.border, color: colors.text }}
+                        style={{
+                          backgroundColor: colors.bg,
+                          borderColor: colors.border,
+                          color: colors.text,
+                        }}
                       >
                         {TARGET_ICONS[deal.targetGroup]}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm" style={{ color: colors.text }}>
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: colors.text }}
+                        >
                           {TARGET_LABELS[deal.targetGroup]}
                         </p>
-                        <p className="text-[10px] text-black/40 dark:text-white/30 font-mono uppercase tracking-wider">
+                        <p className="font-mono text-[10px] tracking-wider text-black/40 uppercase dark:text-white/30">
                           {deal.discountPercent}% off
                         </p>
                       </div>
                     </div>
 
                     <div
-                      className="flex items-center gap-1 rounded-full px-2.5 py-1 border text-xs font-bold"
-                      style={{ backgroundColor: `${colors.bg}`, borderColor: colors.border, color: colors.text }}
+                      className="flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold"
+                      style={{
+                        backgroundColor: `${colors.bg}`,
+                        borderColor: colors.border,
+                        color: colors.text,
+                      }}
                     >
                       <Percent className="size-3" />
                       {deal.discountPercent}%
@@ -282,22 +338,30 @@ export default function Passes() {
                   </div>
 
                   <div>
-                    <p className="font-bold text-black/80 dark:text-white text-sm mb-0.5">{deal.title}</p>
-                    <p className="text-xs leading-relaxed text-black/50 dark:text-white/50">{deal.description}</p>
+                    <p className="mb-0.5 text-sm font-bold text-black/80 dark:text-white">
+                      {deal.title}
+                    </p>
+                    <p className="text-xs leading-relaxed text-black/50 dark:text-white/50">
+                      {deal.description}
+                    </p>
                   </div>
 
                   {deal.code && (
                     <div className="flex items-center gap-2">
                       <Tag className="size-3 text-black/30 dark:text-white/30" />
                       <span className="font-mono text-xs text-black/50 dark:text-white/40">
-                        Code: <span className="font-bold text-black/70 dark:text-white/70">{deal.code}</span>
+                        Code:{" "}
+                        <span className="font-bold text-black/70 dark:text-white/70">
+                          {deal.code}
+                        </span>
                       </span>
                     </div>
                   )}
 
                   {deal.validUntil && (
                     <p className="text-[10px] text-black/30 dark:text-white/25">
-                      Valid until {new Date(deal.validUntil).toLocaleDateString()}
+                      Valid until{" "}
+                      {new Date(deal.validUntil).toLocaleDateString()}
                     </p>
                   )}
                 </div>

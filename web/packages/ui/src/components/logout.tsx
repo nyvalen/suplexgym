@@ -16,7 +16,7 @@ export function Logout() {
   const Logout = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:5103/api/auth/logout",
+        "http://localhost:5001/api/auth/logout",
         {
           method: "POST",
           headers: {

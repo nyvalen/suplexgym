@@ -1,5 +1,6 @@
 import { UserRoundKey } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
+import { useNavigate } from "react-router-dom"
 
 function decodeToken(token: string) {
   const payload = token.split(".")[1]
@@ -16,6 +17,7 @@ console.log(token)
 const data =
   token !== undefined && token !== null && token != "" ? decodeToken(token) : ""
 export function Admin() {
+  const navigate = useNavigate()
   return (
     <Button
       variant="outline"
@@ -24,9 +26,7 @@ export function Admin() {
       onClick={() => {
         {
           console.log("Decoded Token Data:", data)
-          data == "admin"
-            ? (window.location.href = "/admin")
-            : (window.location.href = "/login")
+          data == "admin" ? navigate("/admin") : navigate("/login")
         }
       }}
     >

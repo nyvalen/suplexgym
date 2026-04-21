@@ -5,7 +5,7 @@ import { AppState, AppStateStatus } from "react-native";
 const IS_DEV = __DEV__;
 
 export const DEFAULT_DEV_IP = "192.168.0.216";
-const DEFAULT_PORT = "5103";
+const DEFAULT_PORT = "5001";
 
 export const IP_STORAGE_KEY = "dev_server_ip";
 
@@ -13,7 +13,8 @@ export const IP_STORAGE_KEY = "dev_server_ip";
 export async function getApiBaseUrl(): Promise<string> {
   if (!IS_DEV) {
     const prodUrl = process.env.EXPO_PUBLIC_API_URL;
-    if (!prodUrl) throw new Error("EXPO_PUBLIC_API_URL is not set for production");
+    if (!prodUrl)
+      throw new Error("EXPO_PUBLIC_API_URL is not set for production");
     return prodUrl;
   }
   const stored = await AsyncStorage.getItem(IP_STORAGE_KEY);
@@ -38,25 +39,59 @@ export async function refreshCachedApiBase(): Promise<string> {
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 export const ENDPOINTS = {
-  get login() { return `${getCachedApiBase()}/api/auth/login` },
-  get register() { return `${getCachedApiBase()}/api/auth/register` },
-  get refresh() { return `${getCachedApiBase()}/api/auth/refresh` },
-  get logout() { return `${getCachedApiBase()}/api/auth/logout` },
-  get user() { return `${getCachedApiBase()}/api/user/profile` },
-  get password() { return `${getCachedApiBase()}/api/user/change-password` },
-  get billing() { return `${getCachedApiBase()}/api/user/billing-address` },
-  get settings() { return `${getCachedApiBase()}/api/user/settings` },
-  get cart() { return `${getCachedApiBase()}/api/cart` },
-  get cartAdd() { return `${getCachedApiBase()}/api/cart/add` },
-  get cartClear() { return `${getCachedApiBase()}/api/cart/clear` },
+  get login() {
+    return `${getCachedApiBase()}/api/auth/login`;
+  },
+  get register() {
+    return `${getCachedApiBase()}/api/auth/register`;
+  },
+  get refresh() {
+    return `${getCachedApiBase()}/api/auth/refresh`;
+  },
+  get logout() {
+    return `${getCachedApiBase()}/api/auth/logout`;
+  },
+  get user() {
+    return `${getCachedApiBase()}/api/user/profile`;
+  },
+  get password() {
+    return `${getCachedApiBase()}/api/user/change-password`;
+  },
+  get billing() {
+    return `${getCachedApiBase()}/api/user/billing-address`;
+  },
+  get settings() {
+    return `${getCachedApiBase()}/api/user/settings`;
+  },
+  get cart() {
+    return `${getCachedApiBase()}/api/cart`;
+  },
+  get cartAdd() {
+    return `${getCachedApiBase()}/api/cart/add`;
+  },
+  get cartClear() {
+    return `${getCachedApiBase()}/api/cart/clear`;
+  },
   cartItem: (id: number) => `${getCachedApiBase()}/api/cart/item/${id}`,
-  get items() { return `${getCachedApiBase()}/api/items` },
-  get itemTypes() { return `${getCachedApiBase()}/api/items/types` },
-  get orders() { return `${getCachedApiBase()}/api/orders` },
-  get checkout() { return `${getCachedApiBase()}/api/orders/checkout` },
+  get items() {
+    return `${getCachedApiBase()}/api/items`;
+  },
+  get itemTypes() {
+    return `${getCachedApiBase()}/api/items/types`;
+  },
+  get orders() {
+    return `${getCachedApiBase()}/api/orders`;
+  },
+  get checkout() {
+    return `${getCachedApiBase()}/api/orders/checkout`;
+  },
   renew: (id: number) => `${getCachedApiBase()}/api/orders/renew/${id}`,
-  get news() { return `${getCachedApiBase()}/api/news` },
-  get deals() { return `${getCachedApiBase()}/api/deals` },
+  get news() {
+    return `${getCachedApiBase()}/api/news`;
+  },
+  get deals() {
+    return `${getCachedApiBase()}/api/deals`;
+  },
 };
 
 /**
@@ -64,13 +99,14 @@ export const ENDPOINTS = {
  * Handles: null/empty, absolute URLs, /uploads/... paths.
  * FIXED: Never returns null or empty string that could cause URI parsing errors.
  */
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=800&q=80";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=800&q=80";
 
 export function resolveImageUrl(path: string | null | undefined): string {
   if (!path || path.trim() === "") return FALLBACK_IMAGE;
-  
+
   const trimmed = path.trim();
-  
+
   // Strip hardcoded localhost prefix
   const cleaned = trimmed.startsWith("http://localhost:5103")
     ? trimmed.replace("http://localhost:5103", "")
@@ -161,7 +197,12 @@ export async function authFetch(
   options: RequestInit = {},
 ): Promise<Response> {
   // Guard: never fetch an invalid URL
-  if (!url || url.trim() === "" || url.includes("undefined") || url.includes("null")) {
+  if (
+    !url ||
+    url.trim() === "" ||
+    url.includes("undefined") ||
+    url.includes("null")
+  ) {
     throw new Error(`Invalid URL: "${url}"`);
   }
 
@@ -205,9 +246,12 @@ export async function checkAndRefreshSession(): Promise<boolean> {
   }
 }
 
-let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null = null;
+let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null =
+  null;
 
-export function registerSessionRefreshListener(onExpired: () => void): () => void {
+export function registerSessionRefreshListener(
+  onExpired: () => void,
+): () => void {
   if (appStateSubscription) appStateSubscription.remove();
 
   const handleAppStateChange = async (nextState: AppStateStatus) => {
@@ -220,14 +264,19 @@ export function registerSessionRefreshListener(onExpired: () => void): () => voi
     }
   };
 
-  appStateSubscription = AppState.addEventListener("change", handleAppStateChange);
+  appStateSubscription = AppState.addEventListener(
+    "change",
+    handleAppStateChange,
+  );
   return () => {
     appStateSubscription?.remove();
     appStateSubscription = null;
   };
 }
 
-export function decodeJwt(token: string): Record<string, string | number> | null {
+export function decodeJwt(
+  token: string,
+): Record<string, string | number> | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;

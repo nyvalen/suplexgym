@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OFFLINE_TICKETS_KEY = "offline_tickets";
 export const API_IP_KEY = "api_ip_address";
-export const DEFAULT_PORT = "5103";
+export const DEFAULT_PORT = "5001";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,12 +36,12 @@ function pruneExpired(tickets: OfflineTicket[]): OfflineTicket[] {
 
   // Hard-delete anything expired for >90 days
   expired = expired.filter(
-    (t) => now - new Date(t.expiresAt).getTime() < EXPIRED_TTL_MS
+    (t) => now - new Date(t.expiresAt).getTime() < EXPIRED_TTL_MS,
   );
 
   // Sort most-recently-expired first, keep top MAX_EXPIRED_KEPT
   expired.sort(
-    (a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime()
+    (a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime(),
   );
   expired = expired.slice(0, MAX_EXPIRED_KEPT);
 
@@ -50,7 +50,9 @@ function pruneExpired(tickets: OfflineTicket[]): OfflineTicket[] {
 
 // ─── Ticket Storage ───────────────────────────────────────────────────────────
 
-export async function saveTicketsOffline(tickets: OfflineTicket[]): Promise<void> {
+export async function saveTicketsOffline(
+  tickets: OfflineTicket[],
+): Promise<void> {
   try {
     const existing = await getOfflineTickets();
     const map = new Map(existing.map((t) => [t.id, t]));
