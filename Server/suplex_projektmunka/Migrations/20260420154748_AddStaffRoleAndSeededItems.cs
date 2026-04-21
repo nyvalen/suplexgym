@@ -31,19 +31,19 @@ namespace suplex_projektmunka.Migrations
             // Only insert if they do not already exist (guard: check count via raw SQL)
             migrationBuilder.Sql(@"
                 INSERT INTO Items (Name, Description, ImagePath, Price, Type_id, ValidityDays, CreatedAt, ModifiedAt, IsActive)
-                SELECT 'Daily Pass', 'Full facility access for one day. No commitment required.', NULL, 2900, 1, 1, '2026-01-01', '2026-01-01', 1
+                SELECT 'Napijegy', 'Teljes hozzáférés egy napra. Nincs kötelezettség.', NULL, 2900, 1, 1, '2026-01-01', '2026-01-01', 1
                 WHERE NOT EXISTS (SELECT 1 FROM Items WHERE Type_id = 1 LIMIT 1);
 
                 INSERT INTO Items (Name, Description, ImagePath, Price, Type_id, ValidityDays, CreatedAt, ModifiedAt, IsActive)
-                SELECT 'Monthly Pass', 'Unlimited access for 30 days. Includes all group classes.', NULL, 12900, 2, 30, '2026-01-01', '2026-01-01', 1
+                SELECT 'Havi bérlet', 'Korlátlan hozzáférés 30 napra. Részt vehetsz az összes csoportos edzésen.', NULL, 12900, 2, 30, '2026-01-01', '2026-01-01', 1
                 WHERE NOT EXISTS (SELECT 1 FROM Items WHERE Type_id = 2 LIMIT 1);
 
                 INSERT INTO Items (Name, Description, ImagePath, Price, Type_id, ValidityDays, CreatedAt, ModifiedAt, IsActive)
-                SELECT 'Seasonal Pass', '90 days of unlimited access. Great value for committed trainers.', NULL, 32900, 4, 90, '2026-01-01', '2026-01-01', 1
+                SELECT 'Szezonális bérlet', '90 nap korlátlan hozzáférés. Kiváló választás elkötelezett edzeni vágyóknak.', NULL, 32900, 4, 90, '2026-01-01', '2026-01-01', 1
                 WHERE NOT EXISTS (SELECT 1 FROM Items WHERE Type_id = 4 LIMIT 1);
 
                 INSERT INTO Items (Name, Description, ImagePath, Price, Type_id, ValidityDays, CreatedAt, ModifiedAt, IsActive)
-                SELECT 'Annual Pass', 'Best value — full access for 365 days. Priority booking included.', NULL, 99900, 3, 365, '2026-01-01', '2026-01-01', 1
+                SELECT 'Éves bérlet', 'Legjobb ár-érték arány – teljes hozzáférés 365 napra.', NULL, 99900, 3, 365, '2026-01-01', '2026-01-01', 1
                 WHERE NOT EXISTS (SELECT 1 FROM Items WHERE Type_id = 3 LIMIT 1);
             ");
         }

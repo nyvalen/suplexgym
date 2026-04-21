@@ -192,10 +192,10 @@ namespace suplex_projektmunka.Migrations
                         {
                             Id = 1,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Full facility access for one day. No commitment required.",
+                            Description = "Teljes hozzáférés egy napra. Nincs kötelezettség.",
                             IsActive = true,
                             ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Daily Pass",
+                            Name = "Napijegy",
                             Price = 2900,
                             Type_id = 1,
                             ValidityDays = 1
@@ -204,10 +204,10 @@ namespace suplex_projektmunka.Migrations
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Unlimited access for 30 days. Includes all group classes.",
+                            Description = "Korlátlan hozzáférés 30 napra. Részt vehetsz az összes csoportos edzésen.",
                             IsActive = true,
                             ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Monthly Pass",
+                            Name = "Havi bérlet",
                             Price = 12900,
                             Type_id = 2,
                             ValidityDays = 30
@@ -216,10 +216,10 @@ namespace suplex_projektmunka.Migrations
                         {
                             Id = 3,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "90 days of unlimited access. Great value for committed trainers.",
+                            Description = "90 nap korlátlan hozzáférés. Kiváló választás elkötelezett edzeni vágyóknak.",
                             IsActive = true,
                             ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Seasonal Pass",
+                            Name = "Szezonális bérlet",
                             Price = 32900,
                             Type_id = 4,
                             ValidityDays = 90
@@ -228,10 +228,10 @@ namespace suplex_projektmunka.Migrations
                         {
                             Id = 4,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Best value — full access for 365 days. Priority booking included.",
+                            Description = "Legjobb ár-érték arány – teljes hozzáférés 365 napra.",
                             IsActive = true,
                             ModifiedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Annual Pass",
+                            Name = "Éves bérlet",
                             Price = 99900,
                             Type_id = 3,
                             ValidityDays = 365

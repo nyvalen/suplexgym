@@ -476,49 +476,6 @@ export default function MainScreen() {
 
       {/* ── Two CTA cards ── */}
       <View className="px-5 mt-4 gap-3">
-        {/* Buy tickets CTA */}
-        <TouchableOpacity
-          className="rounded-[20px] p-5 flex-row items-center gap-3.5 border"
-          style={{
-            backgroundColor: isDark
-              ? "rgba(124,58,237,0.12)"
-              : "rgba(124,58,237,0.07)",
-            borderColor: isDark
-              ? "rgba(124,58,237,0.3)"
-              : "rgba(124,58,237,0.2)",
-          }}
-          onPress={() => router.push("/(tabs)/purchase")}
-          activeOpacity={0.8}
-        >
-          <View
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              backgroundColor: "rgba(124,58,237,0.2)",
-              borderWidth: 1,
-              borderColor: "rgba(124,58,237,0.35)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>🎟️</Text>
-          </View>
-          <View className="flex-1">
-            <Text
-              className={`text-[15px] font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-            >
-              {t("main.buyTicket")}
-            </Text>
-            <Text
-              className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
-            >
-              {t("main.buyTicketSub")}
-            </Text>
-          </View>
-          <Text className="text-[#7c3aed] text-lg">→</Text>
-        </TouchableOpacity>
-
         {/* House rules CTA */}
         <TouchableOpacity
           className="rounded-[20px] p-5 flex-row items-center gap-3.5 border"
