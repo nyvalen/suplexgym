@@ -10,7 +10,8 @@
     "noEmit": true,
     "paths": {
       "@workspace/ui/*": ["./src/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": [
     ".",

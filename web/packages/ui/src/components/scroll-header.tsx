@@ -34,9 +34,9 @@ export function ScrollHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 z-20 flex items-center justify-between px-5 py-3 transition-all duration-300 ease-in-out",
+        "fixed top-0 right-0 left-0 z-20 flex items-center justify-between px-4 py-2 transition-all duration-300 ease-in-out",
         visible
-          ? "translate-y-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-transparent opacity-100"
+          ? "translate-y-0 bg-gradient-to-b from-purple-400 to-transparent opacity-100 dark:from-zinc-950 dark:via-zinc-900"
           : "pointer-events-none -translate-y-full opacity-0"
       )}
     >
@@ -46,14 +46,14 @@ export function ScrollHeader() {
         className="flex items-center gap-2.5 rounded-md px-1 py-1 transition-opacity hover:opacity-70"
         onClick={() => scrollTo("hero")}
       >
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/70">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/60 dark:bg-purple-600/95">
           <Dumbbell className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="flex flex-col text-left">
           <span className="text-[11px] leading-none font-semibold tracking-[0.2em] text-white/90 uppercase">
             Suplex Gym
           </span>
-          <span className="text-[9px] tracking-[0.1em] text-white/35">
+          <span className="text-[9px] tracking-[0.1em] text-white/85">
             {t("hero.est")}
           </span>
         </div>

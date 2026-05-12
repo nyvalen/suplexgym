@@ -77,7 +77,9 @@ function ArticleDrawer({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
               </div>
               <div className="absolute right-6 bottom-6 left-6 w-1/4 rounded-xl bg-white/95 p-4 backdrop-blur-sm dark:bg-neutral-900/95">
-                <p className="text-xs font-medium text-muted-foreground">{photoCredit}</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  {photoCredit}
+                </p>
               </div>
             </div>
           </div>
@@ -93,8 +95,12 @@ export default function NewsPage() {
 
   useEffect(() => {
     let active = true
-    fetchNews().then((items) => { if (active) setPosts(items) })
-    return () => { active = false }
+    fetchNews().then((items) => {
+      if (active) setPosts(items)
+    })
+    return () => {
+      active = false
+    }
   }, [])
 
   const [featured, ...rest] = posts
@@ -108,14 +114,17 @@ export default function NewsPage() {
       <ScrollHeader />
 
       <div className="fixed top-4 right-4 z-30">
-        <SidebarTrigger className="rounded-full border border-white/15 bg-zinc-900/80 p-5 text-4xl text-white/80 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-white/30 hover:bg-zinc-800/90 hover:text-white hover:shadow-xl active:scale-95" />
+        <SidebarTrigger className="scale-90 rounded-full border border-white/15 bg-zinc-900/80 p-5 text-4xl text-white/80 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-white/30 hover:bg-zinc-800/90 hover:text-white hover:shadow-xl active:scale-95" />
       </div>
 
       <div className="relative min-h-screen w-full">
         {/* Hero-style header */}
         <div className="bg-radial-[at_300%_50%] from-purple-600 to-85% px-4 pt-6 pb-8 md:px-6">
           <div className="mb-6">
-            <Link to="/" className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70">
+            <Link
+              to="/"
+              className="mb-4 flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70"
+            >
               <ArrowLeft className="h-3 w-3" />
               {t("nav.backHome")}
             </Link>
@@ -129,7 +138,10 @@ export default function NewsPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/90 via-zinc-950/60 to-transparent" />
               </div>
-              <div className="relative flex items-end justify-between p-8 md:p-10" style={{ minHeight: 220 }}>
+              <div
+                className="relative flex items-end justify-between p-8 md:p-10"
+                style={{ minHeight: 220 }}
+              >
                 <div>
                   <span className="mb-3 inline-block font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase">
                     Suplex Gym
@@ -137,7 +149,9 @@ export default function NewsPage() {
                   <h1 className="text-3xl leading-tight font-medium text-white md:text-4xl">
                     {t("news.pageTitle")}
                   </h1>
-                  <p className="mt-2 max-w-sm text-sm text-white/50">{t("news.pageSub")}</p>
+                  <p className="mt-2 max-w-sm text-sm text-white/50">
+                    {t("news.pageSub")}
+                  </p>
                 </div>
                 <span className="hidden font-mono text-[11px] tracking-widest text-white/20 uppercase md:block">
                   {posts.length} {t("news.articles")}
@@ -182,7 +196,11 @@ export default function NewsPage() {
                   </div>
                 </DrawerTrigger>
                 <DrawerContent>
-                  <ArticleDrawer post={featured} closeLabel={t("news.close")} photoCredit={t("news.photoCredit")} />
+                  <ArticleDrawer
+                    post={featured}
+                    closeLabel={t("news.close")}
+                    photoCredit={t("news.photoCredit")}
+                  />
                 </DrawerContent>
               </Drawer>
             </div>
@@ -203,7 +221,9 @@ export default function NewsPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       </div>
                       <div className="p-4">
-                        <p className="mb-2 text-sm leading-snug font-medium text-black/80 dark:text-white">{post.title}</p>
+                        <p className="mb-2 text-sm leading-snug font-medium text-black/80 dark:text-white">
+                          {post.title}
+                        </p>
                         <div className="flex items-center gap-1.5 text-xs text-black/40 dark:text-white/35">
                           <Calendar className="h-3 w-3" />
                           {new Date(post.createdAt).toLocaleDateString()}
@@ -212,7 +232,11 @@ export default function NewsPage() {
                     </div>
                   </DrawerTrigger>
                   <DrawerContent>
-                    <ArticleDrawer post={post} closeLabel={t("news.close")} photoCredit={t("news.photoCredit")} />
+                    <ArticleDrawer
+                      post={post}
+                      closeLabel={t("news.close")}
+                      photoCredit={t("news.photoCredit")}
+                    />
                   </DrawerContent>
                 </Drawer>
               ))}

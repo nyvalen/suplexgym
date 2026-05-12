@@ -16,6 +16,7 @@ import {
 import { Admin } from "./admin"
 import { HoverExpand } from "./unlumen-ui/hover-expand"
 import { IpSettingsDialog } from "./ip-settings-dialog"
+import { Button } from "./button"
 
 function scrollTo(id: string) {
   const el = document.getElementById(id)
@@ -81,11 +82,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-600/70">
             <Dumbbell className="h-3.5 w-3.5 text-white" />
           </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[11px] leading-none font-semibold tracking-[0.2em] text-white/90 uppercase">
+          <div className="flex flex-col text-left opacity-70">
+            <span className="text-[11px] leading-none font-semibold tracking-[0.2em] uppercase dark:text-white/90">
               Suplex Gym
             </span>
-            <span className="text-[9px] tracking-[0.1em] text-white/35">
+            <span className="text-[9px] tracking-[0.1em] dark:text-white/35">
               {t("hero.est")}
             </span>
           </div>
@@ -132,15 +133,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="mb-6 flex items-center gap-1 self-center px-1">
-          <button
-            type="button"
+        <div className="mb-6 flex w-full shrink-0 items-center gap-1 px-1 opacity-70">
+          <Button
+            variant="outline"
             onClick={() => setShowIpSettings(true)}
             className="rounded-md p-1.5 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             title="IP Settings"
           >
             <Settings className="h-4 w-4" />
-          </button>
+          </Button>
           <Admin />
         </div>
       </SidebarFooter>

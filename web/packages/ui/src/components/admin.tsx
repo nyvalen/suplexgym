@@ -19,19 +19,21 @@ const data =
 export function Admin() {
   const navigate = useNavigate()
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="m-2 h-9 w-9 rounded-md transition-colors hover:bg-accent data-[state=open]:bg-accent"
-      onClick={() => {
-        {
-          console.log("Decoded Token Data:", data)
-          data == "admin" ? navigate("/admin") : navigate("/login")
-        }
-      }}
-    >
-      <UserRoundKey className="h-[1.2rem] w-[1.2rem] scale-100 transition-all" />
-      <span className="sr-only">Go to admin panel</span>
-    </Button>
+    <>
+      <Button
+        variant="outline"
+        size="icon"
+        className="m-3 h-9 w-full gap-3 rounded-md transition-colors hover:bg-accent data-[state=open]:bg-accent"
+        onClick={() => {
+          {
+            console.log("Decoded Token Data:", data)
+            data == "admin" ? navigate("/admin") : navigate("/login")
+          }
+        }}
+      >
+        <UserRoundKey className="h-[1.2rem] w-[1.2rem] scale-100 transition-all" />
+        <span>Go to admin panel</span>
+      </Button>
+    </>
   )
 }
