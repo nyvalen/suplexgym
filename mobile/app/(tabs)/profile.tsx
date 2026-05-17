@@ -5,26 +5,41 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Switch,
   Alert,
   Animated,
   StatusBar,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLanguage } from "../i18n/LanguageContext";
-import { Language } from "../i18n";
 import { ENDPOINTS } from "../utils/auth";
 import { useTheme } from "../theme/ThemeContext";
+import { useLanguage } from "../i18n/LanguageContext";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import {
+  User,
+  Lock,
+  MapPin,
+  LogOut,
+  ChevronRight,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Sun,
+  Moon,
+  Monitor,
+} from "lucide-react-native";
+
+type ThemePreference = "system" | "light" | "dark";
 
 interface UserProfile {
   name: string;
   username: string;
   email: string;
+  createdAt?: string;
 }
 interface BillingAddress {
   zipCode: string;
@@ -35,15 +50,289 @@ interface BillingAddress {
   state: string;
 }
 
+// ─── Accordion Section ────────────────────────────────────────────────────────
+function Section({
+  title,
+  icon,
+  children,
+  isDark,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  isDark: boolean;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const heightAnim = useRef(new Animated.Value(defaultOpen ? 1 : 0)).current;
+
+  const toggle = () => {
+    const toValue = open ? 0 : 1;
+    setOpen(!open);
+    Animated.spring(heightAnim, {
+      toValue,
+      useNativeDriver: false,
+      tension: 80,
+      friction: 12,
+    }).start();
+  };
+
+  return (
+    <View
+      className="mb-3 rounded-[20px] overflow-hidden border"
+      style={{
+        backgroundColor: isDark
+          ? "rgba(255,255,255,0.04)"
+          : "rgba(255,255,255,0.95)",
+        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      }}
+    >
+      <TouchableOpacity
+        onPress={toggle}
+        activeOpacity={0.8}
+        className="flex-row items-center px-5 py-4 gap-3"
+      >
+        <View
+          className="w-9 h-9 rounded-[11px] items-center justify-center"
+          style={{ backgroundColor: "rgba(124,58,237,0.12)" }}
+        >
+          {icon}
+        </View>
+        <Text
+          className="flex-1 text-[15px] font-semibold"
+          style={{ color: isDark ? "#fafafa" : "#09090b" }}
+        >
+          {title}
+        </Text>
+        <Animated.View
+          style={{
+            transform: [
+              {
+                rotate: heightAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0deg", "180deg"],
+                }),
+              },
+            ],
+          }}
+        >
+          <ChevronDown
+            size={16}
+            color={isDark ? "#71717a" : "#a1a1aa"}
+          />
+        </Animated.View>
+      </TouchableOpacity>
+
+      {open && (
+        <View
+          className="px-5 pb-5"
+          style={{
+            borderTopWidth: 1,
+            borderTopColor: isDark
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(0,0,0,0.05)",
+          }}
+        >
+          {children}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ─── Field ────────────────────────────────────────────────────────────────────
+function Field({
+  label,
+  value,
+  onChangeText,
+  isDark,
+  keyboardType,
+  secureTextEntry,
+  placeholder,
+  autoCapitalize,
+  rightElement,
+}: {
+  label: string;
+  value: string;
+  onChangeText?: (v: string) => void;
+  isDark: boolean;
+  keyboardType?: any;
+  secureTextEntry?: boolean;
+  placeholder?: string;
+  autoCapitalize?: any;
+  rightElement?: React.ReactNode;
+}) {
+  return (
+    <View className="mt-4">
+      <Text
+        className="text-[10px] font-bold tracking-[1.5px] uppercase mb-1.5"
+        style={{ color: isDark ? "#71717a" : "#a1a1aa" }}
+      >
+        {label}
+      </Text>
+      <View className="flex-row items-center">
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          keyboardType={keyboardType}
+          secureTextEntry={secureTextEntry}
+          placeholder={placeholder || label}
+          placeholderTextColor={isDark ? "#52525b" : "#d4d4d8"}
+          autoCapitalize={autoCapitalize || "none"}
+          className="flex-1 rounded-[14px] px-4 py-3 text-[14px] border"
+          style={{
+            backgroundColor: isDark
+              ? "rgba(255,255,255,0.05)"
+              : "rgba(0,0,0,0.03)",
+            borderColor: isDark
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(0,0,0,0.08)",
+            color: isDark ? "#fafafa" : "#09090b",
+            paddingRight: rightElement ? 48 : 16,
+          }}
+        />
+        {rightElement && (
+          <View className="absolute right-3">{rightElement}</View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// ─── Save Button ──────────────────────────────────────────────────────────────
+function SaveButton({
+  label,
+  onPress,
+  loading,
+  danger,
+}: {
+  label: string;
+  onPress: () => void;
+  loading?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={loading}
+      activeOpacity={0.75}
+      className="rounded-[16px] py-3.5 items-center mt-5 border"
+      style={{
+        backgroundColor: danger
+          ? "rgba(220,38,38,0.06)"
+          : "rgba(124,58,237,0.1)",
+        borderColor: danger
+          ? "rgba(220,38,38,0.2)"
+          : "rgba(124,58,237,0.25)",
+        opacity: loading ? 0.6 : 1,
+      }}
+    >
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={danger ? "#dc2626" : "#7c3aed"}
+        />
+      ) : (
+        <Text
+          className="text-[14px] font-bold"
+          style={{ color: danger ? "#dc2626" : "#7c3aed" }}
+        >
+          {label}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+// ─── Theme Selector ───────────────────────────────────────────────────────────
+function ThemeSelector({
+  isDark,
+  themePreference,
+  setThemePreference,
+  t,
+}: {
+  isDark: boolean;
+  themePreference: ThemePreference;
+  setThemePreference: (p: ThemePreference) => void;
+  t: (key: string) => string;
+}) {
+  const options: { value: ThemePreference; icon: React.ReactNode; label: string }[] = [
+    {
+      value: "light",
+      icon: <Sun size={14} color={themePreference === "light" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      label: "Light",
+    },
+    {
+      value: "system",
+      icon: <Monitor size={14} color={themePreference === "system" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      label: "System",
+    },
+    {
+      value: "dark",
+      icon: <Moon size={14} color={themePreference === "dark" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      label: "Dark",
+    },
+  ];
+
+  return (
+    <View className="mt-4">
+      <Text
+        className="text-[10px] font-bold tracking-[1.5px] uppercase mb-2"
+        style={{ color: isDark ? "#71717a" : "#a1a1aa" }}
+      >
+        Theme
+      </Text>
+      <View
+        className="flex-row rounded-[14px] p-1 gap-1"
+        style={{
+          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+        }}
+      >
+        {options.map((opt) => (
+          <TouchableOpacity
+            key={opt.value}
+            onPress={() => setThemePreference(opt.value)}
+            activeOpacity={0.8}
+            className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[10px]"
+            style={{
+              backgroundColor:
+                themePreference === opt.value ? "#7c3aed" : "transparent",
+            }}
+          >
+            {opt.icon}
+            <Text
+              className="text-[12px] font-semibold"
+              style={{
+                color:
+                  themePreference === opt.value
+                    ? "#fff"
+                    : isDark
+                    ? "#a1a1aa"
+                    : "#52525b",
+              }}
+            >
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function ProfileScreen() {
-  const { locale, setLocale, t } = useLanguage();
-  const { isDark } = useTheme();
+  const { isDark, themePreference, setThemePreference } = useTheme();
+  const { t } = useLanguage();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 450,
+      duration: 400,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -52,10 +341,15 @@ export default function ProfileScreen() {
     name: "",
     username: "",
     email: "",
+    createdAt: undefined,
   });
   const [profileLoading, setProfileLoading] = useState(false);
-  const [passwords, setPasswords] = useState({ current: "", next: "" });
+
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [pwVisible, setPwVisible] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
+
   const [billing, setBilling] = useState<BillingAddress>({
     zipCode: "",
     name: "",
@@ -65,8 +359,8 @@ export default function ProfileScreen() {
     state: "",
   });
   const [billingLoading, setBillingLoading] = useState(false);
-  const [animationsOn, setAnimationsOn] = useState(true);
 
+  // Load profile
   useEffect(() => {
     (async () => {
       const token = await AsyncStorage.getItem("accessToken");
@@ -79,6 +373,7 @@ export default function ProfileScreen() {
         name: data.name ?? "",
         username: data.username ?? "",
         email: data.email ?? "",
+        createdAt: data.createdAt,
       });
       if (data.billingAddress) {
         setBilling({
@@ -89,9 +384,6 @@ export default function ProfileScreen() {
           city: data.billingAddress.city ?? "",
           state: data.billingAddress.state ?? "",
         });
-      }
-      if (data.settings?.language) {
-        setLocale(data.settings.language as Language);
       }
     })();
   }, []);
@@ -108,7 +400,7 @@ export default function ProfileScreen() {
         },
         body: JSON.stringify(profile),
       });
-      if (res.ok) Alert.alert(t("profile.saved"), t("profile.profileSaved"));
+      if (res.ok) Alert.alert("✓", t("profile.profileSaved"));
       else Alert.alert(t("common.error"), t("profile.saveError"));
     } catch {
       Alert.alert(t("common.error"), t("profile.networkError"));
@@ -118,7 +410,7 @@ export default function ProfileScreen() {
   };
 
   const savePassword = async () => {
-    if (!passwords.current || !passwords.next) return;
+    if (!currentPw || !newPw) return;
     setPwLoading(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
@@ -129,19 +421,17 @@ export default function ProfileScreen() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          currentPassword: passwords.current,
-          newPassword: passwords.next,
+          currentPassword: currentPw,
+          newPassword: newPw,
         }),
       });
       if (res.ok) {
-        Alert.alert(t("profile.saved"), t("profile.passwordUpdated"));
-        setPasswords({ current: "", next: "" });
+        Alert.alert("✓", t("profile.passwordUpdated"));
+        setCurrentPw("");
+        setNewPw("");
       } else {
         const data = await res.json().catch(() => ({}));
-        Alert.alert(
-          t("common.error"),
-          data?.message ?? t("profile.wrongPassword"),
-        );
+        Alert.alert(t("common.error"), data?.message ?? t("profile.wrongPassword"));
       }
     } catch {
       Alert.alert(t("common.error"), t("profile.networkError"));
@@ -169,7 +459,7 @@ export default function ProfileScreen() {
           state: billing.state,
         }),
       });
-      Alert.alert(t("profile.saved"), t("profile.billingSaved"));
+      Alert.alert("✓", t("profile.billingSaved"));
     } catch {
       Alert.alert(t("common.error"), t("profile.networkError"));
     } finally {
@@ -177,110 +467,31 @@ export default function ProfileScreen() {
     }
   };
 
-  const saveLanguageToServer = async (lang: Language) => {
-    try {
-      const token = await AsyncStorage.getItem("accessToken");
-      await fetch(ENDPOINTS.settings, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          darkMode: isDark,
-          animation: animationsOn,
-          language: lang,
-        }),
-      });
-    } catch {
-      // silently ignore
-    }
-  };
-
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("refreshToken");
-    router.replace("/");
+    Alert.alert(t("profile.logout"), "Are you sure?", [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("profile.logout"),
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.removeItem("accessToken");
+          await AsyncStorage.removeItem("refreshToken");
+          router.replace("/");
+        },
+      },
+    ]);
   };
 
-  const inputStyle = {
-    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)",
-    borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-  };
-
-  const ActionButton = ({ label, onPress, loading: l, danger }: any) => (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={l}
-      activeOpacity={0.75}
-      className="rounded-2xl py-3.5 items-center mt-3.5 border"
-      style={{
-        backgroundColor: danger
-          ? isDark
-            ? "rgba(248,113,113,0.1)"
-            : "rgba(220,38,38,0.06)"
-          : isDark
-            ? "rgba(124,58,237,0.15)"
-            : "rgba(124,58,237,0.07)",
-        borderColor: danger
-          ? isDark
-            ? "rgba(248,113,113,0.3)"
-            : "rgba(220,38,38,0.2)"
-          : isDark
-            ? "rgba(124,58,237,0.35)"
-            : "rgba(124,58,237,0.2)",
-      }}
-    >
-      {l ? (
-        <ActivityIndicator
-          size="small"
-          color={danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed"}
-        />
-      ) : (
-        <Text
-          className="text-sm font-bold tracking-[0.3px]"
-          style={{
-            color: danger ? (isDark ? "#f87171" : "#dc2626") : "#7c3aed",
-          }}
-        >
-          {label}
-        </Text>
-      )}
-    </TouchableOpacity>
-  );
-
-  const Card = ({ children }: { children: React.ReactNode }) => (
-    <View
-      className="rounded-[20px] border p-5 mb-4"
-      style={{
-        backgroundColor: isDark
-          ? "rgba(255,255,255,0.05)"
-          : "rgba(255,255,255,0.9)",
-        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-      }}
-    >
-      {children}
-    </View>
-  );
-
-  const SectionTitle = ({ title }: { title: string }) => (
-    <Text className="text-[11px] font-extrabold text-[#7c3aed] tracking-[2px] uppercase mb-4">
-      {title}
-    </Text>
-  );
-
-  const FieldLabel = ({ label }: { label: string }) => (
-    <Text
-      className={`text-[11px] font-semibold tracking-[1px] uppercase mb-1.5 mt-2.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
-    >
-      {label}
-    </Text>
-  );
+  const initials = profile.name?.charAt(0)?.toUpperCase() || "?";
+  const memberSince = profile.createdAt
+    ? new Date(profile.createdAt).getFullYear()
+    : null;
 
   return (
     <View
-      className={`flex-1 ${isDark ? "bg-[#09090b]" : "bg-[#fafafa]"}`}
+      className="flex-1"
       style={{
+        backgroundColor: isDark ? "#09090b" : "#fafafa",
         paddingBottom: Platform.OS === "android" ? 140 : 66,
       }}
     >
@@ -290,220 +501,219 @@ export default function ProfileScreen() {
         translucent
       />
 
-      <View
-        pointerEvents="none"
-        className="absolute -top-10 -left-10 w-60 h-60 rounded-full"
-        style={{
-          backgroundColor: isDark
-            ? "rgba(124,58,237,0.12)"
-            : "rgba(124,58,237,0.05)",
-        }}
-      />
+      {/* Background gradient */}
       <LinearGradient
-        colors={["rgba(124,58,237,0.4)", "rgba(124,58,237,0)"]}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: 1200,
-        }}
-        start={{ x: 0, y: 0.9 }}
-        end={{ x: 0, y: 0 }}
+        colors={["rgba(124,58,237,0.35)", "rgba(124,58,237,0)"]}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 300 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       />
 
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Animated.View className="flex-1" style={{ opacity: fadeAnim }}>
-          <ScrollView
-            contentContainerStyle={{ padding: 20, paddingTop: 64 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Avatar header */}
-            <View className="items-center mb-7">
-              <View className="w-[88px] h-[88px] rounded-full border-[2.5px] border-[#7c3aed] p-[3px] mb-3.5">
-                <View
-                  className="flex-1 rounded-full items-center justify-center"
-                  style={{ backgroundColor: "rgba(124,58,237,0.15)" }}
-                >
-                  <Text className="text-[30px] font-extrabold text-[#7c3aed]">
-                    {profile.name?.charAt(0)?.toUpperCase() || "?"}
-                  </Text>
-                </View>
-              </View>
+        <Animated.ScrollView
+          style={{ opacity: fadeAnim }}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 60,
+            paddingBottom: 40,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Hero header ── */}
+          <View className="items-center mb-8 mt-2">
+            {/* Avatar */}
+            <View
+              className="w-20 h-20 rounded-[28px] items-center justify-center mb-4"
+              style={{
+                backgroundColor: "rgba(124,58,237,0.15)",
+                borderWidth: 2,
+                borderColor: "rgba(124,58,237,0.3)",
+              }}
+            >
               <Text
-                className={`text-xl font-bold tracking-[0.3px] mb-1 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
+                className="text-[32px] font-black"
+                style={{ color: "#7c3aed" }}
               >
-                {profile.name || profile.username}
-              </Text>
-              <Text
-                className={`text-xs ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
-              >
-                {profile.email}
+                {initials}
               </Text>
             </View>
 
-            {/* Appearance */}
-            <Card>
-              <SectionTitle title={t("profile.appearance")} />
+            {/* Name */}
+            <Text
+              className="text-[22px] font-extrabold tracking-[-0.3px]"
+              style={{ color: isDark ? "#fafafa" : "#09090b" }}
+            >
+              {profile.name || profile.username || "—"}
+            </Text>
 
-              {/* Language */}
+            {/* Email */}
+            <Text
+              className="text-[13px] mt-0.5"
+              style={{ color: isDark ? "#71717a" : "#a1a1aa" }}
+            >
+              {profile.email}
+            </Text>
+
+            {/* Member since badge */}
+            {memberSince && (
               <View
-                className="flex-row justify-between items-center rounded-xl px-3.5 py-2.5 border"
-                style={inputStyle}
+                className="mt-3 flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border"
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.08)",
+                  borderColor: "rgba(124,58,237,0.2)",
+                }}
               >
-                <Text
-                  className={`text-sm font-medium ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                >
-                  {t("profile.language")}
+                <Text className="text-[11px] font-semibold text-[#8b5cf6]">
+                  {t("profile.memberSince")} {memberSince}
                 </Text>
-                <View className="flex-row gap-2">
-                  {(["en", "hu"] as Language[]).map((lang) => (
-                    <TouchableOpacity
-                      key={lang}
-                      onPress={() => {
-                        setLocale(lang);
-                        saveLanguageToServer(lang);
-                      }}
-                      activeOpacity={0.8}
-                      className="px-4 py-2 rounded-full border"
-                      style={{
-                        backgroundColor:
-                          locale === lang ? "#7c3aed" : "transparent",
-                        borderColor:
-                          locale === lang
-                            ? "#7c3aed"
-                            : isDark
-                              ? "rgba(255,255,255,0.1)"
-                              : "rgba(0,0,0,0.08)",
-                      }}
-                    >
-                      <Text
-                        className="text-xs font-bold"
-                        style={{
-                          color:
-                            locale === lang
-                              ? "#fff"
-                              : isDark
-                                ? "#a1a1aa"
-                                : "#52525b",
-                        }}
-                      >
-                        {lang === "en" ? "EN" : "HU"}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
               </View>
-            </Card>
+            )}
+          </View>
 
-            {/* Personal Info */}
-            <Card>
-              <SectionTitle title={t("profile.personalInfo")} />
-              {[
-                [t("profile.fullName"), "name"],
-                [t("profile.username"), "username"],
-                [t("profile.email"), "email"],
-              ].map(([label, key]) => (
-                <React.Fragment key={key}>
-                  <FieldLabel label={label} />
-                  <TextInput
-                    value={(profile as any)[key]}
-                    onChangeText={(v) =>
-                      setProfile((p) => ({ ...p, [key]: v }))
-                    }
-                    className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                    style={inputStyle}
-                    placeholder={label}
-                    placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
-                    keyboardType={key === "email" ? "email-address" : "default"}
-                  />
-                </React.Fragment>
-              ))}
-              <ActionButton
-                label={t("profile.saveChanges")}
-                onPress={saveProfile}
-                loading={profileLoading}
-              />
-            </Card>
-
-            {/* Password */}
-            <Card>
-              <SectionTitle title={t("profile.changePassword")} />
-              <FieldLabel label={t("profile.currentPassword")} />
-              <TextInput
-                value={passwords.current}
-                onChangeText={(v) =>
-                  setPasswords((p) => ({ ...p, current: v }))
-                }
-                className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                style={inputStyle}
-                placeholder="••••••••"
-                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
-                secureTextEntry
-              />
-              <FieldLabel label={t("profile.newPassword")} />
-              <TextInput
-                value={passwords.next}
-                onChangeText={(v) => setPasswords((p) => ({ ...p, next: v }))}
-                className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                style={inputStyle}
-                placeholder="••••••••"
-                placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
-                secureTextEntry
-              />
-              <ActionButton
-                label={t("profile.updatePassword")}
-                onPress={savePassword}
-                loading={pwLoading}
-              />
-            </Card>
-
-            {/* Billing */}
-            <Card>
-              <SectionTitle title={t("profile.billingAddress")} />
-              {(
-                [
-                  [t("profile.zipCode"), "zipCode", "numeric"],
-                  [t("profile.name"), "name", "default"],
-                  [t("profile.city"), "city", "default"],
-                  [t("profile.street"), "streetAddress", "default"],
-                  [t("profile.apartment"), "apartmentNumber", "default"],
-                  [t("profile.state"), "state", "default"],
-                ] as [string, keyof BillingAddress, any][]
-              ).map(([label, field, kb]) => (
-                <React.Fragment key={field}>
-                  <FieldLabel label={label} />
-                  <TextInput
-                    value={billing[field]}
-                    onChangeText={(v) =>
-                      setBilling((b) => ({ ...b, [field]: v }))
-                    }
-                    className={`rounded-xl px-3.5 py-3 text-sm mb-1 border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
-                    style={inputStyle}
-                    placeholder={label}
-                    placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
-                    keyboardType={kb}
-                  />
-                </React.Fragment>
-              ))}
-              <ActionButton
-                label={t("profile.saveBilling")}
-                onPress={saveBilling}
-                loading={billingLoading}
-              />
-            </Card>
-
-            <ActionButton
-              label={t("profile.logout")}
-              onPress={handleLogout}
-              danger
+          {/* ── Personal Info ── */}
+          <Section
+            title={t("profile.personalInfo")}
+            icon={<User size={17} color="#7c3aed" />}
+            isDark={isDark}
+            defaultOpen
+          >
+            <Field
+              label={t("profile.fullName")}
+              value={profile.name}
+              onChangeText={(v) => setProfile((p) => ({ ...p, name: v }))}
+              isDark={isDark}
+              autoCapitalize="words"
             />
-            <View className="h-5" />
-          </ScrollView>
-        </Animated.View>
+            <Field
+              label={t("profile.username")}
+              value={profile.username}
+              onChangeText={(v) => setProfile((p) => ({ ...p, username: v }))}
+              isDark={isDark}
+            />
+            <Field
+              label={t("profile.email")}
+              value={profile.email}
+              onChangeText={(v) => setProfile((p) => ({ ...p, email: v }))}
+              isDark={isDark}
+              keyboardType="email-address"
+            />
+            <SaveButton
+              label={t("profile.saveChanges")}
+              onPress={saveProfile}
+              loading={profileLoading}
+            />
+          </Section>
+
+          {/* ── Security ── */}
+          <Section
+            title={t("profile.security")}
+            icon={<Lock size={17} color="#7c3aed" />}
+            isDark={isDark}
+          >
+            <Field
+              label={t("profile.currentPassword")}
+              value={currentPw}
+              onChangeText={setCurrentPw}
+              isDark={isDark}
+              secureTextEntry={!pwVisible}
+              placeholder="••••••••"
+              rightElement={
+                <TouchableOpacity
+                  onPress={() => setPwVisible((v) => !v)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  {pwVisible ? (
+                    <EyeOff size={16} color={isDark ? "#71717a" : "#a1a1aa"} />
+                  ) : (
+                    <Eye size={16} color={isDark ? "#71717a" : "#a1a1aa"} />
+                  )}
+                </TouchableOpacity>
+              }
+            />
+            <Field
+              label={t("profile.newPassword")}
+              value={newPw}
+              onChangeText={setNewPw}
+              isDark={isDark}
+              secureTextEntry={!pwVisible}
+              placeholder="••••••••"
+            />
+            <SaveButton
+              label={t("profile.updatePassword")}
+              onPress={savePassword}
+              loading={pwLoading}
+            />
+          </Section>
+
+          {/* ── Billing Address ── */}
+          <Section
+            title={t("profile.billingAddress")}
+            icon={<MapPin size={17} color="#7c3aed" />}
+            isDark={isDark}
+          >
+            {(
+              [
+                [t("profile.zipCode"), "zipCode", "numeric"],
+                [t("profile.name"), "name", "default"],
+                [t("profile.city"), "city", "default"],
+                [t("profile.street"), "streetAddress", "default"],
+                [t("profile.apartment"), "apartmentNumber", "default"],
+                [t("profile.state"), "state", "default"],
+              ] as [string, keyof BillingAddress, any][]
+            ).map(([label, field, kb]) => (
+              <Field
+                key={field}
+                label={label}
+                value={billing[field]}
+                onChangeText={(v) =>
+                  setBilling((b) => ({ ...b, [field]: v }))
+                }
+                isDark={isDark}
+                keyboardType={kb}
+              />
+            ))}
+            <SaveButton
+              label={t("profile.saveBilling")}
+              onPress={saveBilling}
+              loading={billingLoading}
+            />
+          </Section>
+
+          {/* ── Preferences ── */}
+          <Section
+            title={t("profile.preferences")}
+            icon={<Monitor size={17} color="#7c3aed" />}
+            isDark={isDark}
+          >
+            <ThemeSelector
+              isDark={isDark}
+              themePreference={themePreference as ThemePreference}
+              setThemePreference={setThemePreference as (p: ThemePreference) => void}
+              t={t}
+            />
+          </Section>
+
+          {/* ── Logout ── */}
+          <TouchableOpacity
+            onPress={handleLogout}
+            activeOpacity={0.75}
+            className="rounded-[18px] py-4 items-center flex-row justify-center gap-2 border mt-2"
+            style={{
+              backgroundColor: "rgba(220,38,38,0.05)",
+              borderColor: "rgba(220,38,38,0.18)",
+            }}
+          >
+            <LogOut size={16} color="#dc2626" />
+            <Text className="text-[14px] font-bold text-[#dc2626]">
+              {t("profile.logout")}
+            </Text>
+          </TouchableOpacity>
+
+          <View className="h-4" />
+        </Animated.ScrollView>
       </KeyboardAvoidingView>
     </View>
   );

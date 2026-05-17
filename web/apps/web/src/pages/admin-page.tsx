@@ -8,9 +8,9 @@ import CrudsManageUsers from "@workspace/ui/components/creative-tim/blocks/cruds
 import CrudsManageNews from "@workspace/ui/components/creative-tim/blocks/cruds-manage-news"
 import CrudsManageItems from "@workspace/ui/components/creative-tim/blocks/cruds-manage-items"
 import CrudsManageEquipment from "@workspace/ui/components/creative-tim/blocks/cruds-manage-equipment"
-import CrudsManageDeals from "@workspace/ui/components/creative-tim/blocks/cruds-manage-deals"
+import CrudsManageDiscounts from "@workspace/ui/components/creative-tim/blocks/cruds-manage-discounts"
 
-type Section = "users" | "news" | "items" | "equipment" | "deals"
+type Section = "users" | "news" | "items" | "equipment" | "discounts"
 
 function getUserRole(): string {
   try {
@@ -27,13 +27,11 @@ export default function AdminPage() {
   const role = getUserRole()
   const isAdmin = role === "admin"
 
-  // Staff can only access news and equipment
   const defaultSection: Section = isAdmin ? "users" : "news"
   const [section, setSection] = useState<Section>(defaultSection)
 
   const handleSectionChange = (s: Section) => {
-    // Block staff from user/item management
-    if (!isAdmin && (s === "users" || s === "items")) return
+    if (!isAdmin && (s === "users" || s === "items" || s === "discounts")) return
     setSection(s)
   }
 
@@ -47,14 +45,14 @@ export default function AdminPage() {
         userRole={role}
       />
       <div className="fixed top-4 right-4 z-30">
-        <SidebarTrigger className="rounded-full border border-white/15 bg-zinc-900/80 p-5 text-4xl text-white/80 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-white/30 hover:bg-zinc-800/90 hover:text-white hover:shadow-xl active:scale-95" />
+        <SidebarTrigger className="rounded-full border border-border bg-background/80 p-5 text-4xl text-foreground/80 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-border hover:bg-background/90 hover:text-foreground hover:shadow-xl active:scale-95" />
       </div>
-      <div className="to-white-900 h-full w-full flex-col bg-radial-[at_-500%_30%] from-purple-600 to-95% dark:bg-radial-[at_300%_30%] dark:to-85%">
+      <div className="min-h-screen w-full flex-col bg-background dark:bg-radial-[at_300%_30%] dark:from-purple-600 dark:to-85%">
         {section === "users" && isAdmin && <CrudsManageUsers />}
         {section === "news" && <CrudsManageNews />}
         {section === "items" && isAdmin && <CrudsManageItems />}
         {section === "equipment" && <CrudsManageEquipment />}
-        {section === "deals" && <CrudsManageDeals />}
+        {section === "discounts" && isAdmin && <CrudsManageDiscounts />}
       </div>
     </SidebarProvider>
   )

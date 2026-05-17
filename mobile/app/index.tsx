@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useTheme } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
 import { Dumbbell, Settings, Wifi } from "lucide-react-native";
 import { TabBarContext } from "./context/tab-bar-context";
 import { useFocusEffect } from "expo-router";
@@ -31,13 +32,6 @@ import { useNetInfo } from "@react-native-community/netinfo";
 import { subnetPrefix } from "./utils/offline-storage";
 import { useApiStore } from "./store/apiStore";
 import { DevIpSettings } from "./components/DevIpSettings";
-
-const STATS = [
-  { value: "7", label: "Személyi edző" },
-  { value: "2", label: "Éve nyitva" },
-  { value: "20+", label: "Gép" },
-  { value: "100%", label: "elégedettség" },
-];
 
 // ─── IP Config Sheet ──────────────────────────────────────────────────────────
 
@@ -304,9 +298,18 @@ function IpConfigSheet({
 export default function WelcomeScreen() {
   const netInfo = useNetInfo();
   const { isDark } = useTheme();
+  const { t } = useLanguage();
   const [showIpConfig, setShowIpConfig] = useState(false);
 
   const [showDevSettings, setShowDevSettings] = useState(false);
+
+  // Create STATS with translations
+  const STATS = [
+    { value: "7", label: t("welcome.stats.trainers") },
+    { value: "2", label: t("welcome.stats.years") },
+    { value: "20+", label: t("welcome.stats.equipment") },
+    { value: "100%", label: t("welcome.stats.satisfaction") },
+  ];
 
   // Pull the device's own IP from NetInfo details
   const deviceIp =
@@ -430,7 +433,7 @@ export default function WelcomeScreen() {
                 <Text
                   className={`text-[10px] tracking-[1px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
                 >
-                  Alapítva 2024
+                  {t("welcome.founded")} 2024
                 </Text>
               </View>
             </View>
@@ -462,21 +465,20 @@ export default function WelcomeScreen() {
             <Text
               className={`text-[28px] font-normal mb-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#09090b]"}`}
             >
-              A lehetőségek
+              {t("welcome.tagline")}
             </Text>
             <Text className="text-[46px] font-bold italic text-[#7c3aed] tracking-[-1px] leading-[50px]">
-              határtalan
+              {t("welcome.headline")}
             </Text>
             <Text
               className={`text-[36px] font-normal tracking-[-0.5px] leading-[42px] opacity-85 ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
             >
-              tárháza.
+              {t("welcome.subheadline")}
             </Text>
             <Text
               className={`text-sm leading-[22px] mt-3.5 max-w-[280px] ${isDark ? "text-[#646464]" : "text-[#646464]"}`}
             >
-              Fókuszra tervezett tér. Haladásra kialakítva. Semmi felesleges —
-              csak ami számít.
+              {t("welcome.description")}
             </Text>
           </View>
 
@@ -525,7 +527,7 @@ export default function WelcomeScreen() {
               >
                 <View className="w-2 h-2 rounded-full bg-[#f87171]" />
                 <Text className="text-[#f87171] text-sm font-semibold">
-                  No internet connection
+                  {t("common.noInternet")}
                 </Text>
               </View>
               <Pressable
@@ -533,7 +535,7 @@ export default function WelcomeScreen() {
                 onPress={() => router.push("/offline-tickets" as any)}
               >
                 <Text className="text-white text-base font-bold tracking-[0.3px]">
-                  View Saved Tickets
+                  {t("tickets.saved") || "View Saved Tickets"}
                 </Text>
               </Pressable>
             </View>
@@ -544,7 +546,7 @@ export default function WelcomeScreen() {
                 onPress={() => router.push("/sign-in")}
               >
                 <Text className="text-white text-base font-bold tracking-[0.3px]">
-                  Bejelentkezés
+                  {t("welcome.signIn")}
                 </Text>
               </Pressable>
               <Pressable
@@ -562,7 +564,7 @@ export default function WelcomeScreen() {
                 <Text
                   className={`text-base font-semibold ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
                 >
-                  Fiók létrehozása
+                  {t("welcome.createAccount")}
                 </Text>
               </Pressable>
             </View>
@@ -571,7 +573,7 @@ export default function WelcomeScreen() {
           <Text
             className={`text-xs text-center italic leading-[18px] ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
-            „Az erő következetességben gyökerezik."
+            {t("welcome.quote")}
           </Text>
         </Animated.View>
       </ScrollView>

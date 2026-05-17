@@ -13,6 +13,7 @@ import { useTheme } from "./theme/ThemeContext";
 import { useLanguage } from "./i18n/LanguageContext";
 import { LinearGradient } from "expo-linear-gradient";
 
+// Rule definitions — icon and color are static, text comes from i18n
 const RULES = [
   { icon: "👟", key: "footwear", color: "#f59e0b" },
   { icon: "🧴", key: "hygiene", color: "#10b981" },
@@ -22,14 +23,54 @@ const RULES = [
   { icon: "🤝", key: "respect", color: "#7c3aed" },
   { icon: "🚫", key: "substances", color: "#ef4444" },
   { icon: "⏱️", key: "peak", color: "#f97316" },
-];
+] as const;
 
-function RuleCard({ icon, ruleKey, color, index, isDark, t, fadeAnim, slideY }: any) {
+function RuleCard({
+  icon,
+  ruleKey,
+  color,
+  index,
+  isDark,
+  t,
+  fadeAnim,
+  slideY,
+}: {
+  icon: string;
+  ruleKey: string;
+  color: string;
+  index: number;
+  isDark: boolean;
+  t: (key: string) => string;
+  fadeAnim: Animated.Value;
+  slideY: Animated.Value;
+}) {
+  // Stagger each card slightly
+  const cardAnim = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(cardAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 60,
+        useNativeDriver: true,
+      }),
+      Animated.spring(cardSlide, {
+        toValue: 0,
+        tension: 70,
+        friction: 12,
+        delay: index * 60,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   return (
     <Animated.View
       style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideY }],
+        opacity: cardAnim,
+        transform: [{ translateY: cardSlide }],
         marginBottom: 10,
       }}
     >
@@ -37,16 +78,27 @@ function RuleCard({ icon, ruleKey, color, index, isDark, t, fadeAnim, slideY }: 
         style={{
           borderRadius: 20,
           overflow: "hidden",
-          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.95)",
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.04)"
+            : "rgba(255,255,255,0.95)",
           borderWidth: 1,
           borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
         }}
       >
-        {/* Thin color accent top border */}
-        <View style={{ height: 2, backgroundColor: color, opacity: 0.7 }} />
+        {/* Thin top accent */}
+        <View
+          style={{ height: 2, backgroundColor: color, opacity: 0.7 }}
+        />
 
-        <View style={{ flexDirection: "row", alignItems: "flex-start", padding: 16, gap: 14 }}>
-          {/* Icon with colored background */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            padding: 16,
+            gap: 14,
+          }}
+        >
+          {/* Icon bubble */}
           <View
             style={{
               width: 46,
@@ -63,9 +115,16 @@ function RuleCard({ icon, ruleKey, color, index, isDark, t, fadeAnim, slideY }: 
             <Text style={{ fontSize: 22 }}>{icon}</Text>
           </View>
 
-          {/* Text content */}
+          {/* Text */}
           <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 4,
+              }}
+            >
               <Text
                 style={{
                   fontSize: 14,
@@ -114,19 +173,40 @@ export default function RulesScreen() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(slideUp, { toValue: 0, tension: 60, friction: 12, useNativeDriver: true }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideUp, {
+        toValue: 0,
+        tension: 60,
+        friction: 12,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDark ? "#09090b" : "#fafafa" }}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+    <View
+      style={{ flex: 1, backgroundColor: isDark ? "#09090b" : "#fafafa" }}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
 
       {/* Background gradient */}
       <LinearGradient
         colors={["rgba(124,58,237,0.35)", "rgba(124,58,237,0)"]}
-        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 400 }}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 400,
+        }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
@@ -139,24 +219,32 @@ export default function RulesScreen() {
           width: 220,
           height: 220,
           borderRadius: 110,
-          backgroundColor: isDark ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.06)",
+          backgroundColor: isDark
+            ? "rgba(124,58,237,0.12)"
+            : "rgba(124,58,237,0.06)",
         }}
       />
 
       {/* Header */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 }}>
+      <View
+        style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
           style={{ marginBottom: 20 }}
           activeOpacity={0.7}
         >
-          <Text style={{ color: "#7c3aed", fontSize: 15, fontWeight: "600" }}>
+          <Text
+            style={{ color: "#7c3aed", fontSize: 15, fontWeight: "600" }}
+          >
             {t("common.back")}
           </Text>
         </TouchableOpacity>
 
-        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideUp }] }}>
-          {/* Badge */}
+        <Animated.View
+          style={{ opacity: fadeAnim, transform: [{ translateY: slideUp }] }}
+        >
+          {/* Suplex badge */}
           <View
             style={{
               flexDirection: "row",
@@ -176,7 +264,15 @@ export default function RulesScreen() {
                 borderColor: "rgba(124,58,237,0.3)",
               }}
             >
-              <Text style={{ color: "#c4b5fd", fontSize: 10, fontWeight: "700", letterSpacing: 1.5, textTransform: "uppercase" }}>
+              <Text
+                style={{
+                  color: "#c4b5fd",
+                  fontSize: 10,
+                  fontWeight: "700",
+                  letterSpacing: 1.5,
+                  textTransform: "uppercase",
+                }}
+              >
                 Suplex Gym
               </Text>
             </View>
@@ -234,9 +330,13 @@ export default function RulesScreen() {
             style={{
               borderRadius: 18,
               padding: 16,
-              backgroundColor: isDark ? "rgba(124,58,237,0.08)" : "rgba(124,58,237,0.05)",
+              backgroundColor: isDark
+                ? "rgba(124,58,237,0.08)"
+                : "rgba(124,58,237,0.05)",
               borderWidth: 1,
-              borderColor: isDark ? "rgba(124,58,237,0.2)" : "rgba(124,58,237,0.15)",
+              borderColor: isDark
+                ? "rgba(124,58,237,0.2)"
+                : "rgba(124,58,237,0.15)",
             }}
           >
             <Text
@@ -253,7 +353,7 @@ export default function RulesScreen() {
         </Animated.View>
       </ScrollView>
 
-      {/* CTA — Buy Tickets */}
+      {/* CTA — Browse Tickets */}
       <View
         style={{
           position: "absolute",
@@ -265,8 +365,18 @@ export default function RulesScreen() {
         }}
       >
         <LinearGradient
-          colors={isDark ? ["rgba(9,9,11,0)", "rgba(9,9,11,1)"] : ["rgba(250,250,250,0)", "rgba(250,250,250,1)"]}
-          style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 120 }}
+          colors={
+            isDark
+              ? ["rgba(9,9,11,0)", "rgba(9,9,11,1)"]
+              : ["rgba(250,250,250,0)", "rgba(250,250,250,1)"]
+          }
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+          }}
         />
         <TouchableOpacity
           onPress={() => router.push("/(tabs)/purchase")}
@@ -283,7 +393,14 @@ export default function RulesScreen() {
             elevation: 10,
           }}
         >
-          <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700", letterSpacing: 0.3 }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 15,
+              fontWeight: "700",
+              letterSpacing: 0.3,
+            }}
+          >
             {t("rules.cta")}
           </Text>
         </TouchableOpacity>

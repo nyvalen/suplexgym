@@ -12,12 +12,14 @@ import {
 } from "react-native";
 import { ENDPOINTS } from "./utils/auth";
 import { useTheme } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
 import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function SignUpScreen() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     name: "",
@@ -35,7 +37,7 @@ export default function SignUpScreen() {
     setError("");
     const { name, username, email, password } = form;
     if (!name.trim() || !username.trim() || !email.trim() || !password) {
-      setError("Töltsd ki az összes mezőt.");
+      setError(t("signUp.fillAll"));
       return;
     }
     setLoading(true);
@@ -52,9 +54,9 @@ export default function SignUpScreen() {
       });
       const data = await res.json();
       if (res.ok) setSuccess(true);
-      else setError(data.message || "Regisztráció sikertelen.");
+      else setError(data.message || t("signUp.failed"));
     } catch {
-      setError("Hálózati hiba. Kérjük próbáld újra.");
+      setError(t("signUp.networkError"));
     } finally {
       setLoading(false);
     }
@@ -63,29 +65,29 @@ export default function SignUpScreen() {
   const FIELDS = [
     {
       key: "name",
-      label: "Teljes név",
-      placeholder: "Kovács János",
+      label: t("signUp.name"),
+      placeholder: t("signUp.namePlaceholder"),
       keyboard: undefined as any,
       lower: false,
     },
     {
       key: "username",
-      label: "Felhasználónév",
-      placeholder: "kovacsj",
+      label: t("signUp.username"),
+      placeholder: t("signUp.usernamePlaceholder"),
       keyboard: undefined as any,
       lower: true,
     },
     {
       key: "email",
-      label: "Email",
-      placeholder: "te@pelda.hu",
+      label: t("signUp.email"),
+      placeholder: t("signUp.emailPlaceholder"),
       keyboard: "email-address" as const,
       lower: true,
     },
     {
       key: "password",
-      label: "Jelszó",
-      placeholder: "••••••••",
+      label: t("signUp.password"),
+      placeholder: t("signUp.passwordPlaceholder"),
       keyboard: undefined as any,
       secure: true,
     },
@@ -129,7 +131,7 @@ export default function SignUpScreen() {
           <Text
             className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
-            ← Vissza
+            {t("signIn.back")}
           </Text>
         </Pressable>
 
@@ -150,12 +152,12 @@ export default function SignUpScreen() {
           <Text
             className={`text-[28px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            Regisztráció
+            {t("signUp.title")}
           </Text>
           <Text
             className={`text-sm ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
-            Csatlakozz a Suplex Gymhez
+            {t("signUp.subtitle")}
           </Text>
         </View>
 
@@ -187,19 +189,19 @@ export default function SignUpScreen() {
             <Text
               className={`text-xl font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
             >
-              Sikeres regisztráció!
+              {t("signUp.successTitle")}
             </Text>
             <Text
               className={`text-sm text-center leading-5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              Ellenőrizd az emailed, majd jelentkezz be.
+              {t("signUp.successMessage")}
             </Text>
             <Pressable
               className="bg-[#7c3aed] rounded-2xl py-3.5 px-8 mt-2 active:opacity-80"
               onPress={() => router.push("/sign-in")}
             >
               <Text className="text-white text-[15px] font-bold">
-                Bejelentkezés
+                {t("signUp.goToSignIn")}
               </Text>
             </Pressable>
           </View>

@@ -16,8 +16,9 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useCartStore } from "../store";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CARD_HEIGHT = 210;
+const CARD_HEIGHT = 220;
 
 const FALLBACK_IMAGES: Record<number, string> = {
   1: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&w=800&q=80",
@@ -42,6 +43,67 @@ interface TicketItem {
   typeName: string;
   type_id: number;
   imagePath?: string | null;
+  // discount fields applied client-side
+  discountedPrice?: number;
+  discountPercent?: number;
+}
+
+interface Discount {
+  id: string;
+  itemId: number;
+  itemName: string;
+  originalPrice: number;
+  discountPercent: number;
+  discountedPrice: number;
+  validUntil: string | null;
+  createdAt: string;
+}
+
+const DISCOUNT_STORAGE_KEY = "suplex_discounts_v1";
+
+async function loadActiveDiscounts(): Promise<Discount[]> {
+  try {
+    // On mobile we can't access the web's localStorage directly.
+    // We store a synced copy in AsyncStorage whenever the user visits the purchase screen.
+    // The admin panel writes to web localStorage; the mobile app reads its own AsyncStorage copy.
+    const raw = await AsyncStorage.getItem(DISCOUNT_STORAGE_KEY);
+    if (!raw) return [];
+    const all = JSON.parse(raw) as Discount[];
+    return all.filter(
+      (d) => !d.validUntil || new Date(d.validUntil) > new Date()
+    );
+  } catch {
+    return [];
+  }
+}
+
+// Try to fetch discounts from the API if one exists, fallback to local storage
+async function fetchDiscounts(): Promise<Discount[]> {
+  try {
+    const base = ENDPOINTS.items.replace("/api/items", "");
+    const res = await fetch(`${base}/api/discounts`);
+    if (res.ok) {
+      const data = await res.json();
+      // Save to AsyncStorage for offline use
+      await AsyncStorage.setItem(DISCOUNT_STORAGE_KEY, JSON.stringify(data));
+      return data as Discount[];
+    }
+  } catch {
+    // silently fall back
+  }
+  return loadActiveDiscounts();
+}
+
+function applyDiscounts(items: TicketItem[], discounts: Discount[]): TicketItem[] {
+  return items.map((item) => {
+    const discount = discounts.find((d) => d.itemId === item.id);
+    if (!discount) return item;
+    return {
+      ...item,
+      discountedPrice: discount.discountedPrice,
+      discountPercent: discount.discountPercent,
+    };
+  });
 }
 
 function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
@@ -54,6 +116,9 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
     FALLBACK_IMAGES[item.type_id] ||
     FALLBACK_IMAGES[1];
   const scale = useRef(new Animated.Value(1)).current;
+
+  const hasDiscount = item.discountedPrice !== undefined && item.discountedPrice < item.price;
+  const displayPrice = hasDiscount ? item.discountedPrice : item.price;
 
   return (
     <Animated.View
@@ -143,6 +208,29 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
             ⏱ {item.validityDays} {t("purchase.days")}
           </Text>
         </View>
+
+        {/* SALE badge */}
+        {hasDiscount && (
+          <View
+            style={{
+              backgroundColor: "#ef4444",
+              borderRadius: 20,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: "900",
+                letterSpacing: 1,
+              }}
+            >
+              -{item.discountPercent}%
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Bottom panel */}
@@ -181,27 +269,40 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
                 fontSize: 11,
                 marginTop: 1,
               }}
-              numberOfLines={3}
+              numberOfLines={2}
             >
               {item.description}
             </Text>
           ) : null}
+
+          {/* Price row */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "baseline",
-              gap: 3,
+              gap: 6,
               marginTop: 4,
             }}
           >
             <Text
-              style={{ color: cfg.accent, fontSize: 20, fontWeight: "900" }}
+              style={{ color: hasDiscount ? "#ef4444" : cfg.accent, fontSize: 20, fontWeight: "900" }}
             >
-              {item.price.toLocaleString()}
+              {displayPrice.toLocaleString()}
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.45)", fontSize: 12 }}>
               Ft
             </Text>
+            {hasDiscount && (
+              <Text
+                style={{
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: 13,
+                  textDecorationLine: "line-through",
+                }}
+              >
+                {item.price.toLocaleString()} Ft
+              </Text>
+            )}
           </View>
         </View>
 
@@ -278,7 +379,7 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
 
 function CartBar({ cart, t }: any) {
   const translateY = useRef(new Animated.Value(200)).current;
-  const total = cart.reduce((s: number, i: any) => s + i.price, 0);
+  const total = cart.reduce((s: number, i: any) => s + (i.discountedPrice ?? i.price), 0);
   useEffect(() => {
     Animated.spring(translateY, {
       toValue: cart.length > 0 ? 0 : 200,
@@ -382,11 +483,20 @@ export default function PurchaseTicketsScreen() {
   const removeItem = useCartStore((s) => s.removeItem);
 
   useEffect(() => {
-    authFetch(ENDPOINTS.items)
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setItems)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const load = async () => {
+      try {
+        const [rawItems, discounts] = await Promise.all([
+          authFetch(ENDPOINTS.items).then((r) => (r.ok ? r.json() : [])),
+          fetchDiscounts(),
+        ]);
+        setItems(applyDiscounts(rawItems as TicketItem[], discounts));
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   const addToCart = useCallback(
@@ -402,7 +512,7 @@ export default function PurchaseTicketsScreen() {
           addItem({
             itemId: item.id,
             name: item.name,
-            price: item.price,
+            price: item.discountedPrice ?? item.price,
             validityDays: item.validityDays,
             typeName: item.typeName,
             type_id: item.type_id,
@@ -413,7 +523,7 @@ export default function PurchaseTicketsScreen() {
         setAdding((p) => ({ ...p, [item.id]: false }));
       }
     },
-    [adding, addItem, cart],
+    [adding, addItem, cart]
   );
 
   const removeFromCart = useCallback(
@@ -433,7 +543,7 @@ export default function PurchaseTicketsScreen() {
         addItem(cartItem);
       }
     },
-    [cart, removeItem, addItem],
+    [cart, removeItem, addItem]
   );
 
   return (
@@ -496,7 +606,6 @@ export default function PurchaseTicketsScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Tickets */}
           <View style={{ paddingHorizontal: 20 }}>
             {items.length === 0 ? (
               <View style={{ alignItems: "center", marginTop: 60 }}>

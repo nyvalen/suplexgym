@@ -14,11 +14,13 @@ import { router } from "expo-router";
 import { authFetch, ENDPOINTS, saveTokens } from "./utils/auth";
 import { Dumbbell, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "./theme/ThemeContext";
+import { useLanguage } from "./i18n/LanguageContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { OfflineTicket, saveTicketsOffline } from "./utils/offline-storage";
 
 export default function SignInScreen() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +31,7 @@ export default function SignInScreen() {
   const handleLogin = async () => {
     setError("");
     if (!email.trim() || !password) {
-      setError("Töltsd ki az összes mezőt.");
+      setError(t("signIn.fillAll"));
       return;
     }
     setLoading(true);
@@ -46,10 +48,10 @@ export default function SignInScreen() {
         persistTicketsLocally();
         router.replace("/(tabs)/main");
       } else {
-        setError(data.message || "Hibás email vagy jelszó.");
+        setError(data.message || t("signIn.invalidCredentials"));
       }
     } catch {
-      setError("Hálózati hiba. Kérjük próbáld újra.");
+      setError(t("signIn.networkError"));
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,7 @@ export default function SignInScreen() {
           <Text
             className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#646464]"}`}
           >
-            ← Vissza
+            {t("signIn.back")}
           </Text>
         </Pressable>
 
@@ -143,12 +145,12 @@ export default function SignInScreen() {
           <Text
             className={`text-[28px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            Bejelentkezés
+            {t("signIn.title")}
           </Text>
           <Text
             className={`text-sm ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
           >
-            Üdvözlünk a Suplex Gymben
+            {t("signIn.subtitle")}
           </Text>
         </View>
 
@@ -159,7 +161,7 @@ export default function SignInScreen() {
             <Text
               className={`text-[11px] font-semibold tracking-[1px] uppercase ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              Email
+              {t("signIn.email")}
             </Text>
             <TextInput
               className={`rounded-2xl px-[18px] py-3.5 text-[15px] border ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
@@ -171,7 +173,7 @@ export default function SignInScreen() {
                   ? "rgba(255,255,255,0.12)"
                   : "rgba(0,0,0,0.1)",
               }}
-              placeholder="te@pelda.hu"
+              placeholder={t("signIn.emailPlaceholder")}
               placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -185,7 +187,7 @@ export default function SignInScreen() {
             <Text
               className={`text-[11px] font-semibold tracking-[1px] uppercase ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
             >
-              Jelszó
+              {t("signIn.password")}
             </Text>
             <View className="relative">
               <TextInput
@@ -250,7 +252,7 @@ export default function SignInScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text className="text-white text-base font-bold">
-                Bejelentkezés
+                {t("signIn.submit")}
               </Text>
             )}
           </Pressable>
@@ -268,7 +270,7 @@ export default function SignInScreen() {
             <Text
               className={`text-xs ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
             >
-              vagy
+              {t("signIn.or")}
             </Text>
             <View
               className="flex-1 h-px"
@@ -287,8 +289,8 @@ export default function SignInScreen() {
             <Text
               className={`text-sm ${isDark ? "text-[#71717a]" : "text-[#a1a1aa]"}`}
             >
-              Nincs fiókod?{" "}
-              <Text className="text-[#8b5cf6] font-bold">Regisztrálj</Text>
+              {t("signIn.noAccount")}{" "}
+              <Text className="text-[#8b5cf6] font-bold">{t("signIn.register")}</Text>
             </Text>
           </Pressable>
         </View>

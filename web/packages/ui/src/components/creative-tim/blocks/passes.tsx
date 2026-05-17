@@ -1,110 +1,100 @@
 "use client"
 
 import * as React from "react"
-import {
-  Check,
-  Smartphone,
-  GraduationCap,
-  Users,
-  Tag,
-  Percent,
-} from "lucide-react"
+import { Check, Smartphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 const PASS_KEYS = ["napi", "havi", "szezonális", "éves"] as const
 const FEATURED: (typeof PASS_KEYS)[number] = "szezonális"
 
-type TargetGroup = "all" | "student" | "senior" | "member"
+// ─── Discount types ───────────────────────────────────────────────────────────
 
-type Deal = {
+interface ApiItem {
   id: number
-  title: string
-  description: string
-  targetGroup: TargetGroup
+  name: string | null
+  price: number
+  type_id: number
+}
+
+interface Discount {
+  id: string
+  itemId: number
+  itemName: string
+  originalPrice: number
   discountPercent: number
-  isActive: boolean
-  code?: string
-  validUntil?: string
+  discountedPrice: number
+  validUntil: string | null
+  createdAt: string
 }
 
-// Demo deals shown even without backend
-const DEMO_DEALS: Deal[] = [
-  {
-    id: 1,
-    title: "Student Discount",
-    description: "20% off any pass or ticket with a valid student ID.",
-    targetGroup: "student",
-    discountPercent: 20,
-    isActive: true,
-    code: "STUDENT20",
-  },
-  {
-    id: 2,
-    title: "Senior Discount",
-    description: "15% off any pass for members aged 65 and above.",
-    targetGroup: "senior",
-    discountPercent: 15,
-    isActive: true,
-    code: "SENIOR15",
-  },
-]
+const DISCOUNT_STORAGE_KEY = "suplex_discounts_v1"
 
-const TARGET_LABELS: Record<TargetGroup, string> = {
-  all: "Everyone",
-  student: "Students",
-  senior: "Seniors 65+",
-  member: "Members",
+function loadActiveDiscounts(): Discount[] {
+  try {
+    const raw = localStorage.getItem(DISCOUNT_STORAGE_KEY)
+    if (!raw) return []
+    const all = JSON.parse(raw) as Discount[]
+    return all.filter(
+      (d) => !d.validUntil || new Date(d.validUntil) > new Date()
+    )
+  } catch {
+    return []
+  }
 }
 
-const TARGET_ICONS: Record<TargetGroup, React.ReactNode> = {
-  all: <Users className="size-3.5" />,
-  student: <GraduationCap className="size-3.5" />,
-  senior: <Users className="size-3.5" />,
-  member: <Tag className="size-3.5" />,
+// Map type_id → pass key index (1=daily, 2=monthly, 4=seasonal, 3=annual)
+const TYPE_ID_TO_PASS_INDEX: Record<number, number> = {
+  1: 0, // daily
+  2: 1, // monthly
+  4: 2, // seasonal
+  3: 3, // annual
 }
 
-const TARGET_COLORS: Record<
-  TargetGroup,
-  { bg: string; text: string; border: string }
-> = {
-  all: {
-    bg: "rgba(124,58,237,0.1)",
-    text: "#a78bfa",
-    border: "rgba(124,58,237,0.25)",
-  },
-  student: {
-    bg: "rgba(59,130,246,0.1)",
-    text: "#60a5fa",
-    border: "rgba(59,130,246,0.25)",
-  },
-  senior: {
-    bg: "rgba(245,158,11,0.1)",
-    text: "#fbbf24",
-    border: "rgba(245,158,11,0.25)",
-  },
-  member: {
-    bg: "rgba(16,185,129,0.1)",
-    text: "#34d399",
-    border: "rgba(16,185,129,0.25)",
-  },
-}
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Passes() {
   const { t } = useTranslation()
-  const [deals, setDeals] = React.useState<Deal[]>(DEMO_DEALS)
+  const [discountMap, setDiscountMap] = React.useState<Record<number, Discount>>({})
+  const [apiItems, setApiItems] = React.useState<ApiItem[]>([])
 
+  // Load discounts from localStorage (written by admin panel)
   React.useEffect(() => {
-    // Try to fetch real deals from backend
-    const base = `http://${window.location.hostname}:5001`
-    fetch(`${base}/api/deals`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data) && data.length > 0) setDeals(data)
-      })
-      .catch(() => {}) // silently keep demo deals
+    const discounts = loadActiveDiscounts()
+    const map: Record<number, Discount> = {}
+    discounts.forEach((d) => { map[d.itemId] = d })
+    setDiscountMap(map)
+
+    // Re-check every 30 seconds so expired discounts disappear
+    const interval = setInterval(() => {
+      const fresh = loadActiveDiscounts()
+      const freshMap: Record<number, Discount> = {}
+      fresh.forEach((d) => { freshMap[d.itemId] = d })
+      setDiscountMap(freshMap)
+    }, 30_000)
+    return () => clearInterval(interval)
   }, [])
 
-  const activeDeals = deals.filter((d) => d.isActive)
+  // Fetch real items to map IDs to pass cards
+  React.useEffect(() => {
+    const base = `http://${window.location.hostname}:5001`
+    fetch(`${base}/api/items`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: ApiItem[]) => setApiItems(data))
+      .catch(() => {})
+  }, [])
+
+  // Build a map: passIndex → { itemId, discount? }
+  const passDiscountInfo = React.useMemo(() => {
+    const info: Record<number, { itemId: number; discount?: Discount }> = {}
+    apiItems.forEach((item) => {
+      const idx = TYPE_ID_TO_PASS_INDEX[item.type_id]
+      if (idx !== undefined) {
+        const discount = discountMap[item.id]
+        info[idx] = { itemId: item.id, discount }
+      }
+    })
+    return info
+  }, [apiItems, discountMap])
 
   const passes = [
     {
@@ -118,6 +108,7 @@ export default function Passes() {
       }) as string[],
       accentColor: "#f59e0b",
       label: "1 day",
+      rawPrice: 2900,
     },
     {
       key: "havi",
@@ -130,6 +121,7 @@ export default function Passes() {
       }) as string[],
       accentColor: "#10b981",
       label: "30 days",
+      rawPrice: 12900,
     },
     {
       key: "szezonális",
@@ -142,6 +134,7 @@ export default function Passes() {
       }) as string[],
       accentColor: "#7c3aed",
       label: "90 days",
+      rawPrice: 32900,
     },
     {
       key: "éves",
@@ -154,6 +147,7 @@ export default function Passes() {
       }) as string[],
       accentColor: "#6366f1",
       label: "365 days",
+      rawPrice: 99900,
     },
   ]
 
@@ -173,13 +167,18 @@ export default function Passes() {
 
       {/* Passes grid */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {passes.map((pass) => {
+        {passes.map((pass, idx) => {
           const isFeatured = pass.key === FEATURED
+          const discountInfo = passDiscountInfo[idx]
+          const discount = discountInfo?.discount
+          const hasDiscount = !!discount
+
           return (
             <div
               key={pass.key}
               className="relative flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-black/3 p-6 transition-colors hover:bg-black/6 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.05]"
             >
+              {/* Top accent bar */}
               <div
                 className="absolute top-0 right-0 left-0 h-[2.5px]"
                 style={{
@@ -189,12 +188,14 @@ export default function Passes() {
                 }}
               />
 
+              {/* Featured badge */}
               {isFeatured && (
                 <span className="mb-3 inline-block w-fit rounded-full border border-black/5 bg-black/4 px-2.5 py-0.5 font-mono text-[10px] tracking-widest text-black/30 uppercase dark:border-white/20 dark:bg-white/10 dark:text-white/70">
                   {t("passes.popular")}
                 </span>
               )}
 
+              {/* Duration badge row */}
               <div className="mb-3 flex items-center gap-2">
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
@@ -206,20 +207,60 @@ export default function Passes() {
                 >
                   {pass.label}
                 </span>
+
+                {/* SALE badge */}
+                {hasDiscount && (
+                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                    -{discount.discountPercent}%
+                  </span>
+                )}
               </div>
 
+              {/* Pass name + price */}
               <div className="mb-4">
                 <p className="mb-0.5 text-xs font-medium tracking-wide text-black/50 uppercase dark:text-white/50">
                   {pass.name}
                 </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-medium text-black/80 dark:text-white">
-                    {pass.price}
-                  </span>
-                  <span className="text-xs text-black/60 dark:text-white/40">
-                    Ft{pass.unit}
-                  </span>
-                </div>
+
+                {hasDiscount ? (
+                  /* Discounted price layout */
+                  <div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span
+                        className="text-3xl font-medium"
+                        style={{ color: pass.accentColor }}
+                      >
+                        {discount.discountedPrice.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-black/60 dark:text-white/40">
+                        Ft{pass.unit}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1.5">
+                      <span className="text-sm line-through text-black/30 dark:text-white/30">
+                        {discount.originalPrice.toLocaleString()} Ft
+                      </span>
+                      <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                        Save {(discount.originalPrice - discount.discountedPrice).toLocaleString()} Ft
+                      </span>
+                    </div>
+                    {discount.validUntil && (
+                      <p className="mt-1 text-[10px] text-red-500 dark:text-red-400">
+                        Sale ends {new Date(discount.validUntil).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  /* Normal price */
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-medium text-black/80 dark:text-white">
+                      {pass.price}
+                    </span>
+                    <span className="text-xs text-black/60 dark:text-white/40">
+                      Ft{pass.unit}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <p className="mb-5 text-sm leading-relaxed text-black/50 dark:text-white/50">

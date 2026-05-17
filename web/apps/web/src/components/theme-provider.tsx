@@ -11,11 +11,13 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  resolvedTheme: "dark" | "light"
 }
 
 const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
+  resolvedTheme: "dark",
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
@@ -29,27 +31,35 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
+  const [systemIsDark, setSystemIsDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches
+  )
 
+  // Listen for OS-level theme changes
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)")
+    const handler = (e: MediaQueryListEvent) => setSystemIsDark(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
+  // Apply the correct class to <html> whenever theme or systemIsDark changes
   useEffect(() => {
     const root = window.document.documentElement
-
     root.classList.remove("light", "dark")
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
+    const resolved: "dark" | "light" =
+      theme === "system" ? (systemIsDark ? "dark" : "light") : theme
 
-      root.classList.add(systemTheme)
-      return
-    }
+    root.classList.add(resolved)
+  }, [theme, systemIsDark])
 
-    root.classList.add(theme)
-  }, [theme])
+  const resolvedTheme: "dark" | "light" =
+    theme === "system" ? (systemIsDark ? "dark" : "light") : theme
 
-  const value = {
+  const value: ThemeProviderState = {
     theme,
+    resolvedTheme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme)
       setTheme(theme)
