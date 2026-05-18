@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\suplexgym\\Server\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\migrations\\20260518230518_adddiscounts.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\migrations\\20260518230518_adddiscounts.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|c:\\suplexgym\\server\\suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8EB594E1-0F70-4B0F-AE45-28300691C28C}|suplex_projektmunka\\suplex_projektmunka.csproj|solutionrelative:suplex_projektmunka\\models\\context\\gymcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -38,25 +42,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "GymContext.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Models\\Context\\GymContext.cs",
               "RelativeToolTip": "suplex_projektmunka\\Models\\Context\\GymContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIYAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-04T12:16:15.217Z",
-              "IsPinned": true,
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20260518230518_AddDiscounts.cs",
+              "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Migrations\\20260518230518_AddDiscounts.cs",
+              "RelativeDocumentMoniker": "suplex_projektmunka\\Migrations\\20260518230518_AddDiscounts.cs",
+              "ToolTip": "C:\\suplexgym\\Server\\suplex_projektmunka\\Migrations\\20260518230518_AddDiscounts.cs",
+              "RelativeToolTip": "suplex_projektmunka\\Migrations\\20260518230518_AddDiscounts.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAADwvx0AAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-18T23:05:18.964Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "20260421145527_SeedDemoData.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Migrations\\20260421145527_SeedDemoData.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Migrations\\20260421145527_SeedDemoData.cs",
@@ -64,12 +80,11 @@
               "RelativeToolTip": "suplex_projektmunka\\Migrations\\20260421145527_SeedDemoData.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-21T14:55:27.332Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-21T14:55:27.332Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "AdminController.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\AdminController.cs",
@@ -81,7 +96,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Controllers\\UserController.cs",
@@ -93,7 +108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "JwtService.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Services\\JwtService.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Services\\JwtService.cs",
@@ -105,7 +120,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\appsettings.json",
               "RelativeDocumentMoniker": "suplex_projektmunka\\appsettings.json",
@@ -113,12 +128,11 @@
               "RelativeToolTip": "suplex_projektmunka\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-03-06T20:02:10.433Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-06T20:02:10.433Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\suplexgym\\Server\\suplex_projektmunka\\Program.cs",
               "RelativeDocumentMoniker": "suplex_projektmunka\\Program.cs",
@@ -126,8 +140,7 @@
               "RelativeToolTip": "suplex_projektmunka\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T20:00:39.689Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-06T20:00:39.689Z"
             },
             {
               "$type": "Bookmark",

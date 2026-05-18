@@ -16,7 +16,6 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useCartStore } from "../store";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CARD_HEIGHT = 220;
 
@@ -43,82 +42,60 @@ interface TicketItem {
   typeName: string;
   type_id: number;
   imagePath?: string | null;
-  // discount fields applied client-side
   discountedPrice?: number;
   discountPercent?: number;
+  validUntil?: string | null;
 }
 
-interface Discount {
-  id: string;
+interface ApiDiscount {
+  id: number;
   itemId: number;
-  itemName: string;
+  itemName: string | null;
   originalPrice: number;
   discountPercent: number;
   discountedPrice: number;
   validUntil: string | null;
   createdAt: string;
+  isExpired: boolean;
 }
 
-const DISCOUNT_STORAGE_KEY = "suplex_discounts_v1";
-
-async function loadActiveDiscounts(): Promise<Discount[]> {
-  try {
-    // On mobile we can't access the web's localStorage directly.
-    // We store a synced copy in AsyncStorage whenever the user visits the purchase screen.
-    // The admin panel writes to web localStorage; the mobile app reads its own AsyncStorage copy.
-    const raw = await AsyncStorage.getItem(DISCOUNT_STORAGE_KEY);
-    if (!raw) return [];
-    const all = JSON.parse(raw) as Discount[];
-    return all.filter(
-      (d) => !d.validUntil || new Date(d.validUntil) > new Date()
-    );
-  } catch {
-    return [];
-  }
-}
-
-// Try to fetch discounts from the API if one exists, fallback to local storage
-async function fetchDiscounts(): Promise<Discount[]> {
-  try {
-    const base = ENDPOINTS.items.replace("/api/items", "");
-    const res = await fetch(`${base}/api/discounts`);
-    if (res.ok) {
-      const data = await res.json();
-      // Save to AsyncStorage for offline use
-      await AsyncStorage.setItem(DISCOUNT_STORAGE_KEY, JSON.stringify(data));
-      return data as Discount[];
-    }
-  } catch {
-    // silently fall back
-  }
-  return loadActiveDiscounts();
-}
-
-function applyDiscounts(items: TicketItem[], discounts: Discount[]): TicketItem[] {
+function applyDiscounts(items: TicketItem[], discounts: ApiDiscount[]): TicketItem[] {
   return items.map((item) => {
-    const discount = discounts.find((d) => d.itemId === item.id);
+    const discount = discounts.find((d) => d.itemId === item.id && !d.isExpired);
     if (!discount) return item;
     return {
       ...item,
       discountedPrice: discount.discountedPrice,
       discountPercent: discount.discountPercent,
+      validUntil: discount.validUntil,
     };
   });
 }
 
 function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
-  const cfg = TYPE_CONFIG[item.type_id] ?? {
-    accent: "#7c3aed",
-    label: "Pass",
-  };
+  const cfg = TYPE_CONFIG[item.type_id] ?? { accent: "#7c3aed", label: "Pass" };
   const imageUri =
     resolveImageUrl(item.imagePath) ||
     FALLBACK_IMAGES[item.type_id] ||
     FALLBACK_IMAGES[1];
   const scale = useRef(new Animated.Value(1)).current;
 
-  const hasDiscount = item.discountedPrice !== undefined && item.discountedPrice < item.price;
+  const hasDiscount =
+    item.discountedPrice !== undefined && item.discountedPrice < item.price;
   const displayPrice = hasDiscount ? item.discountedPrice : item.price;
+
+  // Time left for sale
+  const saleTimeLeft = React.useMemo(() => {
+    if (!item.validUntil) return null;
+    const diff = new Date(item.validUntil).getTime() - Date.now();
+    if (diff <= 0) return null;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (days > 0) return `${days}d ${hours}h left`;
+    if (hours > 0) return `${hours}h left`;
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${mins}m left`;
+  }, [item.validUntil]);
 
   return (
     <Animated.View
@@ -158,7 +135,7 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
         }}
       />
 
-      {/* Type + duration badges */}
+      {/* Top badges */}
       <View
         style={{
           position: "absolute",
@@ -166,8 +143,10 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
           left: 14,
           flexDirection: "row",
           gap: 8,
+          flexWrap: "wrap",
         }}
       >
+        {/* Type badge */}
         <View
           style={{
             backgroundColor: cfg.accent + "dd",
@@ -188,6 +167,8 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
             {cfg.label}
           </Text>
         </View>
+
+        {/* Duration badge */}
         <View
           style={{
             backgroundColor: "rgba(0,0,0,0.5)",
@@ -233,6 +214,25 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
         )}
       </View>
 
+      {/* Sale expiry indicator */}
+      {hasDiscount && saleTimeLeft && (
+        <View
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 14,
+            backgroundColor: "rgba(239,68,68,0.85)",
+            borderRadius: 12,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 9, fontWeight: "700" }}>
+            ⏰ {saleTimeLeft}
+          </Text>
+        </View>
+      )}
+
       {/* Bottom panel */}
       <View
         style={{
@@ -240,7 +240,9 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: isDark ? "rgba(9,9,11,0.82)" : "rgba(15,15,18,0.80)",
+          backgroundColor: isDark
+            ? "rgba(9,9,11,0.82)"
+            : "rgba(15,15,18,0.80)",
           borderTopWidth: 1,
           borderTopColor: "rgba(255,255,255,0.09)",
           paddingHorizontal: 18,
@@ -285,7 +287,11 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
             }}
           >
             <Text
-              style={{ color: hasDiscount ? "#ef4444" : cfg.accent, fontSize: 20, fontWeight: "900" }}
+              style={{
+                color: hasDiscount ? "#ef4444" : cfg.accent,
+                fontSize: 20,
+                fontWeight: "900",
+              }}
             >
               {displayPrice.toLocaleString()}
             </Text>
@@ -304,6 +310,20 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
               </Text>
             )}
           </View>
+
+          {/* Save amount label */}
+          {hasDiscount && (
+            <Text
+              style={{
+                color: "#4ade80",
+                fontSize: 10,
+                fontWeight: "700",
+                marginTop: 2,
+              }}
+            >
+              Save {(item.price - displayPrice).toLocaleString()} Ft
+            </Text>
+          )}
         </View>
 
         {inCart ? (
@@ -366,7 +386,9 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
             {adding ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
+              <Text
+                style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+              >
                 {t("purchase.addToCart")}
               </Text>
             )}
@@ -379,7 +401,10 @@ function TicketCard({ item, inCart, onAdd, onRemove, adding, isDark, t }: any) {
 
 function CartBar({ cart, t }: any) {
   const translateY = useRef(new Animated.Value(200)).current;
-  const total = cart.reduce((s: number, i: any) => s + (i.discountedPrice ?? i.price), 0);
+  const total = cart.reduce(
+    (s: number, i: any) => s + (i.discountedPrice ?? i.price),
+    0
+  );
   useEffect(() => {
     Animated.spring(translateY, {
       toValue: cart.length > 0 ? 0 : 200,
@@ -388,6 +413,7 @@ function CartBar({ cart, t }: any) {
       friction: 12,
     }).start();
   }, [cart.length]);
+
   return (
     <Animated.View
       style={{
@@ -459,7 +485,9 @@ function CartBar({ cart, t }: any) {
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: "#7c3aed", fontSize: 11, fontWeight: "900" }}>
+            <Text
+              style={{ color: "#7c3aed", fontSize: 11, fontWeight: "900" }}
+            >
               {cart.length}
             </Text>
           </View>
@@ -485,10 +513,14 @@ export default function PurchaseTicketsScreen() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [rawItems, discounts] = await Promise.all([
+        // Fetch items and discounts in parallel
+        const [rawItems, discountRes] = await Promise.all([
           authFetch(ENDPOINTS.items).then((r) => (r.ok ? r.json() : [])),
-          fetchDiscounts(),
+          fetch(ENDPOINTS.discounts).then((r) => (r.ok ? r.json() : [])),
         ]);
+        const discounts: ApiDiscount[] = Array.isArray(discountRes)
+          ? discountRes
+          : [];
         setItems(applyDiscounts(rawItems as TicketItem[], discounts));
       } catch {
         setItems([]);
@@ -519,6 +551,7 @@ export default function PurchaseTicketsScreen() {
             quantity: 1,
           });
       } catch {
+        //
       } finally {
         setAdding((p) => ({ ...p, [item.id]: false }));
       }
@@ -561,13 +594,21 @@ export default function PurchaseTicketsScreen() {
       />
       <LinearGradient
         colors={["rgba(124,58,237,0.28)", "rgba(124,58,237,0)"]}
-        style={{ position: "absolute", left: 0, right: 0, top: 0, height: 220 }}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 220,
+        }}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
       />
 
       {/* Header */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 4 }}>
+      <View
+        style={{ paddingHorizontal: 20, paddingTop: 64, paddingBottom: 4 }}
+      >
         <Text
           style={{
             fontSize: 30,
@@ -601,8 +642,8 @@ export default function PurchaseTicketsScreen() {
                   ? 200
                   : 90
                 : Platform.OS === "android"
-                  ? 160
-                  : 10,
+                ? 160
+                : 10,
           }}
           showsVerticalScrollIndicator={false}
         >

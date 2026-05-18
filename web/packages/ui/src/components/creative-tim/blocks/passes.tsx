@@ -3,11 +3,12 @@
 import * as React from "react"
 import { Check, Smartphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 
 const PASS_KEYS = ["napi", "havi", "szezonális", "éves"] as const
 const FEATURED: (typeof PASS_KEYS)[number] = "szezonális"
 
-// ─── Discount types ───────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ApiItem {
   id: number
@@ -16,81 +17,83 @@ interface ApiItem {
   type_id: number
 }
 
-interface Discount {
-  id: string
+interface ApiDiscount {
+  id: number
   itemId: number
-  itemName: string
+  itemName: string | null
   originalPrice: number
   discountPercent: number
   discountedPrice: number
   validUntil: string | null
   createdAt: string
+  isExpired: boolean
 }
 
-const DISCOUNT_STORAGE_KEY = "suplex_discounts_v1"
-
-function loadActiveDiscounts(): Discount[] {
-  try {
-    const raw = localStorage.getItem(DISCOUNT_STORAGE_KEY)
-    if (!raw) return []
-    const all = JSON.parse(raw) as Discount[]
-    return all.filter(
-      (d) => !d.validUntil || new Date(d.validUntil) > new Date()
-    )
-  } catch {
-    return []
-  }
-}
-
-// Map type_id → pass key index (1=daily, 2=monthly, 4=seasonal, 3=annual)
+// Map type_id → pass card index  (1=daily, 2=monthly, 4=seasonal, 3=annual)
 const TYPE_ID_TO_PASS_INDEX: Record<number, number> = {
-  1: 0, // daily
-  2: 1, // monthly
-  4: 2, // seasonal
-  3: 3, // annual
+  1: 0,
+  2: 1,
+  4: 2,
+  3: 3,
+}
+
+function getTimeLeft(expiryDate: Date): string {
+  const diff = expiryDate.getTime() - Date.now()
+  if (diff <= 0) return ""
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  if (days > 0) return `${days}d ${hours}h left`
+  if (hours > 0) return `${hours}h left`
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  return `${mins}m left`
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Passes() {
   const { t } = useTranslation()
-  const [discountMap, setDiscountMap] = React.useState<Record<number, Discount>>({})
+  const [discountMap, setDiscountMap] = React.useState<
+    Record<number, ApiDiscount>
+  >({})
   const [apiItems, setApiItems] = React.useState<ApiItem[]>([])
 
-  // Load discounts from localStorage (written by admin panel)
-  React.useEffect(() => {
-    const discounts = loadActiveDiscounts()
-    const map: Record<number, Discount> = {}
-    discounts.forEach((d) => { map[d.itemId] = d })
-    setDiscountMap(map)
-
-    // Re-check every 30 seconds so expired discounts disappear
-    const interval = setInterval(() => {
-      const fresh = loadActiveDiscounts()
-      const freshMap: Record<number, Discount> = {}
-      fresh.forEach((d) => { freshMap[d.itemId] = d })
-      setDiscountMap(freshMap)
-    }, 30_000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Fetch real items to map IDs to pass cards
-  React.useEffect(() => {
-    const base = `http://${window.location.hostname}:5001`
-    fetch(`${base}/api/items`)
+  // Fetch active discounts from the real API endpoint
+  const loadDiscounts = React.useCallback(() => {
+    fetch(API_ENDPOINTS.items.replace("/api/items", "/api/discounts"))
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: ApiItem[]) => setApiItems(data))
+      .then((discounts: ApiDiscount[]) => {
+        const map: Record<number, ApiDiscount> = {}
+        discounts
+          .filter((d) => !d.isExpired)
+          .forEach((d) => {
+            map[d.itemId] = d
+          })
+        setDiscountMap(map)
+      })
       .catch(() => {})
   }, [])
 
-  // Build a map: passIndex → { itemId, discount? }
+  React.useEffect(() => {
+    // Fetch items
+    fetch(API_ENDPOINTS.items)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: ApiItem[]) => setApiItems(data))
+      .catch(() => {})
+
+    loadDiscounts()
+
+    // Re-poll every 60 s so expiring discounts vanish automatically
+    const interval = setInterval(loadDiscounts, 60_000)
+    return () => clearInterval(interval)
+  }, [loadDiscounts])
+
+  // Build passIndex → { itemId, discount? }
   const passDiscountInfo = React.useMemo(() => {
-    const info: Record<number, { itemId: number; discount?: Discount }> = {}
+    const info: Record<number, { itemId: number; discount?: ApiDiscount }> = {}
     apiItems.forEach((item) => {
       const idx = TYPE_ID_TO_PASS_INDEX[item.type_id]
       if (idx !== undefined) {
-        const discount = discountMap[item.id]
-        info[idx] = { itemId: item.id, discount }
+        info[idx] = { itemId: item.id, discount: discountMap[item.id] }
       }
     })
     return info
@@ -165,13 +168,17 @@ export default function Passes() {
         </span>
       </div>
 
-      {/* Passes grid */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {passes.map((pass, idx) => {
           const isFeatured = pass.key === FEATURED
           const discountInfo = passDiscountInfo[idx]
           const discount = discountInfo?.discount
           const hasDiscount = !!discount
+
+          const timeLeft =
+            hasDiscount && discount.validUntil
+              ? getTimeLeft(new Date(discount.validUntil))
+              : null
 
           return (
             <div
@@ -195,8 +202,8 @@ export default function Passes() {
                 </span>
               )}
 
-              {/* Duration badge row */}
-              <div className="mb-3 flex items-center gap-2">
+              {/* Duration + SALE badges */}
+              <div className="mb-3 flex items-center gap-2 flex-wrap">
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
                   style={{
@@ -208,7 +215,6 @@ export default function Passes() {
                   {pass.label}
                 </span>
 
-                {/* SALE badge */}
                 {hasDiscount && (
                   <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                     -{discount.discountPercent}%
@@ -216,15 +222,15 @@ export default function Passes() {
                 )}
               </div>
 
-              {/* Pass name + price */}
+              {/* Name + price */}
               <div className="mb-4">
                 <p className="mb-0.5 text-xs font-medium tracking-wide text-black/50 uppercase dark:text-white/50">
                   {pass.name}
                 </p>
 
                 {hasDiscount ? (
-                  /* Discounted price layout */
                   <div>
+                    {/* Discounted price (prominent) */}
                     <div className="flex items-baseline gap-1.5">
                       <span
                         className="text-3xl font-medium"
@@ -236,17 +242,33 @@ export default function Passes() {
                         Ft{pass.unit}
                       </span>
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1.5">
+                    {/* Original price struck through + saving */}
+                    <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
                       <span className="text-sm line-through text-black/30 dark:text-white/30">
                         {discount.originalPrice.toLocaleString()} Ft
                       </span>
                       <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                        Save {(discount.originalPrice - discount.discountedPrice).toLocaleString()} Ft
+                        Save{" "}
+                        {(
+                          discount.originalPrice - discount.discountedPrice
+                        ).toLocaleString()}{" "}
+                        Ft
                       </span>
                     </div>
-                    {discount.validUntil && (
-                      <p className="mt-1 text-[10px] text-red-500 dark:text-red-400">
-                        Sale ends {new Date(discount.validUntil).toLocaleDateString()}
+                    {/* Expiry countdown */}
+                    {timeLeft && (
+                      <p className="mt-1 text-[10px] font-semibold text-red-500 dark:text-red-400">
+                        ⏰ Sale ends in {timeLeft}
+                      </p>
+                    )}
+                    {discount.validUntil && !timeLeft && (
+                      <p className="mt-1 text-[10px] text-black/30 dark:text-white/30">
+                        Sale ended
+                      </p>
+                    )}
+                    {!discount.validUntil && (
+                      <p className="mt-1 text-[10px] text-black/30 dark:text-white/30">
+                        Indefinite offer
                       </p>
                     )}
                   </div>
