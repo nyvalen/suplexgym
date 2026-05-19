@@ -7,9 +7,22 @@ import { Card } from "../../card"
 import { Input } from "../../input"
 import { Label } from "../../label"
 import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../../select"
-import { Plus, X, Trash2, Tag, Clock, Percent, TrendingDown } from "lucide-react"
+import {
+  Plus,
+  X,
+  Trash2,
+  Tag,
+  Clock,
+  Percent,
+  TrendingDown,
+} from "lucide-react"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,21 +93,27 @@ function DiscountCard({
       }`}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-            isActive
-              ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-              : "bg-muted text-muted-foreground"
-          }`}>
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <span
+            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+              isActive
+                ? "border border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
             <Percent className="size-3" />
             {discount.discountPercent}% {t("cruds.discounts.off")}
           </span>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-            isActive
-              ? "bg-green-500/10 text-green-600 dark:text-green-400"
-              : "bg-muted text-muted-foreground"
-          }`}>
-            {isActive ? t("cruds.discounts.active") : t("cruds.discounts.expired")}
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${
+              isActive
+                ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {isActive
+              ? t("cruds.discounts.active")
+              : t("cruds.discounts.expired")}
           </span>
         </div>
 
@@ -102,13 +121,18 @@ function DiscountCard({
 
         <div className="mt-1 flex items-baseline gap-2">
           <span className="text-base font-bold text-foreground">
-            {discount.discountedPrice.toLocaleString()} {t("cruds.discounts.huf")}
+            {discount.discountedPrice.toLocaleString()}{" "}
+            {t("cruds.discounts.huf")}
           </span>
-          <span className="text-sm line-through text-muted-foreground">
+          <span className="text-sm text-muted-foreground line-through">
             {discount.originalPrice.toLocaleString()} {t("cruds.discounts.huf")}
           </span>
           <span className="text-xs text-green-600 dark:text-green-400">
-            -{(discount.originalPrice - discount.discountedPrice).toLocaleString()} Ft
+            -
+            {(
+              discount.originalPrice - discount.discountedPrice
+            ).toLocaleString()}{" "}
+            Ft
           </span>
         </div>
 
@@ -154,7 +178,11 @@ export default function CrudsManageDiscounts() {
 
   const loadDiscounts = async () => {
     try {
-      const res = await fetchWithAuth(`${API_ENDPOINTS.adminItems.replace("/items", "/discounts")}/all`)
+      const discountsBase = API_ENDPOINTS.adminItems.replace(
+        "/admin/items",
+        "/discounts"
+      )
+      const res = await fetchWithAuth(`${discountsBase}/all`)
       if (res.ok) {
         const data: Discount[] = await res.json()
         setDiscounts(data)
@@ -167,27 +195,38 @@ export default function CrudsManageDiscounts() {
   useEffect(() => {
     // Load items from public endpoint
     fetch(API_ENDPOINTS.items)
-      .then(r => r.ok ? r.json() : [])
+      .then((r) => (r.ok ? r.json() : []))
       .then((data: Item[]) => setItems(data))
       .catch(() => {})
 
     loadDiscounts()
   }, [])
 
-  const selectedItem = items.find(i => String(i.id) === selectedItemId)
+  const selectedItem = items.find((i) => String(i.id) === selectedItemId)
   const pctNum = Number(discountPct)
-  const previewDiscounted = selectedItem ? calcDiscounted(selectedItem.price, pctNum) : 0
-  const previewSaving = selectedItem ? selectedItem.price - previewDiscounted : 0
+  const previewDiscounted = selectedItem
+    ? calcDiscounted(selectedItem.price, pctNum)
+    : 0
+  const previewSaving = selectedItem
+    ? selectedItem.price - previewDiscounted
+    : 0
 
   const handleCreate = async () => {
-    if (!selectedItem) { flash(t("cruds.discounts.selectTicket")); return }
+    if (!selectedItem) {
+      flash(t("cruds.discounts.selectTicket"))
+      return
+    }
     if (!discountPct || isNaN(pctNum) || pctNum < 1 || pctNum > 99) {
-      flash(t("cruds.discounts.discountPercent") + ": 1–99%"); return
+      flash(t("cruds.discounts.discountPercent") + ": 1–99%")
+      return
     }
 
     setLoading(true)
     try {
-      const discountsBase = API_ENDPOINTS.adminItems.replace("/admin/items", "/discounts")
+      const discountsBase = API_ENDPOINTS.adminItems.replace(
+        "/admin/items",
+        "/discounts"
+      )
       const res = await fetchWithAuth(discountsBase, {
         method: "POST",
         body: JSON.stringify({
@@ -212,38 +251,57 @@ export default function CrudsManageDiscounts() {
 
   const handleDelete = async (id: number) => {
     if (!confirm(t("cruds.discounts.confirmDelete"))) return
+    // Optimistically remove from UI
+    setDiscounts((prev) => prev.filter((d) => d.id !== id))
     try {
-      const discountsBase = API_ENDPOINTS.adminItems.replace("/admin/items", "/discounts")
-      const res = await fetchWithAuth(`${discountsBase}/${id}`, { method: "DELETE" })
+      const discountsBase = API_ENDPOINTS.adminItems.replace(
+        "/admin/items",
+        "/discounts"
+      )
+      const res = await fetchWithAuth(`${discountsBase}/${id}`, {
+        method: "DELETE",
+      })
       if (!res.ok) throw new Error()
       flash(t("cruds.discounts.deleted"))
       await loadDiscounts()
     } catch {
       flash(t("cruds.discounts.deleteFailed"))
+      // Reload on error to restore state
+      await loadDiscounts()
     }
   }
 
   // Items without an active discount are available for new discounts
   const activeDiscountItemIds = new Set(
-    discounts.filter(d => !d.isExpired).map(d => d.itemId)
+    discounts.filter((d) => !d.isExpired).map((d) => d.itemId)
   )
-  const availableItems = items.filter(i => !activeDiscountItemIds.has(i.id))
+  const availableItems = items.filter((i) => !activeDiscountItemIds.has(i.id))
 
-  const activeDiscounts = discounts.filter(d => !d.isExpired)
-  const expiredDiscounts = discounts.filter(d => d.isExpired)
+  const activeDiscounts = discounts.filter((d) => !d.isExpired)
+  const expiredDiscounts = discounts.filter((d) => d.isExpired)
 
   return (
     <section className="grid min-h-screen place-items-center py-16">
-      <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8">
+      <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8 dark:bg-black/20">
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-2xl font-semibold">{t("cruds.discounts.title")}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{t("cruds.discounts.description")}</p>
+            <h3 className="text-2xl font-semibold">
+              {t("cruds.discounts.title")}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("cruds.discounts.description")}
+            </p>
           </div>
-          <Button onClick={() => setShowCreate(v => !v)} size="sm">
-            {showCreate ? <X className="size-4" /> : <Plus className="size-4" />}
-            {showCreate ? t("cruds.discounts.cancel") : t("cruds.discounts.newDiscount")}
+          <Button onClick={() => setShowCreate((v) => !v)} size="sm">
+            {showCreate ? (
+              <X className="size-4" />
+            ) : (
+              <Plus className="size-4" />
+            )}
+            {showCreate
+              ? t("cruds.discounts.cancel")
+              : t("cruds.discounts.newDiscount")}
           </Button>
         </div>
 
@@ -258,15 +316,22 @@ export default function CrudsManageDiscounts() {
             <div className="space-y-1.5">
               <Label>{t("cruds.discounts.selectTicket")}</Label>
               {availableItems.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("cruds.discounts.noTickets")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("cruds.discounts.noTickets")}
+                </p>
               ) : (
-                <Select value={selectedItemId} onValueChange={setSelectedItemId}>
+                <Select
+                  value={selectedItemId}
+                  onValueChange={setSelectedItemId}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t("cruds.discounts.selectTicketPlaceholder")} />
+                    <SelectValue
+                      placeholder={t("cruds.discounts.selectTicketPlaceholder")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {availableItems.map(item => (
+                      {availableItems.map((item) => (
                         <SelectItem key={item.id} value={String(item.id)}>
                           <span className="flex items-center gap-2">
                             <span>{item.name}</span>
@@ -289,16 +354,25 @@ export default function CrudsManageDiscounts() {
               </Label>
               <div className="flex items-center gap-3">
                 <Input
-                  type="number" min={1} max={99} value={discountPct}
-                  onChange={e => setDiscountPct(e.target.value)}
-                  placeholder="20" className="w-28"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={discountPct}
+                  onChange={(e) => setDiscountPct(e.target.value)}
+                  placeholder="20"
+                  className="w-28"
                 />
                 <input
-                  type="range" min={1} max={99} value={pctNum || 20}
-                  onChange={e => setDiscountPct(e.target.value)}
+                  type="range"
+                  min={1}
+                  max={99}
+                  value={pctNum || 20}
+                  onChange={(e) => setDiscountPct(e.target.value)}
                   className="flex-1 accent-primary"
                 />
-                <span className="w-12 text-right text-sm font-bold text-primary">{discountPct}%</span>
+                <span className="w-12 text-right text-sm font-bold text-primary">
+                  {discountPct}%
+                </span>
               </div>
             </div>
 
@@ -308,24 +382,31 @@ export default function CrudsManageDiscounts() {
                 {t("cruds.discounts.validUntil")}
               </Label>
               <Input
-                type="datetime-local" value={validUntil}
-                onChange={e => setValidUntil(e.target.value)}
+                type="datetime-local"
+                value={validUntil}
+                onChange={(e) => setValidUntil(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
               />
-              <p className="text-xs text-muted-foreground">{t("cruds.discounts.validUntilNote")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("cruds.discounts.validUntilNote")}
+              </p>
             </div>
 
             {selectedItem && !isNaN(pctNum) && pctNum > 0 && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Price Preview</p>
+                <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                  Price Preview
+                </p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">{selectedItem.name}</p>
-                    <div className="flex items-baseline gap-2 mt-1">
+                    <p className="text-sm text-muted-foreground">
+                      {selectedItem.name}
+                    </p>
+                    <div className="mt-1 flex items-baseline gap-2">
                       <span className="text-lg font-bold text-foreground">
                         {previewDiscounted.toLocaleString()} Ft
                       </span>
-                      <span className="text-sm line-through text-muted-foreground">
+                      <span className="text-sm text-muted-foreground line-through">
                         {selectedItem.price.toLocaleString()} Ft
                       </span>
                     </div>
@@ -358,16 +439,18 @@ export default function CrudsManageDiscounts() {
           {activeDiscounts.length === 0 && expiredDiscounts.length === 0 && (
             <div className="rounded-xl border border-dashed border-border p-8 text-center">
               <TrendingDown className="mx-auto mb-3 size-8 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">{t("cruds.discounts.noDiscounts")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("cruds.discounts.noDiscounts")}
+              </p>
             </div>
           )}
 
           {activeDiscounts.length > 0 && (
             <>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 {t("cruds.discounts.active")} ({activeDiscounts.length})
               </p>
-              {activeDiscounts.map(discount => (
+              {activeDiscounts.map((discount) => (
                 <DiscountCard
                   key={discount.id}
                   discount={discount}
@@ -381,10 +464,10 @@ export default function CrudsManageDiscounts() {
 
           {expiredDiscounts.length > 0 && (
             <>
-              <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="mt-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 {t("cruds.discounts.expired")} ({expiredDiscounts.length})
               </p>
-              {expiredDiscounts.map(discount => (
+              {expiredDiscounts.map((discount) => (
                 <DiscountCard
                   key={discount.id}
                   discount={discount}
@@ -397,7 +480,9 @@ export default function CrudsManageDiscounts() {
           )}
         </div>
 
-        {message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}
+        {message && (
+          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
+        )}
       </Card>
     </section>
   )

@@ -21,9 +21,8 @@ export function Admin() {
   return (
     <>
       <Button
-        variant="outline"
-        size="icon"
-        className="m-3 h-9 w-full gap-3 rounded-md transition-colors hover:bg-accent data-[state=open]:bg-accent"
+        variant="ghost"
+        className="h-8 flex-1 gap-3 rounded-md transition-colors hover:bg-accent data-[state=open]:bg-accent"
         onClick={() => {
           {
             console.log("Decoded Token Data:", data)

@@ -151,7 +151,7 @@ export default function CrudsManageEquipment() {
 
   return (
     <section className="grid min-h-screen place-items-center py-16">
-      <Card className="mx-auto w-full max-w-2xl bg-black/5 p-6 lg:p-8 dark:bg-black/20">
+      <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8 dark:bg-black/20">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-semibold">

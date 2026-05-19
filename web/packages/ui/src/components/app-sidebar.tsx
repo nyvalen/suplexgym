@@ -135,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <div className="mb-6 flex w-full shrink-0 items-center gap-1 px-1 opacity-70">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => setShowIpSettings(true)}
             className="rounded-md p-1.5 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             title="IP Settings"

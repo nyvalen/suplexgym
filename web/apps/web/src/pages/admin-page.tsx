@@ -31,7 +31,8 @@ export default function AdminPage() {
   const [section, setSection] = useState<Section>(defaultSection)
 
   const handleSectionChange = (s: Section) => {
-    if (!isAdmin && (s === "users" || s === "items" || s === "discounts")) return
+    if (!isAdmin && (s === "users" || s === "items" || s === "discounts"))
+      return
     setSection(s)
   }
 
@@ -47,7 +48,7 @@ export default function AdminPage() {
       <div className="fixed top-4 right-4 z-30">
         <SidebarTrigger className="rounded-full border border-border bg-background/80 p-5 text-4xl text-foreground/80 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-border hover:bg-background/90 hover:text-foreground hover:shadow-xl active:scale-95" />
       </div>
-      <div className="min-h-screen w-full flex-col bg-background dark:bg-radial-[at_300%_30%] dark:from-purple-600 dark:to-85%">
+      <div className="min-h-screen w-full flex-col bg-radial-[at_300%_30%] from-purple-600 to-85% dark:bg-zinc-900">
         {section === "users" && isAdmin && <CrudsManageUsers />}
         {section === "news" && <CrudsManageNews />}
         {section === "items" && isAdmin && <CrudsManageItems />}
