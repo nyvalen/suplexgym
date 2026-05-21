@@ -117,10 +117,7 @@ function Section({
             ],
           }}
         >
-          <ChevronDown
-            size={16}
-            color={isDark ? "#71717a" : "#a1a1aa"}
-          />
+          <ChevronDown size={16} color={isDark ? "#71717a" : "#a1a1aa"} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -185,9 +182,7 @@ function Field({
             backgroundColor: isDark
               ? "rgba(255,255,255,0.05)"
               : "rgba(0,0,0,0.03)",
-            borderColor: isDark
-              ? "rgba(255,255,255,0.1)"
-              : "rgba(0,0,0,0.08)",
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
             color: isDark ? "#fafafa" : "#09090b",
             paddingRight: rightElement ? 48 : 16,
           }}
@@ -222,9 +217,7 @@ function SaveButton({
         backgroundColor: danger
           ? "rgba(220,38,38,0.06)"
           : "rgba(124,58,237,0.1)",
-        borderColor: danger
-          ? "rgba(220,38,38,0.2)"
-          : "rgba(124,58,237,0.25)",
+        borderColor: danger ? "rgba(220,38,38,0.2)" : "rgba(124,58,237,0.25)",
         opacity: loading ? 0.6 : 1,
       }}
     >
@@ -257,20 +250,53 @@ function ThemeSelector({
   setThemePreference: (p: ThemePreference) => void;
   t: (key: string) => string;
 }) {
-  const options: { value: ThemePreference; icon: React.ReactNode; label: string }[] = [
+  const options: {
+    value: ThemePreference;
+    icon: React.ReactNode;
+    label: string;
+  }[] = [
     {
       value: "light",
-      icon: <Sun size={14} color={themePreference === "light" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      icon: (
+        <Sun
+          size={14}
+          color={
+            themePreference === "light"
+              ? "#fff"
+              : isDark
+                ? "#a1a1aa"
+                : "#52525b"
+          }
+        />
+      ),
       label: "Light",
     },
     {
       value: "system",
-      icon: <Monitor size={14} color={themePreference === "system" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      icon: (
+        <Monitor
+          size={14}
+          color={
+            themePreference === "system"
+              ? "#fff"
+              : isDark
+                ? "#a1a1aa"
+                : "#52525b"
+          }
+        />
+      ),
       label: "System",
     },
     {
       value: "dark",
-      icon: <Moon size={14} color={themePreference === "dark" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"} />,
+      icon: (
+        <Moon
+          size={14}
+          color={
+            themePreference === "dark" ? "#fff" : isDark ? "#a1a1aa" : "#52525b"
+          }
+        />
+      ),
       label: "Dark",
     },
   ];
@@ -286,7 +312,9 @@ function ThemeSelector({
       <View
         className="flex-row rounded-[14px] p-1 gap-1"
         style={{
-          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.05)"
+            : "rgba(0,0,0,0.04)",
           borderWidth: 1,
           borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
         }}
@@ -310,8 +338,73 @@ function ThemeSelector({
                   themePreference === opt.value
                     ? "#fff"
                     : isDark
-                    ? "#a1a1aa"
-                    : "#52525b",
+                      ? "#a1a1aa"
+                      : "#52525b",
+              }}
+            >
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// ─── Language Selector ────────────────────────────────────────────────────────
+function LanguageSelector({
+  isDark,
+  locale,
+  setLocale,
+  t,
+}: {
+  isDark: boolean;
+  locale: string;
+  setLocale: (lang: string) => void;
+  t: (key: string) => string;
+}) {
+  const options: { value: string; label: string }[] = [
+    { value: "en", label: "English" },
+    { value: "hu", label: "Magyar" },
+  ];
+
+  return (
+    <View className="mt-4">
+      <Text
+        className="text-[10px] font-bold tracking-[1.5px] uppercase mb-2"
+        style={{ color: isDark ? "#71717a" : "#a1a1aa" }}
+      >
+        Language
+      </Text>
+      <View
+        className="flex-row rounded-[14px] p-1 gap-1"
+        style={{
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.05)"
+            : "rgba(0,0,0,0.04)",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+        }}
+      >
+        {options.map((opt) => (
+          <TouchableOpacity
+            key={opt.value}
+            onPress={() => setLocale(opt.value)}
+            activeOpacity={0.8}
+            className="flex-1 items-center justify-center py-2.5 rounded-[10px]"
+            style={{
+              backgroundColor: locale === opt.value ? "#7c3aed" : "transparent",
+            }}
+          >
+            <Text
+              className="text-[12px] font-semibold"
+              style={{
+                color:
+                  locale === opt.value
+                    ? "#fff"
+                    : isDark
+                      ? "#a1a1aa"
+                      : "#52525b",
               }}
             >
               {opt.label}
@@ -326,7 +419,7 @@ function ThemeSelector({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function ProfileScreen() {
   const { isDark, themePreference, setThemePreference } = useTheme();
-  const { t } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -431,7 +524,10 @@ export default function ProfileScreen() {
         setNewPw("");
       } else {
         const data = await res.json().catch(() => ({}));
-        Alert.alert(t("common.error"), data?.message ?? t("profile.wrongPassword"));
+        Alert.alert(
+          t("common.error"),
+          data?.message ?? t("profile.wrongPassword"),
+        );
       }
     } catch {
       Alert.alert(t("common.error"), t("profile.networkError"));
@@ -668,9 +764,7 @@ export default function ProfileScreen() {
                 key={field}
                 label={label}
                 value={billing[field]}
-                onChangeText={(v) =>
-                  setBilling((b) => ({ ...b, [field]: v }))
-                }
+                onChangeText={(v) => setBilling((b) => ({ ...b, [field]: v }))}
                 isDark={isDark}
                 keyboardType={kb}
               />
@@ -691,7 +785,15 @@ export default function ProfileScreen() {
             <ThemeSelector
               isDark={isDark}
               themePreference={themePreference as ThemePreference}
-              setThemePreference={setThemePreference as (p: ThemePreference) => void}
+              setThemePreference={
+                setThemePreference as (p: ThemePreference) => void
+              }
+              t={t}
+            />
+            <LanguageSelector
+              isDark={isDark}
+              locale={locale}
+              setLocale={setLocale}
               t={t}
             />
           </Section>

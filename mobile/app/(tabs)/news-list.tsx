@@ -121,7 +121,6 @@ function NewsCard({ item, onPress, isDark, t }: any) {
             numberOfLines={2}
           >
             {item.title}
-            
           </Text>
           <View>
             <Text
@@ -202,12 +201,12 @@ export default function NewsListScreen() {
         <Text
           className={`text-[30px] font-extrabold tracking-[-0.5px] ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
         >
-          {t("news.title")}
+          {t("news.pageTitle")}
         </Text>
         <Text
           className={`text-xs mt-0.5 ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}
         >
-          {t("news.subtitle")}
+          {t("news.pageSub")}
         </Text>
       </View>
 
@@ -218,7 +217,7 @@ export default function NewsListScreen() {
           <Text
             className={`text-lg font-bold ${isDark ? "text-[#fafafa]" : "text-[#09090b]"}`}
           >
-            {t("news.noNews")}
+            {t("news.noArticles")}
           </Text>
         </View>
       ) : (

@@ -1,5 +1,6 @@
 import { I18n } from "i18n-js";
 import { getLocales } from "expo-localization";
+import { read } from "node:fs";
 
 const en = {
   nav: {
@@ -114,6 +115,7 @@ const en = {
     pageTitle: "News",
     pageSub: "Updates, announcements and stories from Suplex Gym",
     articles: "articles",
+    readMore: "Read more",
     featured: "Featured",
     noArticles: "No articles yet.",
     close: "Close",
@@ -308,7 +310,8 @@ const en = {
     },
     discounts: {
       title: "Manage Discounts",
-      description: "Apply time-limited price discounts to tickets. The original price is crossed out and the discounted price is shown to users.",
+      description:
+        "Apply time-limited price discounts to tickets. The original price is crossed out and the discounted price is shown to users.",
       newDiscount: "New Discount",
       cancel: "Cancel",
       selectTicket: "Select Ticket",
@@ -322,7 +325,8 @@ const en = {
       saving: "Saving",
       active: "Active",
       expired: "Expired",
-      noDiscounts: "No discounts set. Create one to show reduced prices on tickets.",
+      noDiscounts:
+        "No discounts set. Create one to show reduced prices on tickets.",
       confirmDelete: "Remove this discount?",
       created: "Discount applied.",
       createFailed: "Failed to apply discount.",
@@ -338,8 +342,10 @@ const en = {
   },
   rules: {
     title: "House Rules",
-    subtitle: "Please follow these guidelines to ensure a great experience for everyone at Suplex Gym.",
-    footer: "Failure to comply with the house rules may result in membership suspension. Thank you for helping us maintain a great environment for everyone.",
+    subtitle:
+      "Please follow these guidelines to ensure a great experience for everyone at Suplex Gym.",
+    footer:
+      "Failure to comply with the house rules may result in membership suspension. Thank you for helping us maintain a great environment for everyone.",
     cta: "Browse Tickets →",
     items: {
       footwear: {
@@ -579,7 +585,7 @@ const en = {
     billing: "Billing",
     account: "Account",
   },
-}
+};
 
 const hu: typeof en = {
   nav: {
@@ -695,6 +701,7 @@ const hu: typeof en = {
     pageSub: "Hírek, bejelentések és történetek a Suplex Edzőteremből",
     articles: "cikk",
     featured: "Kiemelt",
+    readMore: "Olvass tovább",
     noArticles: "Még nincs cikk.",
     close: "Bezárás",
     photoCredit: "Fotó: Suplex Edzőterem",
@@ -794,7 +801,8 @@ const hu: typeof en = {
   cruds: {
     users: {
       title: "Felhasználók kezelése",
-      description: "Felhasználó szerepek és aktív állapot megtekintése és módosítása.",
+      description:
+        "Felhasználó szerepek és aktív állapot megtekintése és módosítása.",
       foundingAdminProtected: "Az alapító admin (ID {id}) védett",
       foundingAdmin: "Alapító admin",
       active: "Aktív",
@@ -807,7 +815,8 @@ const hu: typeof en = {
         "Ez az alapító admin — szerepmódosítás és deaktiválás nem engedélyezett.",
       roleChangeBlocked: "Az alapító admin szerepe nem módosítható.",
       unableToLoad: "Nem sikerült betölteni a felhasználókat.",
-      couldNotDetermineRole: "Nem sikerült meghatározni a frissítendő szerep azonosítóját.",
+      couldNotDetermineRole:
+        "Nem sikerült meghatározni a frissítendő szerep azonosítóját.",
       roleUpdated: "Felhasználó szerep sikeresen frissítve.",
       updateFailed: "Frissítés sikertelen. Ellenőrizd a konzolt.",
       cannotDeactivate: "Az alapító admin nem deaktiválható.",
@@ -865,7 +874,8 @@ const hu: typeof en = {
     },
     equipment: {
       title: "Felszerelés kezelése",
-      description: "Felszerelés hozzáadása, állapot frissítése és eltávolítása.",
+      description:
+        "Felszerelés hozzáadása, állapot frissítése és eltávolítása.",
       addEquipment: "Felszerelés hozzáadása",
       newEquipment: "Új felszerelés",
       name: "Név",
@@ -888,7 +898,8 @@ const hu: typeof en = {
     },
     discounts: {
       title: "Kedvezmények kezelése",
-      description: "Időkorlátozott árengedmények alkalmazása jegyekre. Az eredeti ár áthúzva jelenik meg, az akciós ár pedig kiemelten látható.",
+      description:
+        "Időkorlátozott árengedmények alkalmazása jegyekre. Az eredeti ár áthúzva jelenik meg, az akciós ár pedig kiemelten látható.",
       newDiscount: "Új kedvezmény",
       cancel: "Mégse",
       selectTicket: "Jegy kiválasztása",
@@ -902,7 +913,8 @@ const hu: typeof en = {
       saving: "Megtakarítás",
       active: "Aktív",
       expired: "Lejárt",
-      noDiscounts: "Nincs beállítva kedvezmény. Hozzon létre egyet az akciós árak megjelenítéséhez.",
+      noDiscounts:
+        "Nincs beállítva kedvezmény. Hozzon létre egyet az akciós árak megjelenítéséhez.",
       confirmDelete: "Eltávolítja ezt a kedvezményt?",
       created: "Kedvezmény alkalmazva.",
       createFailed: "Nem sikerült alkalmazni a kedvezményt.",
@@ -918,8 +930,10 @@ const hu: typeof en = {
   },
   rules: {
     title: "Házirend",
-    subtitle: "Kérjük, tartsa be az alábbi szabályokat, hogy mindenki számára kellemes élményt biztosítsunk a Suplex Gymben.",
-    footer: "A házirendben foglaltak be nem tartása tagságfelfüggesztést vonhat maga után. Köszönjük, hogy hozzájárul a kellemes környezet megőrzéséhez.",
+    subtitle:
+      "Kérjük, tartsa be az alábbi szabályokat, hogy mindenki számára kellemes élményt biztosítsunk a Suplex Gymben.",
+    footer:
+      "A házirendben foglaltak be nem tartása tagságfelfüggesztést vonhat maga után. Köszönjük, hogy hozzájárul a kellemes környezet megőrzéséhez.",
     cta: "Jegyek böngészése →",
     items: {
       footwear: {
@@ -997,9 +1011,9 @@ const hu: typeof en = {
     stats: {
       members: "Aktív tagok",
       workouts: "Heti edzések",
-      trainers: "Edzők",
-      years: "Évek",
-      equipment: "Gépek",
+      trainers: "Edző",
+      years: "Éve nyitva",
+      equipment: "Gép",
       satisfaction: "Elégedettség",
     },
   },
@@ -1159,7 +1173,7 @@ const hu: typeof en = {
     billing: "Számlázás",
     account: "Fiók",
   },
-}
+};
 
 const i18n = new I18n();
 i18n.translations = {

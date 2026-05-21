@@ -32,8 +32,8 @@ export default function Hero() {
 
   const stats = [
     { label: t("stats.trainers"), value: "7" },
-    { label: t("stats.machines"), value: "20+" },
-    { label: t("stats."), value: "12" },
+    { label: t("stats.equipment"), value: "20+" },
+    { label: t("stats.satisfaction"), value: "100%" },
     { label: t("stats.years"), value: "2" },
   ]
 
