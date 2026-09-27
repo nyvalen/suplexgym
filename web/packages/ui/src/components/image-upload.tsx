@@ -1,14 +1,13 @@
 import { useRef, useState } from "react"
 import { Upload, X } from "lucide-react"
 import { authTokens } from "@workspace/ui/lib/auth"
-
-export const API_BASE = "http://localhost:5001"
+import { getCachedApiBase } from "@workspace/ui/lib/api-config"
 
 /** Resolve any image path (relative /uploads/... or absolute http) to a displayable src */
 export function resolveImageSrc(path: string | null | undefined): string {
   if (!path) return ""
   if (path.startsWith("http://") || path.startsWith("https://")) return path
-  return `${API_BASE}${path}`
+  return `${getCachedApiBase()}${path}`
 }
 
 interface ImageUploadProps {
@@ -33,7 +32,8 @@ export function ImageUpload({
     try {
       const form = new FormData()
       form.append("file", file)
-      const res = await fetch(`${API_BASE}/api/upload`, {
+      const apiBase = getCachedApiBase()
+      const res = await fetch(`${apiBase}/api/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${authTokens.getAccessToken()}` },
         body: form,
@@ -46,7 +46,7 @@ export function ImageUpload({
       }
       const data = (await res.json()) as { url: string }
       // Store full absolute URL so images display everywhere without extra resolution
-      onChange(`${API_BASE}${data.url}`)
+      onChange(`${apiBase}${data.url}`)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Upload failed")
     } finally {
@@ -95,7 +95,7 @@ export function ImageUpload({
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           onClick={() => inputRef.current?.click()}
-          className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-3 text-center transition-colors hover:border-primary/50 hover:bg-muted/50"
+          className="flex min-h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-3 text-center transition-colors hover:border-primary/50 hover:bg-muted/50"
         >
           <input
             ref={inputRef}

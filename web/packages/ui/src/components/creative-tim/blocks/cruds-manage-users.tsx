@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   fetchWithAuth,
@@ -81,12 +81,12 @@ export default function CrudsManageUsers() {
   const [message, setMessage] = useState("")
   const [foundingAdminId, setFoundingAdminId] = useState<number | null>(null)
 
-  const flash = (msg: string) => {
+  const flash = useCallback((msg: string) => {
     setMessage(msg)
     setTimeout(() => setMessage(""), 4000)
-  }
+  }, [])
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const [users, fetchedRoles] = await Promise.all([
         fetchUsers(),
@@ -107,11 +107,11 @@ export default function CrudsManageUsers() {
       console.error("Failed to load users", error)
       flash(t("cruds.users.unableToLoad"))
     }
-  }
+  }, [flash, t])
 
   useEffect(() => {
     loadUsers()
-  }, [])
+  }, [loadUsers])
 
   const updateUserRole = async (id: number) => {
     if (isProtectedAction(id, foundingAdminId, "role-change")) {

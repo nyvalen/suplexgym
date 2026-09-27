@@ -34,11 +34,12 @@ The app depends on the following environment variables:
 git clone https://github.com/nyvalen/suplexgym.git
 ```
 
-2 - Build the web and the mobile application:
+2 - Install dependencies and build each application from its own directory:
 
 ```bash
-npm install
+cd web
+npm ci
+npm run build --workspace=web
 ```
 
-
-This command will build the frontend and run all unit tests.
+For the mobile app, run `npm install` from `mobile/`. Build the ASP.NET server from `Server/` with `dotnet build`.

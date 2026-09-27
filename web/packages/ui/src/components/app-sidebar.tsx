@@ -34,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (isHome) {
       scrollTo(sectionId)
     } else {
-      window.location.href = `/#${sectionId}`
+      window.location.assign(`/#${sectionId}`)
     }
   }
 

@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 // web/packages/ui/src/lib/api-config.ts
 // Central API configuration for the web app.
 
@@ -6,11 +8,14 @@ export const API_IP_KEY = "web_server_ip"
 
 let _cachedBase: string | null = null
 
+const configuredBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "")
+
 function buildUrl(ip: string): string {
   return `http://${ip}:${DEFAULT_PORT}`
 }
 
 export function getCachedApiBase(): string {
+  if (configuredBase) return configuredBase
   if (_cachedBase) return _cachedBase
   const stored = localStorage.getItem(API_IP_KEY)
   if (stored) {

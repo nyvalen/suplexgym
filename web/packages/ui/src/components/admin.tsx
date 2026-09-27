@@ -24,9 +24,11 @@ export function Admin() {
         variant="ghost"
         className="h-8 flex-1 gap-3 rounded-md transition-colors hover:bg-accent data-[state=open]:bg-accent"
         onClick={() => {
-          {
-            console.log("Decoded Token Data:", data)
-            data == "admin" ? navigate("/admin") : navigate("/login")
+          console.log("Decoded Token Data:", data)
+          if (data === "admin") {
+            navigate("/admin")
+          } else {
+            navigate("/login")
           }
         }}
       >

@@ -51,10 +51,6 @@ function calcDiscounted(originalPrice: number, pct: number): number {
   return Math.round(originalPrice * (1 - pct / 100))
 }
 
-function isDiscountActive(d: Discount): boolean {
-  return !d.isExpired
-}
-
 function getTimeLeft(expiryDate: Date): string {
   const now = new Date()
   const diff = expiryDate.getTime() - now.getTime()

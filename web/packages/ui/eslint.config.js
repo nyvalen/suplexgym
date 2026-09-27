@@ -19,5 +19,11 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Shared UI modules intentionally export hooks/helpers alongside components.
+      'react-refresh/only-export-components': 'off',
+      // Effects here synchronize React state with browser APIs and remote data.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

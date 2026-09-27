@@ -5,8 +5,8 @@ import { Check, Smartphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { API_ENDPOINTS } from "@workspace/ui/lib/api-config"
 
-const PASS_KEYS = ["napi", "havi", "szezonális", "éves"] as const
-const FEATURED: (typeof PASS_KEYS)[number] = "szezonális"
+type PassKey = "napi" | "havi" | "szezonális" | "éves"
+const FEATURED: PassKey = "szezonális"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

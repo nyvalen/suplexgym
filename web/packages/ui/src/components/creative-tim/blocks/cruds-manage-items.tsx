@@ -69,6 +69,89 @@ async function fetchTypes(): Promise<ItemType[]> {
   }
 }
 
+function FormFields({
+  form,
+  setForm,
+  types,
+}: {
+  form: ItemForm
+  setForm: React.Dispatch<React.SetStateAction<ItemForm>>
+  types: ItemType[]
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="space-y-1 sm:col-span-2">
+        <Label>Name</Label>
+        <Input
+          value={form.name}
+          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          placeholder="Daily pass"
+        />
+      </div>
+      <div className="space-y-1 sm:col-span-2">
+        <Label>Description</Label>
+        <Textarea
+          value={form.description}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, description: e.target.value }))
+          }
+          rows={2}
+          placeholder="Optional description"
+        />
+      </div>
+      <div className="space-y-1 sm:col-span-2">
+        <Label>Cover Image</Label>
+        <ImageUpload
+          value={form.imagePath}
+          onChange={(url) => setForm((f) => ({ ...f, imagePath: url }))}
+        />
+      </div>
+      <div className="space-y-1">
+        <Label>Price (HUF)</Label>
+        <Input
+          type="number"
+          min={0}
+          value={form.price}
+          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+          placeholder="2500"
+        />
+      </div>
+      <div className="space-y-1">
+        <Label>Validity (days)</Label>
+        <Input
+          type="number"
+          min={1}
+          value={form.validityDays}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, validityDays: e.target.value }))
+          }
+          placeholder="30"
+        />
+      </div>
+      <div className="space-y-1 sm:col-span-2">
+        <Label>Type</Label>
+        <Select
+          value={form.type_id}
+          onValueChange={(v) => setForm((f) => ({ ...f, type_id: v }))}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {types.map((t) => (
+                <SelectItem key={t.id} value={String(t.id)}>
+                  {t.type}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+}
+
 export default function CrudsManageItems() {
   const { t } = useTranslation()
   const [items, setItems] = useState<Item[]>([])
@@ -187,85 +270,6 @@ export default function CrudsManageItems() {
     }
   }
 
-  const FormFields = ({
-    form,
-    setForm,
-  }: {
-    form: ItemForm
-    setForm: React.Dispatch<React.SetStateAction<ItemForm>>
-  }) => (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <div className="space-y-1 sm:col-span-2">
-        <Label>Name</Label>
-        <Input
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          placeholder="Daily pass"
-        />
-      </div>
-      <div className="space-y-1 sm:col-span-2">
-        <Label>Description</Label>
-        <Textarea
-          value={form.description}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, description: e.target.value }))
-          }
-          rows={2}
-          placeholder="Optional description"
-        />
-      </div>
-      <div className="space-y-1 sm:col-span-2">
-        <Label>Cover Image</Label>
-        <ImageUpload
-          value={form.imagePath}
-          onChange={(url) => setForm((f) => ({ ...f, imagePath: url }))}
-        />
-      </div>
-      <div className="space-y-1">
-        <Label>Price (HUF)</Label>
-        <Input
-          type="number"
-          min={0}
-          value={form.price}
-          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-          placeholder="2500"
-        />
-      </div>
-      <div className="space-y-1">
-        <Label>Validity (days)</Label>
-        <Input
-          type="number"
-          min={1}
-          value={form.validityDays}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, validityDays: e.target.value }))
-          }
-          placeholder="30"
-        />
-      </div>
-      <div className="space-y-1 sm:col-span-2">
-        <Label>Type</Label>
-        <Select
-          value={form.type_id}
-          onValueChange={(v) => setForm((f) => ({ ...f, type_id: v }))}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {types.map((t) => (
-                <SelectItem key={t.id} value={String(t.id)}>
-                  {t.type}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
-
   return (
     <section className="grid min-h-screen place-items-center py-16">
       <Card className="mx-auto w-full max-w-2xl p-6 lg:p-8 dark:bg-black/20">
@@ -289,7 +293,7 @@ export default function CrudsManageItems() {
         {showCreate && (
           <div className="mb-6 space-y-3 rounded-lg border border-border p-4">
             <h4 className="font-medium">New Item</h4>
-            <FormFields form={createForm} setForm={setCreateForm} />
+            <FormFields form={createForm} setForm={setCreateForm} types={types} />
             <Button onClick={handleCreate}>Create</Button>
           </div>
         )}
@@ -302,7 +306,7 @@ export default function CrudsManageItems() {
             <div key={item.id} className="rounded-lg border border-border p-4">
               {editingId === item.id ? (
                 <div className="space-y-3">
-                  <FormFields form={editForm} setForm={setEditForm} />
+                  <FormFields form={editForm} setForm={setEditForm} types={types} />
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleUpdate(item.id)}>
                       <Check className="size-3.5" /> Save

@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // ThemeProvider intentionally exports its matching hook from the same module.
+      'react-refresh/only-export-components': 'off',
+    },
   },
 ])
