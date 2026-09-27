@@ -3,15 +3,49 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Data.Sqlite;
 using suplex_projektmunka.Models.Context;
 using suplex_projektmunka.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// App Service's HOME directory is persistent and writable, unlike the deployed app directory.
+var dataDirectory = builder.Configuration["Storage:DataDirectory"];
+if (string.IsNullOrWhiteSpace(dataDirectory))
+{
+    var appServiceHome = Environment.GetEnvironmentVariable("HOME");
+    dataDirectory = !builder.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(appServiceHome)
+        ? Path.Combine(appServiceHome, "data")
+        : Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+}
+dataDirectory = Path.GetFullPath(dataDirectory);
+Directory.CreateDirectory(dataDirectory);
+builder.Configuration["Storage:DataDirectory"] = dataDirectory;
+
+var configuredConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=suplex_gym.db";
+var sqliteConnection = new SqliteConnectionStringBuilder(configuredConnectionString);
+if (!Path.IsPathRooted(sqliteConnection.DataSource))
+{
+    sqliteConnection.DataSource = Path.Combine(dataDirectory, sqliteConnection.DataSource);
+}
+var databaseDirectory = Path.GetDirectoryName(sqliteConnection.DataSource);
+if (!string.IsNullOrWhiteSpace(databaseDirectory))
+{
+    Directory.CreateDirectory(databaseDirectory);
+}
+
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret) || Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+{
+    throw new InvalidOperationException(
+        "Configure Jwt:Secret with a secret of at least 32 UTF-8 bytes (Azure App Service setting: Jwt__Secret).");
+}
+
 // ─── DATABASE ─────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<GymContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(sqliteConnection.ToString()));
 
 // ─── SERVICES ─────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -30,7 +64,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+                Encoding.UTF8.GetBytes(jwtSecret)),
             ValidateLifetime = true,
         };
 
@@ -114,19 +148,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Ensure wwwroot/uploads folder exists
-var uploadsDir = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "uploads");
+// Keep user uploads on App Service's persistent writable storage.
+var uploadsDir = Path.Combine(dataDirectory, "uploads");
 Directory.CreateDirectory(uploadsDir);
 
 //app.UseHttpsRedirection(); // Disabled for local development
 
-// Serve static files (uploaded images) from wwwroot
+// Serve static frontend assets from wwwroot and persistent uploaded files separately.
 app.UseDefaultFiles();
-string currentDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(currentDir),
-    RequestPath = ""
+    FileProvider = new PhysicalFileProvider(uploadsDir),
+    RequestPath = "/uploads"
 });
 
 app.UseCors("FrontendPolicy");

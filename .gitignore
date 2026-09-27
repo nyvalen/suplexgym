@@ -27,6 +27,7 @@ bld/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+publish/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
@@ -114,6 +115,7 @@ npm-debug.log*
 
 # No vscode stuff
 .vscode
+.vs/
 
 # No bundled stuff in git
 dist

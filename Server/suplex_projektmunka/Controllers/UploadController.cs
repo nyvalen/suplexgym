@@ -9,10 +9,12 @@ namespace suplex_projektmunka.Controllers
     public class UploadController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
-        public UploadController(IWebHostEnvironment env)
+        public UploadController(IWebHostEnvironment env, IConfiguration configuration)
         {
             _env = env;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -35,8 +37,8 @@ namespace suplex_projektmunka.Controllers
             if (file.Length > 10 * 1024 * 1024)
                 return BadRequest(new { message = "File size must not exceed 10 MB." });
 
-            // Save to wwwroot/uploads
-            var uploadsPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "uploads");
+            // Save to the configured persistent storage directory.
+            var uploadsPath = GetUploadsPath();
             Directory.CreateDirectory(uploadsPath);
 
             var ext = Path.GetExtension(file.FileName).ToLower();
@@ -62,7 +64,9 @@ namespace suplex_projektmunka.Controllers
             if (string.IsNullOrWhiteSpace(fileName) || fileName.Contains(".."))
                 return BadRequest(new { message = "Invalid file name." });
 
-            var uploadsPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "uploads");
+            var uploadsPath = GetUploadsPath();
+            if (!string.Equals(fileName, Path.GetFileName(fileName), StringComparison.Ordinal))
+                return BadRequest(new { message = "Invalid file name." });
             var filePath = Path.Combine(uploadsPath, fileName);
 
             if (!System.IO.File.Exists(filePath))
@@ -70,6 +74,15 @@ namespace suplex_projektmunka.Controllers
 
             System.IO.File.Delete(filePath);
             return Ok(new { message = "File deleted." });
+        }
+
+        private string GetUploadsPath()
+        {
+            var dataDirectory = _configuration["Storage:DataDirectory"];
+            var root = string.IsNullOrWhiteSpace(dataDirectory)
+                ? Path.Combine(_env.ContentRootPath, "App_Data")
+                : dataDirectory;
+            return Path.Combine(root, "uploads");
         }
     }
 }
