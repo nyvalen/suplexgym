@@ -1,5 +1,6 @@
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://10.224.51.141:5001";
+  process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "") ||
+  "https://suplexgym-api-eweeg4c7cngng5fa.germanywestcentral-01.azurewebsites.net";
 
 export const api_endpoints = {
   login: `${API_BASE_URL}/api/auth/login`,

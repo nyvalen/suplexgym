@@ -17,4 +17,4 @@ Build and check the app with `npm run build --workspace=web`, `npm run lint --wo
 
 Set the Vercel project Root Directory to `web`. The included `vercel.json` builds the `web` workspace and publishes `apps/web/dist`, with SPA route fallback for React Router.
 
-Set `VITE_API_BASE_URL` in Vercel's Production (and Preview, if needed) environment variables to the publicly reachable HTTPS base URL of the ASP.NET API, without a trailing slash. The API must allow the deployed Vercel origin through CORS. If unset, local development continues to use the configured/local API host.
+Set `VITE_API_BASE_URL` in Vercel's Production (and Preview, if needed) environment variables to the publicly reachable HTTPS base URL of the ASP.NET API, without a trailing slash. The API must allow the deployed Vercel origin through CORS. If unset, the app uses `https://suplexgym-api-eweeg4c7cngng5fa.germanywestcentral-01.azurewebsites.net`; a saved API IP can still override it during local development.

@@ -10,13 +10,14 @@ import { Button } from "@workspace/ui/components/button"
 import { AuthContext } from "../../../../apps/web/src/context/auth-context"
 import { useContext } from "react"
 import { fetchWithAuth } from "../lib/auth"
+import { API_ENDPOINTS } from "../lib/api-config"
 
 export function Logout() {
   const { setIsLoggedIn } = useContext(AuthContext)
   const Logout = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:5001/api/auth/logout",
+        API_ENDPOINTS.logout,
         {
           method: "POST",
           headers: {

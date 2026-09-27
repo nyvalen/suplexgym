@@ -5,10 +5,12 @@
 
 export const DEFAULT_PORT = "5001"
 export const API_IP_KEY = "web_server_ip"
+export const DEFAULT_API_BASE_URL =
+  "https://suplexgym-api-eweeg4c7cngng5fa.germanywestcentral-01.azurewebsites.net"
 
 let _cachedBase: string | null = null
 
-const configuredBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "")
+const configuredBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "")
 
 function buildUrl(ip: string): string {
   return `http://${ip}:${DEFAULT_PORT}`
@@ -22,7 +24,7 @@ export function getCachedApiBase(): string {
     _cachedBase = buildUrl(stored)
     return _cachedBase
   }
-  _cachedBase = `http://${window.location.hostname}:${DEFAULT_PORT}`
+  _cachedBase = DEFAULT_API_BASE_URL
   return _cachedBase
 }
 

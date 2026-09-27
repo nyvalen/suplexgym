@@ -14,6 +14,7 @@ import {
   DrawerTrigger,
 } from "@workspace/ui/components/drawer"
 import { Calendar } from "lucide-react"
+import { API_ENDPOINTS, resolveImageUrl } from "@workspace/ui/lib/api-config"
 
 type NewsItem = {
   imagePath: string
@@ -22,19 +23,9 @@ type NewsItem = {
   createdAt: string
 }
 
-function resolveImage(path: string): string {
-  if (!path) return ""
-  // Remove localhost:5103 URL prefix if present, keeping only the path
-  if (path.startsWith("http://localhost:5001")) {
-    path = path.replace("http://localhost:5001", "")
-  }
-  if (path.startsWith("http")) return path
-  return `http://localhost:5001${path}`
-}
-
 async function fetchNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetch("http://localhost:5001/api/news")
+    const res = await fetch(API_ENDPOINTS.news)
     if (!res.ok) throw new Error("Failed fetch")
     return (await res.json()) as NewsItem[]
   } catch (err) {
@@ -67,7 +58,7 @@ export default function BlogContent() {
                 <CardHeader className="p-4 pb-0">
                   <div className="relative h-60 w-full overflow-hidden rounded-lg">
                     <img
-                      src={resolveImage(imagePath)}
+                      src={resolveImageUrl(imagePath)}
                       alt={title}
                       className="h-full w-full object-cover object-center"
                     />

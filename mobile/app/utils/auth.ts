@@ -3,31 +3,27 @@ import { AppState, AppStateStatus } from "react-native";
 
 // ─── Base URL ─────────────────────────────────────────────────────────────────
 const IS_DEV = __DEV__;
+export const DEFAULT_API_BASE_URL =
+  "https://suplexgym-api-eweeg4c7cngng5fa.germanywestcentral-01.azurewebsites.net";
 
 export const DEFAULT_DEV_IP = "192.168.0.216";
 const DEFAULT_PORT = "5001";
+const configuredBase = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
 
 export const IP_STORAGE_KEY = "dev_server_ip";
 
 export async function getApiBaseUrl(): Promise<string> {
-  if (!IS_DEV) {
-    const prodUrl = process.env.EXPO_PUBLIC_API_URL;
-    if (!prodUrl)
-      throw new Error("EXPO_PUBLIC_API_URL is not set for production");
-    return prodUrl;
-  }
+  if (configuredBase) return configuredBase;
+  if (!IS_DEV) return DEFAULT_API_BASE_URL;
   const stored = await AsyncStorage.getItem(IP_STORAGE_KEY);
-  const ip = stored?.trim() || DEFAULT_DEV_IP;
-  return `http://${ip}:${DEFAULT_PORT}`;
+  const ip = stored?.trim();
+  return ip ? `http://${ip}:${DEFAULT_PORT}` : DEFAULT_API_BASE_URL;
 }
 
-let _cachedBase = `http://${DEFAULT_DEV_IP}:${DEFAULT_PORT}`;
+let _cachedBase = DEFAULT_API_BASE_URL;
 
 export function getCachedApiBase(): string {
-  if (!IS_DEV) {
-    return process.env.EXPO_PUBLIC_API_URL || _cachedBase;
-  }
-  return _cachedBase;
+  return configuredBase || _cachedBase;
 }
 
 export async function refreshCachedApiBase(): Promise<string> {
